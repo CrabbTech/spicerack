@@ -820,3 +820,54 @@ input, select, textarea {
 
 .q-hit { border-color: var(--enc-green); color: var(--enc-green); }
 .q-miss { border-color: var(--danger); color: var(--danger); }
+
+/* ---- drills ---- */
+
+.drill-grid { display: grid; min-width: 0; }
+
+.drill-zone {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: rgba(23, 26, 29, 0.9);
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 1040px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.drill-kinds { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+
+.drill-kind {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  text-align: left;
+  max-width: 250px;
+}
+
+.drill-kind small { color: var(--muted); font-size: 11px; }
+.drill-kind-on { border-color: var(--accent); background: rgba(255, 111, 42, 0.14); }
+
+.drill-card {
+  text-align: center;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface-2);
+  padding: 20px 16px 16px;
+}
+
+.drill-progress {
+  color: var(--faint);
+  font-family: var(--mono);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.drill-prompt { margin: 6px 0 4px; font-size: 44px; line-height: 1.05; }
+.drill-actions { margin-top: 12px; }
+.drill-hint { justify-content: center; }
+.drill-foot { text-align: center; }

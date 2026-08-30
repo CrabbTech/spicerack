@@ -91,10 +91,11 @@ const scoreImageSrc = (image: string): string =>
 
 export interface SongViewProps {
   onExit: () => void;
+  onDrills?: () => void;
   initialSongId?: string;
 }
 
-export function SongView({ onExit, initialSongId }: SongViewProps) {
+export function SongView({ onExit, onDrills, initialSongId }: SongViewProps) {
   const [imported, setImported] = useState<Score[]>(() => loadImportedSongs());
   const library = useMemo(() => [...SONGS, ...imported], [imported]);
   const [songId, setSongId] = useState(() =>
@@ -408,6 +409,7 @@ export function SongView({ onExit, initialSongId }: SongViewProps) {
             {copied === 'tab' ? 'Copied' : 'Copy tab'}
           </button>
           <button className="tool-btn" onClick={exportMidi}>{copied === 'midi' ? 'Saved' : 'MIDI'}</button>
+          {onDrills && <button className="tool-btn" title="chord-grab and key-recall flashcards" onClick={onDrills}>🎯 Drills</button>}
           <button className="tool-btn" onClick={onExit}>← Playground</button>
         </div>
       </header>

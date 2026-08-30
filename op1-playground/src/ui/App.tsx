@@ -17,6 +17,7 @@ import { mixSeeds, mulberry32 } from '../lib/rng';
 import { LitKey, Op1Keyboard } from './Op1Keyboard';
 import { MelodyStrip } from './MelodyStrip';
 import { SongView } from './SongView';
+import { DrillsView } from './DrillsView';
 
 interface UserSlot {
   id: number;
@@ -100,7 +101,9 @@ export default function App() {
   const initialSongId = useMemo(
     () => new URLSearchParams(window.location.search).get('song') ?? undefined, [],
   );
-  const [view, setView] = useState<'playground' | 'songs'>(initialSongId ? 'songs' : 'playground');
+  const initialView = useMemo(() => new URLSearchParams(window.location.search).get('view'), []);
+  const [view, setView] = useState<'playground' | 'songs' | 'drills'>(
+    initialSongId ? 'songs' : initialView === 'drills' ? 'drills' : 'playground');
   const [tonicIdx, setTonicIdx] = useState(0);
   const [mode, setMode] = useState<ModeId>('major');
   const [slots, setSlots] = useState<UserSlot[]>(() => DEFAULT_TOKENS.map((t) => makeSlot(t)));
@@ -319,7 +322,11 @@ export default function App() {
   const totalBars = slots.reduce((sum, s) => sum + s.bars, 0);
 
   if (view === 'songs') {
-    return <SongView initialSongId={initialSongId} onExit={() => setView('playground')} />;
+    return <SongView initialSongId={initialSongId} onExit={() => setView('playground')}
+      onDrills={() => setView('drills')} />;
+  }
+  if (view === 'drills') {
+    return <DrillsView onExit={() => setView('playground')} onSongs={() => setView('songs')} />;
   }
 
   return (
@@ -364,6 +371,8 @@ export default function App() {
           </button>
           <button className="tool-btn" title="tabs of transcribed songs"
             onClick={() => { stopPlayback(); setView('songs'); }}>♪ Songs</button>
+          <button className="tool-btn" title="chord-grab and key-recall flashcards"
+            onClick={() => { stopPlayback(); setView('drills'); }}>🎯 Drills</button>
           <button className="tool-btn" onClick={copyChart}>{copied === 'chart' ? 'Copied' : 'Copy tab'}</button>
           <button className="tool-btn" onClick={exportMidi}>{copied === 'midi' ? 'Saved' : 'MIDI'}</button>
           {webMidiOut.supported && (
