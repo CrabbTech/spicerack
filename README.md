@@ -18,5 +18,9 @@ npm run tauri build  # .app + .dmg in src-tauri/target/release/bundle/
 npm test
 ```
 
+`op1-playground/` is a third, standalone web app: the OP-1 Field's 24-key
+keyboard as a chord/melody workshop, plus **song tabs** — screenshots of sheet
+music transcribed into OP-1 key-by-key tablature.
+
 `example_image.jpeg` is the physical "chord_files" folder product that
 inspired the whole thing.
