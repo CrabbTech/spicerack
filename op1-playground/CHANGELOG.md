@@ -3,7 +3,13 @@
 All notable changes to `op1-playground`. Newest first. Dates are local;
 hashes refer to this repo's `main`.
 
-## 2026-08-30 · Ear training — `5a3bd14`
+## 2026-08-30 · Trouble keys
+- Play-along now remembers which physical keys you miss, per song
+  (`Grader.missedByKey` folded into localStorage after every graded take).
+- The play-along panel shows the worst offenders as chips (`T4 ×5`) with a
+  reset; the home shelf warns "watch T4 · T2" on each song's card.
+
+## 2026-08-30 · Ear training — `735dc91`
 - New drill kind **by ear**: the card sounds a diatonic chord (name hidden,
   🔊 replay on tap); grab its tones by ear, any octave. The name reveals with
   the voicing when you complete it. Sevenths toggle applies; bests persist

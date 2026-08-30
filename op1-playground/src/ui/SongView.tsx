@@ -20,7 +20,7 @@ import { buildMidiFile, downloadBlob } from '../audio/midiExport';
 import { webMidiIn } from '../audio/webmidi';
 import { Grader, expectedFor } from '../practice/score';
 import { INDEX_TO_QWERTY, qwertyIndex } from '../practice/qwerty';
-import { markPracticed } from '../practice/progress';
+import { clearTrouble, markPracticed, readTrouble, recordTrouble, topTrouble } from '../practice/progress';
 import { LitKey, Op1Keyboard } from './Op1Keyboard';
 import { NavTabs, ViewId } from './NavTabs';
 
@@ -121,6 +121,7 @@ export function SongView({ onNav, initialSongId }: SongViewProps) {
   const [bestScore, setBestScore] = useState<number | null>(null);
   const [judge, setJudge] = useState<Map<number, 'hit' | 'miss'>>(() => new Map());
   const [midiInName, setMidiInName] = useState<string | null>(null);
+  const [troubleTick, setTroubleTick] = useState(0);
   const graderRef = useRef<Grader | null>(null);
   const alongT0 = useRef(0);
   const judgeTimers = useRef<number[]>([]);
@@ -176,6 +177,10 @@ export function SongView({ onNav, initialSongId }: SongViewProps) {
       const accuracy = grader.accuracy;
       setAlongStats({ ...grader.stats(), accuracy });
       markPracticed();
+      if (score) {
+        recordTrouble(score.id, grader.missedByKey());
+        setTroubleTick((t) => t + 1);
+      }
       try {
         const prev = Number(window.localStorage.getItem(bestKey) ?? -1);
         if (accuracy > prev) {
@@ -369,6 +374,13 @@ export function SongView({ onNav, initialSongId }: SongViewProps) {
     saveImportedSongs(next);
     if (songId === id) setSongId(SONGS[0]?.id ?? next[0]?.id ?? '');
   };
+
+  const trouble = useMemo(
+    () => (score ? topTrouble(readTrouble(score.id)) : []),
+    // troubleTick invalidates after each graded take
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [score?.id, troubleTick],
+  );
 
   // while playing, the keyboard follows the transport; stopped, it shows the step
   const displayBar = playing && playingBar !== null ? section.bars[playingBar] ?? bar : bar;
@@ -569,6 +581,18 @@ export function SongView({ onNav, initialSongId }: SongViewProps) {
                 )}
                 {bestScore !== null && <span className="along-best">best {bestScore}%</span>}
               </div>
+              {trouble.length > 0 && (
+                <div className="trouble-row">
+                  <span className="mini-label">trouble keys</span>
+                  {trouble.map((t) => (
+                    <span key={t.index} className="trouble-chip" title={`missed ${t.count}× across your takes`}>
+                      {keyTag(t.index)} ×{t.count}
+                    </span>
+                  ))}
+                  <button className="tool-btn" title="forget these and start fresh"
+                    onClick={() => { clearTrouble(score.id); setTroubleTick((t) => t + 1); }}>reset</button>
+                </div>
+              )}
               <div className="qwerty-hint">
                 {INDEX_TO_QWERTY.map((k, i) => (
                   <span key={i} className={`qwerty-key${judge.get(i) ? ` q-${judge.get(i)}` : ''}`}>{k}</span>

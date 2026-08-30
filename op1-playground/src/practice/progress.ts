@@ -77,6 +77,56 @@ export const storageEntries = (): [string, string][] => {
 };
 
 // ---------------------------------------------------------------------------
+// Trouble keys: which physical keys keep getting missed, per song.
+
+const troubleKey = (songId: string): string => `${STORAGE_PREFIX}.trouble.${songId}`;
+
+export function readTrouble(songId: string): Record<number, number> {
+  try {
+    const raw = JSON.parse(window.localStorage.getItem(troubleKey(songId)) ?? '{}');
+    const out: Record<number, number> = {};
+    if (raw && typeof raw === 'object') {
+      for (const [k, v] of Object.entries(raw)) {
+        const idx = Number(k);
+        if (Number.isInteger(idx) && idx >= 0 && idx < 24 && Number.isFinite(Number(v))) {
+          out[idx] = Number(v);
+        }
+      }
+    }
+    return out;
+  }
+  catch {
+    return {};
+  }
+}
+
+/** Fold one take's missed keys into the song's running memory. */
+export function recordTrouble(songId: string, missed: Map<number, number>): void {
+  if (!missed.size) return;
+  try {
+    const cur = readTrouble(songId);
+    for (const [idx, n] of missed) cur[idx] = (cur[idx] ?? 0) + n;
+    window.localStorage.setItem(troubleKey(songId), JSON.stringify(cur));
+  }
+  catch { /* private browsing */ }
+}
+
+export function clearTrouble(songId: string): void {
+  try {
+    window.localStorage.removeItem(troubleKey(songId));
+  }
+  catch { /* private browsing */ }
+}
+
+/** The worst offenders, most-missed first. */
+export function topTrouble(counts: Record<number, number>, limit = 4): { index: number; count: number }[] {
+  return Object.entries(counts)
+    .map(([k, v]) => ({ index: Number(k), count: v }))
+    .sort((a, b) => b.count - a.count || a.index - b.index)
+    .slice(0, limit);
+}
+
+// ---------------------------------------------------------------------------
 // Showing up: the practice-day log and streak.
 
 const DAYS_KEY = `${STORAGE_PREFIX}.days`;

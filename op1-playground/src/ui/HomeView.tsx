@@ -6,8 +6,9 @@ import { useMemo } from 'react';
 import { keyLabel } from '../theory/harmony';
 import { SONGS } from '../data/songs';
 import {
-  collectProgress, dayStamp, readDays, storageEntries, streakOf, suggestSession,
+  collectProgress, dayStamp, readDays, readTrouble, storageEntries, streakOf, suggestSession, topTrouble,
 } from '../practice/progress';
+import { keyTag } from '../op1/op1';
 import { NavTabs, ViewId } from './NavTabs';
 
 export interface HomeViewProps {
@@ -87,6 +88,12 @@ export function HomeView({ onNav, onOpenSong }: HomeViewProps) {
                   {best
                     ? <span className="shelf-best">best {best.accuracy}% @ {best.tempoPct}% tempo</span>
                     : <span className="shelf-best shelf-untried">no graded take yet</span>}
+                  {(() => {
+                    const worst = topTrouble(readTrouble(song.id), 2);
+                    return worst.length
+                      ? <span className="shelf-trouble">watch {worst.map((t) => keyTag(t.index)).join(' · ')}</span>
+                      : null;
+                  })()}
                   <span className="shelf-actions">
                     <span className="chip" onClick={(e) => { e.stopPropagation(); onOpenSong(song.id, 'drills'); }}>
                       🎯 drill its grabs

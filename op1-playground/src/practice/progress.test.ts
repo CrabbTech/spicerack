@@ -31,6 +31,15 @@ describe('record parsing', () => {
   });
 });
 
+describe('trouble keys', () => {
+  it('ranks the worst offenders first and caps the list', async () => {
+    const { topTrouble } = await import('./progress');
+    const top = topTrouble({ 3: 2, 8: 7, 15: 7, 20: 1, 5: 3 }, 3);
+    expect(top.map((t) => t.index)).toEqual([8, 15, 5]);
+    expect(top[0].count).toBe(7);
+  });
+});
+
 describe('streak', () => {
   it('counts consecutive days ending today', () => {
     expect(streakOf(['2026-08-28', '2026-08-29', '2026-08-30'], '2026-08-30')).toBe(3);

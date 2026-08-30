@@ -119,6 +119,21 @@ export class Grader {
     return { kind: 'miss', index };
   }
 
+  /**
+   * How many expected presses of each physical key went unhit, over every
+   * pass started so far — the raw material for the trouble-key memory.
+   */
+  missedByKey(): Map<number, number> {
+    const out = new Map<number, number>();
+    for (let p = 0; p <= this.maxPass; p++) {
+      this.notes.forEach((n, i) => {
+        if (this.matched.has(`${p}:${i}`)) return;
+        out.set(n.index, (out.get(n.index) ?? 0) + 1);
+      });
+    }
+    return out;
+  }
+
   /** Running totals across every pass started so far. */
   stats(): PassStats {
     const expected = this.notes.length * (this.maxPass + 1);

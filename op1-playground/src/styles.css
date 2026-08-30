@@ -994,3 +994,19 @@ input, select, textarea {
 }
 
 .drill-replay { margin-top: 8px; }
+
+/* ---- trouble keys ---- */
+
+.trouble-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.trouble-row .mini-label { margin: 0; }
+
+.trouble-chip {
+  border: 1px solid var(--danger);
+  border-radius: 999px;
+  padding: 3px 10px;
+  color: var(--danger);
+  font-family: var(--mono);
+  font-size: 12px;
+}
+
+.shelf-trouble { color: var(--danger); font-family: var(--mono); font-size: 11px; }

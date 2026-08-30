@@ -65,6 +65,16 @@ describe('grader', () => {
     expect(g.stats().expected).toBe(6);                // two passes' worth
   });
 
+  it('reports which keys went unhit, per pass', () => {
+    const g = new Grader(fixture);
+    g.play(0, 61);            // hit note 0 (index 8)
+    g.play(2000 + 500, 65);   // pass 2: hit note 1 (index 12)
+    const missed = g.missedByKey();
+    expect(missed.get(8)).toBe(1);   // missed in pass 2 only
+    expect(missed.get(12)).toBe(1);  // missed in pass 1 only
+    expect(missed.get(15)).toBe(2);  // missed both passes
+  });
+
   it('scores a clean take at 100', () => {
     const g = new Grader(fixture);
     g.play(0, 61); g.play(500, 65); g.play(1000, 68);
