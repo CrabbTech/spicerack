@@ -1,9 +1,10 @@
 // The studio's three rooms, one nav. Same component in every header so the
 // app reads as one instrument: build progressions, learn songs, drill hands.
 
-export type ViewId = 'playground' | 'songs' | 'drills';
+export type ViewId = 'home' | 'playground' | 'songs' | 'drills';
 
 const TABS: { id: ViewId; label: string; title: string }[] = [
+  { id: 'home', label: '⌂ HOME', title: 'streaks, records, and today\'s session' },
   { id: 'playground', label: 'PLAYGROUND', title: 'build and study progressions' },
   { id: 'songs', label: '♪ SONGS', title: 'transcribed scores as OP-1 tab' },
   { id: 'drills', label: '🎯 DRILLS', title: 'flashcard sprints for the hands' },

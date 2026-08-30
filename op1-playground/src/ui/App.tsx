@@ -18,7 +18,8 @@ import { LitKey, Op1Keyboard } from './Op1Keyboard';
 import { MelodyStrip } from './MelodyStrip';
 import { SongView } from './SongView';
 import { DrillsView } from './DrillsView';
-import { NavTabs } from './NavTabs';
+import { NavTabs, ViewId } from './NavTabs';
+import { HomeView } from './HomeView';
 
 interface UserSlot {
   id: number;
@@ -103,8 +104,13 @@ export default function App() {
     () => new URLSearchParams(window.location.search).get('song') ?? undefined, [],
   );
   const initialView = useMemo(() => new URLSearchParams(window.location.search).get('view'), []);
-  const [view, setView] = useState<'playground' | 'songs' | 'drills'>(
-    initialSongId ? 'songs' : initialView === 'drills' ? 'drills' : 'playground');
+  const [view, setView] = useState<ViewId>(
+    initialSongId ? 'songs'
+      : initialView === 'drills' ? 'drills'
+      : initialView === 'playground' ? 'playground'
+      : initialView === 'songs' ? 'songs'
+      : 'home');
+  const [songFocus, setSongFocus] = useState<string | undefined>(initialSongId);
   const [tonicIdx, setTonicIdx] = useState(0);
   const [mode, setMode] = useState<ModeId>('major');
   const [slots, setSlots] = useState<UserSlot[]>(() => DEFAULT_TOKENS.map((t) => makeSlot(t)));
@@ -322,11 +328,15 @@ export default function App() {
   const allVibes = [...new Set(PRESETS.flatMap((p) => p.vibe))].sort();
   const totalBars = slots.reduce((sum, s) => sum + s.bars, 0);
 
+  if (view === 'home') {
+    return <HomeView onNav={setView}
+      onOpenSong={(songId, target) => { setSongFocus(songId); setView(target); }} />;
+  }
   if (view === 'songs') {
-    return <SongView initialSongId={initialSongId} onNav={setView} />;
+    return <SongView initialSongId={songFocus} onNav={setView} />;
   }
   if (view === 'drills') {
-    return <DrillsView onNav={setView} />;
+    return <DrillsView initialSongId={songFocus} onNav={setView} />;
   }
 
   return (

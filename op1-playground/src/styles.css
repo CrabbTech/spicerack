@@ -894,3 +894,101 @@ input, select, textarea {
 
 .nav-tab:hover:not(:disabled) { background: var(--surface-3); border-color: transparent; }
 .nav-tab-on { background: rgba(255, 111, 42, 0.16); color: var(--accent); }
+
+/* ---- home ---- */
+
+.home-grid { display: flex; flex-direction: column; gap: 14px; }
+
+.home-hero {
+  display: grid;
+  grid-template-columns: 260px minmax(0, 1fr);
+  gap: 14px;
+}
+
+.home-streak, .home-session, .home-shelf {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: rgba(23, 26, 29, 0.9);
+  padding: 16px;
+}
+
+.home-streak {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  text-align: center;
+}
+
+.home-streak-num { font-family: var(--mono); font-size: 56px; font-weight: 900; color: var(--accent); line-height: 1; }
+.home-streak-label { font-family: var(--mono); font-size: 13px; text-transform: uppercase; letter-spacing: 0.1em; }
+
+.home-session h2 { margin: 0 0 10px; font-size: 15px; }
+
+.session-step {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  text-align: left;
+  margin-bottom: 8px;
+  padding: 10px 12px;
+}
+
+.session-step span:last-child { display: flex; flex-direction: column; gap: 2px; }
+.session-step small { color: var(--muted); font-size: 11px; }
+
+.session-num {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  flex: none;
+  border: 1px solid var(--accent);
+  border-radius: 999px;
+  color: var(--accent);
+  font-family: var(--mono);
+  font-weight: 900;
+}
+
+.shelf-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: 10px;
+}
+
+.shelf-card {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  text-align: left;
+  padding: 12px 14px;
+}
+
+.shelf-card strong { font-family: var(--mono); font-size: 13px; }
+.shelf-card em { color: var(--faint); font-style: normal; font-family: var(--mono); font-size: 11px; }
+.shelf-best { color: var(--enc-green); font-family: var(--mono); font-size: 12px; }
+.shelf-untried { color: var(--muted); }
+.shelf-actions { margin-top: 4px; }
+.shelf-actions .chip { display: inline-block; }
+
+.drill-records { display: flex; flex-wrap: wrap; gap: 10px; }
+
+.drill-record {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface-2);
+  padding: 8px 12px;
+  font-family: var(--mono);
+  font-size: 12px;
+}
+
+.drill-record strong { color: var(--enc-green); font-size: 14px; }
+
+@media (max-width: 900px) {
+  .home-hero { grid-template-columns: minmax(0, 1fr); }
+}

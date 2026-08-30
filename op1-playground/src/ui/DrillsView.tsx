@@ -13,6 +13,7 @@ import { NavTabs, ViewId } from './NavTabs';
 import { INDEX_TO_QWERTY, qwertyIndex } from '../practice/qwerty';
 import { webMidiIn } from '../audio/webmidi';
 import { player } from '../audio/player';
+import { markPracticed } from '../practice/progress';
 import { LitKey, Op1Keyboard } from './Op1Keyboard';
 
 const RUN_LENGTH = 10;
@@ -20,11 +21,14 @@ const MODE_ORDER: ModeId[] = ['major', 'minor', 'dorian', 'mixolydian', 'lydian'
 
 export interface DrillsViewProps {
   onNav: (view: ViewId) => void;
+  /** open with this song's grab drill selected */
+  initialSongId?: string;
 }
 
-export function DrillsView({ onNav }: DrillsViewProps) {
+export function DrillsView({ onNav, initialSongId }: DrillsViewProps) {
   const [kind, setKind] = useState<DrillKind>('chord');
-  const [sourceId, setSourceId] = useState<'keys' | string>('keys');
+  const [sourceId, setSourceId] = useState<'keys' | string>(
+    () => (initialSongId && SONGS.some((s) => s.id === initialSongId) ? initialSongId : 'keys'));
   const [tonicIdx, setTonicIdx] = useState(0);
   const [mode, setMode] = useState<ModeId>('major');
   const [sevenths, setSevenths] = useState(false);
@@ -105,6 +109,7 @@ export function DrillsView({ onNav }: DrillsViewProps) {
     const seconds = (performance.now() - startRef.current) / 1000;
     const score = runScore(performance.now() - startRef.current, finalMistakes);
     setResult({ score, mistakes: finalMistakes, seconds: Math.round(seconds * 10) / 10 });
+    markPracticed();
     try {
       const prev = Number(window.localStorage.getItem(bestKey) ?? Infinity);
       if (score < prev) {

@@ -20,6 +20,7 @@ import { buildMidiFile, downloadBlob } from '../audio/midiExport';
 import { webMidiIn } from '../audio/webmidi';
 import { Grader, expectedFor } from '../practice/score';
 import { INDEX_TO_QWERTY, qwertyIndex } from '../practice/qwerty';
+import { markPracticed } from '../practice/progress';
 import { LitKey, Op1Keyboard } from './Op1Keyboard';
 import { NavTabs, ViewId } from './NavTabs';
 
@@ -174,6 +175,7 @@ export function SongView({ onNav, initialSongId }: SongViewProps) {
     if (grader && grader.stats().hits + grader.stats().extras > 0) {
       const accuracy = grader.accuracy;
       setAlongStats({ ...grader.stats(), accuracy });
+      markPracticed();
       try {
         const prev = Number(window.localStorage.getItem(bestKey) ?? -1);
         if (accuracy > prev) {
