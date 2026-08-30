@@ -18,6 +18,7 @@ import { LitKey, Op1Keyboard } from './Op1Keyboard';
 import { MelodyStrip } from './MelodyStrip';
 import { SongView } from './SongView';
 import { DrillsView } from './DrillsView';
+import { NavTabs } from './NavTabs';
 
 interface UserSlot {
   id: number;
@@ -322,11 +323,10 @@ export default function App() {
   const totalBars = slots.reduce((sum, s) => sum + s.bars, 0);
 
   if (view === 'songs') {
-    return <SongView initialSongId={initialSongId} onExit={() => setView('playground')}
-      onDrills={() => setView('drills')} />;
+    return <SongView initialSongId={initialSongId} onNav={setView} />;
   }
   if (view === 'drills') {
-    return <DrillsView onExit={() => setView('playground')} onSongs={() => setView('songs')} />;
+    return <DrillsView onNav={setView} />;
   }
 
   return (
@@ -369,10 +369,7 @@ export default function App() {
             onClick={playing ? stopPlayback : () => void startPlayback()}>
             {playing ? '■ Stop' : '▶ Play'}
           </button>
-          <button className="tool-btn" title="tabs of transcribed songs"
-            onClick={() => { stopPlayback(); setView('songs'); }}>♪ Songs</button>
-          <button className="tool-btn" title="chord-grab and key-recall flashcards"
-            onClick={() => { stopPlayback(); setView('drills'); }}>🎯 Drills</button>
+          <NavTabs active="playground" onNav={(v) => { stopPlayback(); setView(v); }} />
           <button className="tool-btn" onClick={copyChart}>{copied === 'chart' ? 'Copied' : 'Copy tab'}</button>
           <button className="tool-btn" onClick={exportMidi}>{copied === 'midi' ? 'Saved' : 'MIDI'}</button>
           {webMidiOut.supported && (

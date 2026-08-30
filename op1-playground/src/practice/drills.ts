@@ -5,6 +5,7 @@
 import { Note } from 'tonal';
 import { KeySig, diatonicPalette, parseToken, prettyNote, scaleNotes } from '../theory/harmony';
 import { OP1_BASE_MIDI, OP1_KEY_COUNT, Voicing, fitChord, keyTag } from '../op1/op1';
+import { CompiledBar } from '../songs/compile';
 import { Rng } from '../lib/rng';
 
 export type DrillKind = 'chord' | 'keytag' | 'note';
@@ -25,6 +26,8 @@ export interface DrillCard {
   targetChromas?: number[];
   /** exact key to press (keytag cards) */
   targetIndex?: number;
+  /** exact keys to collect (song-grab cards) */
+  targetIndexes?: number[];
   /** what to light up when the card is done */
   reveal: { index: number; label: string; isRoot: boolean }[];
 }
@@ -77,13 +80,42 @@ export function makeCard(kind: DrillKind, key: KeySig, sevenths: boolean, rng: R
   };
 }
 
+export interface SongDrillBar {
+  bar: CompiledBar;
+  sectionName: string;
+}
+
+/** A grab from the repertoire: this bar's chord, exactly as the tab voices it. */
+export function makeSongCard(bars: SongDrillBar[], rng: Rng): DrillCard {
+  const pick = bars[Math.floor(rng() * bars.length)];
+  const { bar } = pick;
+  const rootChroma = Note.chroma(bar.chord.bass ?? bar.chord.root) ?? -1;
+  return {
+    kind: 'chord',
+    prompt: bar.chord.symbol,
+    sub: `bar ${bar.number} · ${pick.sectionName} — grab it exactly as the tab voices it`,
+    targetIndexes: bar.voicing.midis.map((m) => m - OP1_BASE_MIDI),
+    reveal: bar.voicing.midis.map((m, i) => ({
+      index: m - OP1_BASE_MIDI,
+      label: bar.keyTags[i],
+      isRoot: m % 12 === rootChroma,
+    })),
+  };
+}
+
 export type PressResult =
   | { verdict: 'good'; done: boolean; collected: number[] }
   | { verdict: 'already'; done: false; collected: number[] }
   | { verdict: 'wrong'; done: false; collected: number[] };
 
-/** Judge one key press against a card, given the chromas collected so far. */
+/** Judge one key press against a card, given what is collected so far. */
 export function judgePress(card: DrillCard, index: number, collected: number[]): PressResult {
+  if (card.targetIndexes) {
+    if (!card.targetIndexes.includes(index)) return { verdict: 'wrong', done: false, collected };
+    if (collected.includes(index)) return { verdict: 'already', done: false, collected };
+    const next = [...collected, index];
+    return { verdict: 'good', done: next.length === card.targetIndexes.length, collected: next };
+  }
   if (card.targetIndex !== undefined) {
     return index === card.targetIndex
       ? { verdict: 'good', done: true, collected }

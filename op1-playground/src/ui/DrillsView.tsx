@@ -6,7 +6,10 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { KeySig, MODE_NAMES, ModeId, TONIC_CHOICES, prettyNote } from '../theory/harmony';
 import { OP1_BASE_MIDI } from '../op1/op1';
 import { mixSeeds, mulberry32 } from '../lib/rng';
-import { DRILL_KINDS, DrillCard, DrillKind, judgePress, makeCard, runScore } from '../practice/drills';
+import { DRILL_KINDS, DrillCard, DrillKind, SongDrillBar, judgePress, makeCard, makeSongCard, runScore } from '../practice/drills';
+import { SONGS } from '../data/songs';
+import { compileScore } from '../songs/compile';
+import { NavTabs, ViewId } from './NavTabs';
 import { INDEX_TO_QWERTY, qwertyIndex } from '../practice/qwerty';
 import { webMidiIn } from '../audio/webmidi';
 import { player } from '../audio/player';
@@ -16,12 +19,12 @@ const RUN_LENGTH = 10;
 const MODE_ORDER: ModeId[] = ['major', 'minor', 'dorian', 'mixolydian', 'lydian', 'phrygian'];
 
 export interface DrillsViewProps {
-  onExit: () => void;
-  onSongs: () => void;
+  onNav: (view: ViewId) => void;
 }
 
-export function DrillsView({ onExit, onSongs }: DrillsViewProps) {
+export function DrillsView({ onNav }: DrillsViewProps) {
   const [kind, setKind] = useState<DrillKind>('chord');
+  const [sourceId, setSourceId] = useState<'keys' | string>('keys');
   const [tonicIdx, setTonicIdx] = useState(0);
   const [mode, setMode] = useState<ModeId>('major');
   const [sevenths, setSevenths] = useState(false);
@@ -40,13 +43,24 @@ export function DrillsView({ onExit, onSongs }: DrillsViewProps) {
   const midiUnsub = useRef<(() => void) | null>(null);
 
   const key: KeySig = useMemo(() => ({ tonic: TONIC_CHOICES[tonicIdx], mode }), [tonicIdx, mode]);
+  const songSource = useMemo(() => {
+    const score = SONGS.find((s) => s.id === sourceId);
+    if (!score) return undefined;
+    const song = compileScore(score);
+    const bars: SongDrillBar[] = song.sections.flatMap((sec) =>
+      sec.bars.map((bar) => ({ bar, sectionName: sec.name })));
+    return { title: score.title, bars };
+  }, [sourceId]);
   const cards = useMemo(() => {
     const rng = mulberry32(mixSeeds(0xd811, runSeed));
-    return Array.from({ length: RUN_LENGTH }, () => makeCard(kind, key, sevenths, rng));
-  }, [kind, key, sevenths, runSeed]);
+    return Array.from({ length: RUN_LENGTH }, () =>
+      songSource ? makeSongCard(songSource.bars, rng) : makeCard(kind, key, sevenths, rng));
+  }, [kind, key, sevenths, runSeed, songSource]);
   const card: DrillCard | undefined = cardIdx === null ? undefined : cards[cardIdx];
 
-  const bestKey = `op1playground.drill.${kind}.${key.tonic}.${key.mode}.${sevenths ? '7' : '3'}`;
+  const bestKey = songSource
+    ? `op1playground.drill.song.${sourceId}`
+    : `op1playground.drill.${kind}.${key.tonic}.${key.mode}.${sevenths ? '7' : '3'}`;
   useEffect(() => {
     try {
       const stored = window.localStorage.getItem(bestKey);
@@ -70,7 +84,7 @@ export function DrillsView({ onExit, onSongs }: DrillsViewProps) {
   }, []);
 
   useEffect(() => stopRun, [stopRun]);
-  useEffect(() => { stopRun(); setResult(null); }, [kind, key, sevenths, stopRun]);
+  useEffect(() => { stopRun(); setResult(null); }, [kind, key, sevenths, sourceId, stopRun]);
 
   const startRun = async () => {
     setRunSeed((s) => s + 1);
@@ -179,17 +193,31 @@ export function DrillsView({ onExit, onSongs }: DrillsViewProps) {
           <div>
             <div className="brand-name">DRILLS</div>
             <div className="brand-sub">
-              {DRILL_KINDS.find((k) => k.id === kind)?.label} · {prettyNote(key.tonic)} {MODE_NAMES[key.mode]}
-              {kind === 'chord' ? (sevenths ? ' · sevenths' : ' · triads') : ''}
+              {songSource
+                ? `song grabs · ${songSource.title}`
+                : `${DRILL_KINDS.find((k) => k.id === kind)?.label} · ${prettyNote(key.tonic)} ${MODE_NAMES[key.mode]}${kind === 'chord' ? (sevenths ? ' · sevenths' : ' · triads') : ''}`}
             </div>
           </div>
         </div>
         <div className="transport">
-          <button className="tool-btn" onClick={onSongs}>♪ Songs</button>
-          <button className="tool-btn" onClick={onExit}>← Playground</button>
+          <NavTabs active="drills" onNav={onNav} />
         </div>
       </header>
 
+      <section className="preset-zone">
+        <div className="preset-filters">
+          <span className="mini-label">drill from</span>
+          <button className={sourceId === 'keys' ? 'chip chip-on' : 'chip'}
+            onClick={() => setSourceId('keys')}>any key</button>
+          {SONGS.map((s) => (
+            <button key={s.id} className={sourceId === s.id ? 'chip chip-on' : 'chip'}
+              title="chord grabs from this song's tab, exact keys"
+              onClick={() => setSourceId(s.id)}>{s.title}</button>
+          ))}
+        </div>
+      </section>
+
+      {!songSource && (
       <section className="key-strip">
         <div className="key-picker" aria-label="key">
           {TONIC_CHOICES.map((tonic, i) => (
@@ -206,9 +234,11 @@ export function DrillsView({ onExit, onSongs }: DrillsViewProps) {
           ))}
         </div>
       </section>
+      )}
 
       <main className="drill-grid">
         <section className="drill-zone">
+          {!songSource && (
           <div className="drill-kinds">
             {DRILL_KINDS.map((k) => (
               <button key={k.id} className={`drill-kind${k.id === kind ? ' drill-kind-on' : ''}`}
@@ -224,6 +254,13 @@ export function DrillsView({ onExit, onSongs }: DrillsViewProps) {
               </label>
             )}
           </div>
+          )}
+          {songSource && (
+            <p className="meta-line">
+              chord grabs from <strong>{songSource.title}</strong> — {songSource.bars.length} bars in the pool,
+              exact keys as the tab voices them
+            </p>
+          )}
 
           <div className="drill-card">
             {running && card ? (

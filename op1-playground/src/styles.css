@@ -871,3 +871,26 @@ input, select, textarea {
 .drill-actions { margin-top: 12px; }
 .drill-hint { justify-content: center; }
 .drill-foot { text-align: center; }
+
+/* ---- nav tabs ---- */
+
+.nav-tabs {
+  display: flex;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  overflow: hidden;
+  background: var(--surface-2);
+}
+
+.nav-tab {
+  border: 0;
+  border-radius: 0;
+  background: none;
+  padding: 7px 14px;
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.nav-tab:hover:not(:disabled) { background: var(--surface-3); border-color: transparent; }
+.nav-tab-on { background: rgba(255, 111, 42, 0.16); color: var(--accent); }

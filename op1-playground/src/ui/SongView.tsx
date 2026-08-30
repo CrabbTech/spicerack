@@ -21,6 +21,7 @@ import { webMidiIn } from '../audio/webmidi';
 import { Grader, expectedFor } from '../practice/score';
 import { INDEX_TO_QWERTY, qwertyIndex } from '../practice/qwerty';
 import { LitKey, Op1Keyboard } from './Op1Keyboard';
+import { NavTabs, ViewId } from './NavTabs';
 
 const STORE_KEY = 'op1playground.songs';
 
@@ -90,12 +91,11 @@ const scoreImageSrc = (image: string): string =>
   image.startsWith('data:') ? image : import.meta.env.BASE_URL + image;
 
 export interface SongViewProps {
-  onExit: () => void;
-  onDrills?: () => void;
+  onNav: (view: ViewId) => void;
   initialSongId?: string;
 }
 
-export function SongView({ onExit, onDrills, initialSongId }: SongViewProps) {
+export function SongView({ onNav, initialSongId }: SongViewProps) {
   const [imported, setImported] = useState<Score[]>(() => loadImportedSongs());
   const library = useMemo(() => [...SONGS, ...imported], [imported]);
   const [songId, setSongId] = useState(() =>
@@ -267,7 +267,7 @@ export function SongView({ onExit, onDrills, initialSongId }: SongViewProps) {
       <div className="app">
         <header className="topbar">
           <div className="brand"><div className="mark">F4</div><div className="brand-name">SONGS</div></div>
-          <button className="tool-btn" onClick={onExit}>← Playground</button>
+          <NavTabs active="songs" onNav={onNav} />
         </header>
         <p className="meta-line">No songs in the library yet.</p>
       </div>
@@ -409,8 +409,7 @@ export function SongView({ onExit, onDrills, initialSongId }: SongViewProps) {
             {copied === 'tab' ? 'Copied' : 'Copy tab'}
           </button>
           <button className="tool-btn" onClick={exportMidi}>{copied === 'midi' ? 'Saved' : 'MIDI'}</button>
-          {onDrills && <button className="tool-btn" title="chord-grab and key-recall flashcards" onClick={onDrills}>🎯 Drills</button>}
-          <button className="tool-btn" onClick={onExit}>← Playground</button>
+          <NavTabs active="songs" onNav={onNav} />
         </div>
       </header>
 

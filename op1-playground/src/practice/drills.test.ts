@@ -41,6 +41,31 @@ describe('card generation', () => {
   });
 });
 
+describe('song-grab cards', () => {
+  it('demands the exact keys of a bar voicing and reveals its key tags', async () => {
+    const { compileScore } = await import('../songs/compile');
+    const { songById } = await import('../data/songs');
+    const { makeSongCard } = await import('./drills');
+    const song = compileScore(songById('laid-back-db-intro')!);
+    const bars = song.sections.flatMap((sec) => sec.bars.map((bar) => ({ bar, sectionName: sec.name })));
+    const rng = mulberry32(9);
+    for (let i = 0; i < 8; i++) {
+      const card = makeSongCard(bars, rng);
+      expect(card.targetIndexes!.length).toBeGreaterThanOrEqual(3);
+      // exact-key judging: a chroma-equivalent wrong octave is wrong
+      let collected: number[] = [];
+      for (const idx of card.targetIndexes!) {
+        const res = judgePress(card, idx, collected);
+        expect(res.verdict).toBe('good');
+        collected = res.collected;
+      }
+      const other = [...Array(24).keys()].find((k) => !card.targetIndexes!.includes(k))!;
+      expect(judgePress(card, other, []).verdict).toBe('wrong');
+      for (const r of card.reveal) expect(r.label).toMatch(/^(B|T)\d+$/);
+    }
+  });
+});
+
 describe('judging', () => {
   const rng = mulberry32(5);
   const chordCard = makeCard('chord', key, false, rng);
