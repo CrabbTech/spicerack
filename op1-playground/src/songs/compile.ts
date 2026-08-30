@@ -325,6 +325,29 @@ export function expandPasses(section: CompiledSection): PassBar[] {
   return out;
 }
 
+/**
+ * Practice slice: one pass over a contiguous run of a section's bars —
+ * what the practice loop plays. `fromBar`/`toBar` are bar indices, inclusive.
+ */
+export function practicePlayback(
+  section: CompiledSection, fromBar: number, toBar: number, octaveShift?: number,
+): SongPlayback {
+  const shift = octaveShift ?? section.octaveShift;
+  const lo = Math.max(0, Math.min(fromBar, toBar));
+  const hi = Math.min(section.bars.length - 1, Math.max(fromBar, toBar));
+  const bars = section.bars.filter((b) => b.index >= lo && b.index <= hi);
+  const offset = bars[0]?.startBeat ?? 0;
+  const slots: SongPlayback['slots'] = [];
+  const melody: SongPlayback['melody'] = [];
+  for (const bar of bars) {
+    slots.push({ bars: bar.beats / 4, midis: bar.voicing.midis.map((m) => m + 12 * shift) });
+    for (const note of bar.notes) {
+      melody.push({ start: note.start - offset, dur: note.dur, midi: note.midi + 12 * shift });
+    }
+  }
+  return { slots, melody, beats: bars.reduce((sum, b) => sum + b.beats, 0) };
+}
+
 export interface SongPlayback {
   slots: { bars: number; midis: number[] }[];
   melody: { start: number; dur: number; midi: number }[];

@@ -25,6 +25,12 @@ export interface PlaySpec {
   arp: ArpStyle;
   chordsOn: boolean;
   melodyOn: boolean;
+  /** beats per bar for the click accents (default 4) */
+  beatsPerBar?: number;
+  /** count-in beats played before beat 0; the loop skips them on repeats */
+  countInBeats?: number;
+  /** metronome through the material (the count-in always clicks) */
+  click?: boolean;
   onSlot?: (index: number | null) => void;
   onMelody?: (midi: number | null) => void;
   /** hardware out: (midi, velocity 0..1, durMs, atMs perf-timestamp) */
@@ -43,6 +49,26 @@ export const swungBeat = (beat: number, swing: number): number =>
 
 interface ChordEvent { time: number; midis: number[]; dur: number; vel: number; slotIdx: number | null }
 interface MelodyEvent { time: number; midi: number; dur: number; vel: number }
+
+export interface ClickEvent { time: number; accent: boolean }
+
+/**
+ * Metronome schedule in seconds: every beat of the count-in (first beat
+ * accented), then — only when `through` — every beat of the material with
+ * accents on bar starts.
+ */
+export function clickEvents(
+  countInBeats: number, totalBeats: number, beatsPerBar: number, spb: number, through: boolean,
+): ClickEvent[] {
+  const out: ClickEvent[] = [];
+  for (let b = 0; b < countInBeats; b++) out.push({ time: b * spb, accent: b === 0 });
+  if (through) {
+    for (let b = 0; b < totalBeats; b++) {
+      out.push({ time: (countInBeats + b) * spb, accent: b % beatsPerBar === 0 });
+    }
+  }
+  return out;
+}
 
 /** Expand slots into swung chord events + slot-highlight markers (seconds). */
 export function chordEvents(spec: PlaySpec, spb: number): ChordEvent[] {
@@ -92,6 +118,7 @@ export function chordEvents(spec: PlaySpec, spb: number): ChordEvent[] {
 class Player {
   private chordSynth: Tone.PolySynth | null = null;
   private melodySynth: Tone.Synth | null = null;
+  private clickSynth: Tone.Synth | null = null;
   private parts: Tone.Part[] = [];
   private started = false;
 
@@ -115,6 +142,11 @@ class Player {
         oscillator: { type: 'square' },
         envelope: { attack: 0.01, decay: 0.18, sustain: 0.35, release: 0.2 },
       }).chain(new Tone.Filter(3800, 'lowpass'), delay, leadVol, Tone.getDestination());
+
+      this.clickSynth = new Tone.Synth({
+        oscillator: { type: 'sine' },
+        envelope: { attack: 0.001, decay: 0.05, sustain: 0, release: 0.03 },
+      }).chain(new Tone.Volume(-9), Tone.getDestination());
     }
   }
 
@@ -138,10 +170,12 @@ class Player {
     const spb = 60 / spec.bpm;
     const totalBeats = spec.slots.reduce((sum, s) => sum + s.bars * 4, 0);
     if (totalBeats <= 0) return;
+    const countIn = Math.max(0, spec.countInBeats ?? 0);
+    const off = countIn * spb;
     transport.bpm.value = spec.bpm;
     transport.loop = true;
-    transport.loopStart = 0;
-    transport.loopEnd = totalBeats * spb;
+    transport.loopStart = off; // repeats skip the count-in
+    transport.loopEnd = off + totalBeats * spb;
 
     const draw = Tone.getDraw();
     const chordPart = new Tone.Part<ChordEvent>((time, ev) => {
@@ -155,13 +189,22 @@ class Player {
         const atMs = performance.now() + Math.max(0, (time - Tone.now()) * 1000);
         for (const m of ev.midis) spec.midiSend(m, ev.vel, ev.dur * 1000, atMs);
       }
-    }, chordEvents(spec, spb));
+    }, chordEvents(spec, spb).map((ev) => ({ ...ev, time: ev.time + off })));
     chordPart.start(0);
     this.parts.push(chordPart);
 
+    const clicks = clickEvents(countIn, totalBeats, spec.beatsPerBar ?? 4, spb, spec.click === true);
+    if (clicks.length) {
+      const clickPart = new Tone.Part<ClickEvent>((time, ev) => {
+        this.clickSynth!.triggerAttackRelease(ev.accent ? 1660 : 1108, 0.03, time, ev.accent ? 0.9 : 0.55);
+      }, clicks);
+      clickPart.start(0);
+      this.parts.push(clickPart);
+    }
+
     if (spec.melodyOn && spec.melody.length) {
       const events: MelodyEvent[] = spec.melody.map((n) => ({
-        time: swungBeat(n.start, spec.swing) * spb,
+        time: swungBeat(n.start, spec.swing) * spb + off,
         midi: n.midi,
         dur: Math.max(0.1, n.dur * spb * 0.92),
         vel: 0.85,

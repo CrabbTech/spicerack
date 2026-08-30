@@ -8,7 +8,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Note } from 'tonal';
 import { formulaFromIntervals, keyLabel, prettyNote, prettyNumeral } from '../theory/harmony';
 import { OP1_BASE_MIDI, keyTag, rangeLabel } from '../op1/op1';
-import { CompiledBar, CompiledSection, compileScore, expandPasses, gridFor, playbackFor } from '../songs/compile';
+import { CompiledBar, CompiledSection, compileScore, expandPasses, gridFor, playbackFor, practicePlayback } from '../songs/compile';
 import { FIGURES } from '../songs/figures';
 import { Moment, firstMomentOfBar, momentsOf } from '../songs/moments';
 import { Score } from '../songs/types';
@@ -106,6 +106,11 @@ export function SongView({ onExit, initialSongId }: SongViewProps) {
   const [playingBar, setPlayingBar] = useState<number | null>(null);
   const [playingIndex, setPlayingIndex] = useState<number | null>(null);
   const [copied, setCopied] = useState<'tab' | 'json' | 'midi' | null>(null);
+  const [tempoPct, setTempoPct] = useState(100);
+  const [metronome, setMetronome] = useState(false);
+  const [countIn, setCountIn] = useState(true);
+  const [loopFrom, setLoopFrom] = useState(0);
+  const [loopTo, setLoopTo] = useState(Infinity);
   const [importOpen, setImportOpen] = useState(false);
   const [importText, setImportText] = useState(SCORE_TEMPLATE);
   const [importErrors, setImportErrors] = useState<string[]>([]);
@@ -126,8 +131,8 @@ export function SongView({ onExit, initialSongId }: SongViewProps) {
   );
   const passBars = useMemo(() => playedSections.flatMap((s) => expandPasses(s)), [playedSections]);
 
-  useEffect(() => { setSectionIdx(0); setStepIdx(0); }, [songId]);
-  useEffect(() => { setStepIdx(0); }, [sectionIdx]);
+  useEffect(() => { setSectionIdx(0); setStepIdx(0); setTempoPct(100); }, [songId]);
+  useEffect(() => { setStepIdx(0); setLoopFrom(0); setLoopTo(Infinity); }, [sectionIdx, songId]);
 
   const stop = useCallback(() => {
     player.stop();
@@ -137,7 +142,7 @@ export function SongView({ onExit, initialSongId }: SongViewProps) {
   }, []);
 
   // never let the sound and the display drift apart
-  useEffect(() => { stop(); }, [chart, wholeSong, chordsOn, partOn, sectionIdx, stop]);
+  useEffect(() => { stop(); }, [chart, wholeSong, chordsOn, partOn, sectionIdx, tempoPct, metronome, countIn, loopFrom, loopTo, stop]);
   useEffect(() => stop, [stop]);
 
   const shift = section?.octaveShift ?? 0;
@@ -186,28 +191,40 @@ export function SongView({ onExit, initialSongId }: SongViewProps) {
     );
   }
 
+  const rangeLo = Math.max(0, Math.min(loopFrom, loopTo));
+  const rangeHi = Math.min(section ? section.bars.length - 1 : 0, Math.max(loopFrom, loopTo));
+  const rangeActive = !wholeSong && section !== undefined &&
+    (rangeLo > 0 || rangeHi < section.bars.length - 1);
+  const practiceBpm = Math.max(30, Math.min(240, Math.round(score.bpm * tempoPct / 100)));
+
   const start = async () => {
     const token = ++playToken.current;
-    const spec = playbackFor(playedSections);
+    const spec = wholeSong
+      ? playbackFor(playedSections)
+      : practicePlayback(section, rangeLo, rangeHi);
+    const practiceBars = wholeSong ? [] : section.bars.filter((b) => b.index >= rangeLo && b.index <= rangeHi);
     await player.play({
       slots: spec.slots,
       melody: spec.melody,
-      bpm: Math.max(40, Math.min(220, score.bpm)),
+      bpm: practiceBpm,
       swing: 0,
       arp: 'off',
       chordsOn,
       melodyOn: partOn,
+      beatsPerBar: song.meter[0],
+      countInBeats: countIn ? song.meter[0] : 0,
+      click: metronome,
       onSlot: (i) => {
         if (i === null) { setPlayingBar(null); return; }
-        const passBar = passBars[i];
-        if (!passBar) return;
-        setPlayingBar(passBar.bar.index);
+        const bar = wholeSong ? passBars[i]?.bar : practiceBars[i];
+        if (!bar) return;
+        setPlayingBar(bar.index);
         if (wholeSong) {
-          const sectionOf = playedSections.findIndex((s) => s.bars.includes(passBar.bar));
+          const sectionOf = playedSections.findIndex((s) => s.bars.includes(bar));
           if (sectionOf >= 0) setSectionIdx(sectionOf);
         }
         // keep the step cursor trailing playback so stopping leaves you in place
-        setStepIdx(firstMomentOfBar(momentsOf(playedSections.find((s) => s.bars.includes(passBar.bar)) ?? section), passBar.bar.index));
+        setStepIdx(firstMomentOfBar(momentsOf(playedSections.find((s) => s.bars.includes(bar)) ?? section), bar.index));
       },
       onMelody: (midi) => setPlayingIndex(midi === null ? null : midi - OP1_BASE_MIDI - 12 * shift),
     });
@@ -392,6 +409,43 @@ export function SongView({ onExit, initialSongId }: SongViewProps) {
             <span className="meta-line">← → step through · shift+← → jump bars</span>
           </div>
 
+          <div className="practice-strip">
+            <span className="mini-label">practice</span>
+            <label className="practice-tempo" title="practice tempo — start slow, earn the real one">
+              <input type="range" min={40} max={120} step={5} value={tempoPct}
+                onChange={(e) => setTempoPct(Number(e.target.value))} />
+              <strong>{tempoPct}%</strong>
+              <em>♩={practiceBpm}</em>
+            </label>
+            <label className="smooth-toggle" title="one bar of clicks before the top; the loop skips it on repeats">
+              <input type="checkbox" checked={countIn} onChange={(e) => setCountIn(e.target.checked)} />
+              count-in
+            </label>
+            <label className="smooth-toggle" title="click through the music, accented on bar starts">
+              <input type="checkbox" checked={metronome} onChange={(e) => setMetronome(e.target.checked)} />
+              metronome
+            </label>
+            {!wholeSong && section.bars.length > 1 && (
+              <span className="practice-range">
+                <span className="mini-label">loop bars</span>
+                <select value={rangeLo} onChange={(e) => setLoopFrom(Number(e.target.value))}>
+                  {section.bars.map((b) => <option key={b.index} value={b.index}>{b.number}</option>)}
+                </select>
+                <span>–</span>
+                <select value={rangeHi} onChange={(e) => setLoopTo(Number(e.target.value))}>
+                  {section.bars.map((b) => <option key={b.index} value={b.index}>{b.number}</option>)}
+                </select>
+                {rangeActive && (
+                  <button className="tool-btn" title="loop the whole section again"
+                    onClick={() => { setLoopFrom(0); setLoopTo(Infinity); }}>clear</button>
+                )}
+              </span>
+            )}
+            {tempoPct !== 100 && (
+              <button className="tool-btn" onClick={() => setTempoPct(100)}>full speed</button>
+            )}
+          </div>
+
           {section.note && <p className="section-note">{section.note}</p>}
           {bar.figure && !playing && (
             <p className="section-note">
@@ -422,7 +476,7 @@ export function SongView({ onExit, initialSongId }: SongViewProps) {
           <div className="slot-grid">
             {section.bars.map((b) => (
               <article key={b.index}
-                className={`slot-card func-${b.chord.func}${b.index === moment.barIdx ? ' slot-active' : ''}${playingBar === b.index ? ' slot-playing' : ''}`}
+                className={`slot-card func-${b.chord.func}${b.index === moment.barIdx ? ' slot-active' : ''}${playingBar === b.index ? ' slot-playing' : ''}${rangeActive && b.index >= rangeLo && b.index <= rangeHi ? ' slot-looped' : ''}`}
                 onClick={() => goToStep(firstMomentOfBar(moments, b.index), false)}>
                 <div className="slot-top">
                   <span className={`numeral numeral-${b.chord.func}`}>

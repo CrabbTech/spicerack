@@ -746,3 +746,33 @@ input, select, textarea {
   .perform-readout { gap: 14px; }
   .perform-chord h1 { font-size: 21px; }
 }
+
+/* ---- practice strip ---- */
+
+.practice-strip {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 12px;
+  border-top: 1px dashed var(--line);
+  padding-top: 10px;
+}
+
+.practice-tempo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--mono);
+}
+
+.practice-tempo input[type="range"] { width: 150px; accent-color: var(--accent); }
+.practice-tempo strong { min-width: 42px; text-align: right; }
+.practice-tempo em { color: var(--muted); font-style: normal; font-size: 11px; }
+
+.practice-range { display: flex; align-items: center; gap: 6px; }
+.practice-range select { padding: 4px 6px; font-family: var(--mono); font-size: 12px; }
+.practice-range .mini-label { margin: 0; }
+
+.slot-looped { box-shadow: inset 0 0 0 1px var(--accent); }
