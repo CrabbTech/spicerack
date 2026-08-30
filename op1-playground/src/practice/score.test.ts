@@ -22,6 +22,22 @@ describe('expected timeline', () => {
   });
 });
 
+describe('hands-separate expectations', () => {
+  it('scopes to one part and covers both when unscoped', async () => {
+    const { compileScore } = await import('../songs/compile');
+    const { songById } = await import('../data/songs');
+    const song = compileScore(songById('waltz-in-d')!);
+    const section = song.sections[0];
+    const both = expectedFor(section, 0, 0, 60);
+    const melody = expectedFor(section, 0, 0, 60, 'melody');
+    const left = expectedFor(section, 0, 0, 60, 'left');
+    expect(melody.notes.length).toBe(6);
+    expect(left.notes.length).toBe(6);
+    expect(both.notes.length).toBe(12);
+    expect(melody.passMs).toBe(both.passMs);
+  });
+});
+
 describe('grader', () => {
   const fixture = {
     notes: [

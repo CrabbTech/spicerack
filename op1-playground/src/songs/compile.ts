@@ -330,7 +330,8 @@ export function expandPasses(section: CompiledSection): PassBar[] {
  * what the practice loop plays. `fromBar`/`toBar` are bar indices, inclusive.
  */
 export function practicePlayback(
-  section: CompiledSection, fromBar: number, toBar: number, octaveShift?: number,
+  section: CompiledSection, fromBar: number, toBar: number,
+  octaveShift?: number, part?: PartId,
 ): SongPlayback {
   const shift = octaveShift ?? section.octaveShift;
   const lo = Math.max(0, Math.min(fromBar, toBar));
@@ -342,6 +343,7 @@ export function practicePlayback(
   for (const bar of bars) {
     slots.push({ bars: bar.beats / 4, midis: bar.voicing.midis.map((m) => m + 12 * shift) });
     for (const note of bar.notes) {
+      if (part && note.part !== part) continue;
       melody.push({ start: note.start - offset, dur: note.dur, midi: note.midi + 12 * shift });
     }
   }

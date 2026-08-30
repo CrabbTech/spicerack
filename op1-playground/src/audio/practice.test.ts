@@ -41,6 +41,17 @@ describe('practice slice', () => {
     expect(slice.slots.length).toBe(3); // bars 2..4
   });
 
+  it('filters to one hand when asked', async () => {
+    const { songById: byId } = await import('../data/songs');
+    const waltz = compileScore(byId('waltz-in-d')!);
+    const sec = waltz.sections[0];
+    const left = practicePlayback(sec, 0, 0, undefined, 'left');
+    const both = practicePlayback(sec, 0, 0);
+    expect(left.melody.length).toBe(6);
+    expect(both.melody.length).toBe(12);
+    expect(left.beats).toBe(both.beats);
+  });
+
   it('full range matches one pass of the section', () => {
     const slice = practicePlayback(section, 0, section.bars.length - 1);
     expect(slice.beats).toBe(section.beats);

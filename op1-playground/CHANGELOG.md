@@ -3,6 +3,13 @@
 All notable changes to `op1-playground`. Newest first. Dates are local;
 hashes refer to this repo's `main`.
 
+## 2026-08-30 · Hands-separate practice
+- Songs with two written parts (the waltz) get a **hands** selector in the
+  practice strip: both / right / left. It scopes playback *and* play-along
+  grading to that part, with separate best scores per hand
+  (`…best.<song>.<section>.<pct>~melody`). Sections with one part are
+  untouched.
+
 ## 2026-08-30 · Trouble keys
 - Play-along now remembers which physical keys you miss, per song
   (`Grader.missedByKey` folded into localStorage after every graded take).

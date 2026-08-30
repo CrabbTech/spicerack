@@ -2,7 +2,7 @@
 // and a Grader that judges incoming presses (hardware MIDI or the QWERTY
 // piano) against them. Pure and tested — the UI only feeds it events.
 
-import { CompiledSection } from '../songs/compile';
+import { CompiledSection, PartId } from '../songs/compile';
 import { OP1_BASE_MIDI } from '../op1/op1';
 
 export interface ExpectedNote {
@@ -19,7 +19,7 @@ export interface ExpectedNote {
  * exist, otherwise the chord voicing struck at the top of each bar.
  */
 export function expectedFor(
-  section: CompiledSection, fromBar: number, toBar: number, bpm: number,
+  section: CompiledSection, fromBar: number, toBar: number, bpm: number, part?: PartId,
 ): { notes: ExpectedNote[]; passMs: number } {
   const lo = Math.max(0, Math.min(fromBar, toBar));
   const hi = Math.min(section.bars.length - 1, Math.max(fromBar, toBar));
@@ -31,6 +31,7 @@ export function expectedFor(
   for (const bar of bars) {
     if (bar.notes.length) {
       for (const n of bar.notes) {
+        if (part && n.part !== part) continue;
         notes.push({ atMs: (n.start - offset) * msPerBeat, midi: n.midi + shift, index: n.index });
       }
     }

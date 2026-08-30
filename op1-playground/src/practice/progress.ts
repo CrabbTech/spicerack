@@ -10,6 +10,8 @@ export interface SongBest {
   sectionId: string;
   tempoPct: number;
   accuracy: number;
+  /** hands-separate takes: which part was graded */
+  scope?: 'melody' | 'left';
 }
 
 export interface DrillBest {
@@ -24,9 +26,13 @@ export function parseSongBest(key: string, value: string): SongBest | undefined 
   const parts = key.split('.');
   if (parts.length !== 5 || parts[0] !== STORAGE_PREFIX || parts[1] !== 'best') return undefined;
   const accuracy = Number(value);
-  const tempoPct = Number(parts[4]);
+  const [pct, scope] = parts[4].split('~');
+  const tempoPct = Number(pct);
   if (!Number.isFinite(accuracy) || !Number.isFinite(tempoPct)) return undefined;
-  return { songId: parts[2], sectionId: parts[3], tempoPct, accuracy };
+  return {
+    songId: parts[2], sectionId: parts[3], tempoPct, accuracy,
+    ...(scope === 'melody' || scope === 'left' ? { scope } : {}),
+  };
 }
 
 /** 'op1playground.drill.…' -> DrillBest */

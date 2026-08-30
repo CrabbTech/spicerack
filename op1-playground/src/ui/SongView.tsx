@@ -8,7 +8,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Note } from 'tonal';
 import { formulaFromIntervals, keyLabel, prettyNote, prettyNumeral } from '../theory/harmony';
 import { OP1_BASE_MIDI, keyTag, rangeLabel } from '../op1/op1';
-import { CompiledBar, CompiledSection, compileScore, expandPasses, gridFor, playbackFor, practicePlayback } from '../songs/compile';
+import { CompiledBar, CompiledSection, PartId, compileScore, expandPasses, gridFor, playbackFor, practicePlayback } from '../songs/compile';
 import { FIGURES } from '../songs/figures';
 import { Moment, firstMomentOfBar, momentsOf } from '../songs/moments';
 import { Score } from '../songs/types';
@@ -122,6 +122,7 @@ export function SongView({ onNav, initialSongId }: SongViewProps) {
   const [judge, setJudge] = useState<Map<number, 'hit' | 'miss'>>(() => new Map());
   const [midiInName, setMidiInName] = useState<string | null>(null);
   const [troubleTick, setTroubleTick] = useState(0);
+  const [partScope, setPartScope] = useState<'both' | PartId>('both');
   const graderRef = useRef<Grader | null>(null);
   const alongT0 = useRef(0);
   const judgeTimers = useRef<number[]>([]);
@@ -146,10 +147,10 @@ export function SongView({ onNav, initialSongId }: SongViewProps) {
   );
   const passBars = useMemo(() => playedSections.flatMap((s) => expandPasses(s)), [playedSections]);
 
-  const bestKey = `op1playground.best.${score?.id}.${section?.id}.${tempoPct}`;
+  const bestKey = `op1playground.best.${score?.id}.${section?.id}.${tempoPct}${partScope === 'both' ? '' : `~${partScope}`}`;
 
   useEffect(() => { setSectionIdx(0); setStepIdx(0); setTempoPct(100); }, [songId]);
-  useEffect(() => { setStepIdx(0); setLoopFrom(0); setLoopTo(Infinity); }, [sectionIdx, songId]);
+  useEffect(() => { setStepIdx(0); setLoopFrom(0); setLoopTo(Infinity); setPartScope('both'); }, [sectionIdx, songId]);
   useEffect(() => {
     setAlongStats(null);
     try {
@@ -193,7 +194,7 @@ export function SongView({ onNav, initialSongId }: SongViewProps) {
   }, [bestKey]);
 
   // never let the sound and the display drift apart
-  useEffect(() => { stop(); }, [chart, wholeSong, chordsOn, partOn, sectionIdx, tempoPct, metronome, countIn, loopFrom, loopTo, stop]);
+  useEffect(() => { stop(); }, [chart, wholeSong, chordsOn, partOn, sectionIdx, tempoPct, metronome, countIn, loopFrom, loopTo, partScope, stop]);
   useEffect(() => stop, [stop]);
 
   const shift = section?.octaveShift ?? 0;
@@ -289,12 +290,13 @@ export function SongView({ onNav, initialSongId }: SongViewProps) {
 
   const start = async () => {
     const token = ++playToken.current;
+    const scope = partScope === 'both' ? undefined : partScope;
     const spec = wholeSong
       ? playbackFor(playedSections)
-      : practicePlayback(section, rangeLo, rangeHi);
+      : practicePlayback(section, rangeLo, rangeHi, undefined, scope);
     const practiceBars = wholeSong ? [] : section.bars.filter((b) => b.index >= rangeLo && b.index <= rangeHi);
     if (playAlong && !wholeSong) {
-      graderRef.current = new Grader(expectedFor(section, rangeLo, rangeHi, practiceBpm));
+      graderRef.current = new Grader(expectedFor(section, rangeLo, rangeHi, practiceBpm, scope));
       setAlongStats(null);
       const unsub = await webMidiIn.listen((midi) => feedPress(midi, false));
       midiUnsub.current = unsub;
@@ -533,6 +535,15 @@ export function SongView({ onNav, initialSongId }: SongViewProps) {
               <input type="checkbox" checked={metronome} onChange={(e) => setMetronome(e.target.checked)} />
               metronome
             </label>
+            {!wholeSong && parts.length > 1 && (
+              <span className="practice-range" title="which written part plays and gets graded">
+                <span className="mini-label">hands</span>
+                {(['both', 'melody', 'left'] as const).map((p) => (
+                  <button key={p} className={partScope === p ? 'chip chip-on' : 'chip'}
+                    onClick={() => setPartScope(p)}>{p === 'melody' ? 'right' : p}</button>
+                ))}
+              </span>
+            )}
             {!wholeSong && section.bars.length > 1 && (
               <span className="practice-range">
                 <span className="mini-label">loop bars</span>
