@@ -39,3 +39,51 @@ class WebMidiOut {
 }
 
 export const webMidiOut = new WebMidiOut();
+
+// ---------------------------------------------------------------------------
+// Hardware in: listen to what the player actually presses — the OP-1 Field
+// shows up as a MIDI input over the same USB cable.
+
+export type NoteOnHandler = (midi: number, velocity: number, atMs: number) => void;
+
+class WebMidiIn {
+  readonly supported = typeof navigator !== 'undefined' && 'requestMIDIAccess' in navigator;
+  private access: MIDIAccess | null = null;
+
+  async inputNames(): Promise<string[]> {
+    if (!this.supported) return [];
+    try {
+      this.access ??= await navigator.requestMIDIAccess({ sysex: false });
+    }
+    catch {
+      return [];
+    }
+    return [...this.access.inputs.values()].map((i) => i.name ?? i.id);
+  }
+
+  /** Subscribe to note-ons from every input. Returns an unsubscribe. */
+  async listen(handler: NoteOnHandler): Promise<() => void> {
+    if (!this.supported) return () => {};
+    try {
+      this.access ??= await navigator.requestMIDIAccess({ sysex: false });
+    }
+    catch {
+      return () => {};
+    }
+    const inputs = [...this.access.inputs.values()];
+    const onMessage = (e: MIDIMessageEvent) => {
+      const data = e.data;
+      if (!data || data.length < 3) return;
+      const status = data[0] & 0xf0;
+      if (status === 0x90 && data[2] > 0) {
+        handler(data[1], data[2] / 127, e.timeStamp || performance.now());
+      }
+    };
+    for (const input of inputs) input.addEventListener('midimessage', onMessage);
+    return () => {
+      for (const input of inputs) input.removeEventListener('midimessage', onMessage);
+    };
+  }
+}
+
+export const webMidiIn = new WebMidiIn();

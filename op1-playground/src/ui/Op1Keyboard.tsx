@@ -16,9 +16,11 @@ export interface Op1KeyboardProps {
   compact?: boolean;
   /** scale to the container's width (viewBox keeps the proportions) */
   fluid?: boolean;
+  /** play-along feedback: key index -> hit (green) or miss (red) */
+  judge?: Map<number, 'hit' | 'miss'>;
 }
 
-export function Op1Keyboard({ lit, flashIndex = null, compact = false, fluid = false }: Op1KeyboardProps) {
+export function Op1Keyboard({ lit, flashIndex = null, compact = false, fluid = false, judge }: Op1KeyboardProps) {
   const u = compact ? 22 : 34;
   const pad = compact ? 5 : 8;
   const topH = u * 1.05;
@@ -29,6 +31,8 @@ export function Op1Keyboard({ lit, flashIndex = null, compact = false, fluid = f
   const r = compact ? 3.5 : 5;
 
   const keyClass = (index: number, base: string): string => {
+    const verdict = judge?.get(index);
+    if (verdict) return verdict === 'hit' ? 'op1-key-hit' : 'op1-key-miss';
     if (index === flashIndex) return 'op1-key-flash';
     const hit = lit.get(index);
     if (hit) return hit.isRoot ? 'op1-key-root' : 'op1-key-lit';

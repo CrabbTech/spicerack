@@ -17,6 +17,9 @@ import { SONGS } from '../data/songs';
 import { buildSongChart, songMidiFilename } from '../export/songTab';
 import { player } from '../audio/player';
 import { buildMidiFile, downloadBlob } from '../audio/midiExport';
+import { webMidiIn } from '../audio/webmidi';
+import { Grader, expectedFor } from '../practice/score';
+import { INDEX_TO_QWERTY, qwertyIndex } from '../practice/qwerty';
 import { LitKey, Op1Keyboard } from './Op1Keyboard';
 
 const STORE_KEY = 'op1playground.songs';
@@ -111,6 +114,15 @@ export function SongView({ onExit, initialSongId }: SongViewProps) {
   const [countIn, setCountIn] = useState(true);
   const [loopFrom, setLoopFrom] = useState(0);
   const [loopTo, setLoopTo] = useState(Infinity);
+  const [playAlong, setPlayAlong] = useState(false);
+  const [alongStats, setAlongStats] = useState<{ hits: number; expected: number; extras: number; avgAbsMs: number; accuracy: number } | null>(null);
+  const [bestScore, setBestScore] = useState<number | null>(null);
+  const [judge, setJudge] = useState<Map<number, 'hit' | 'miss'>>(() => new Map());
+  const [midiInName, setMidiInName] = useState<string | null>(null);
+  const graderRef = useRef<Grader | null>(null);
+  const alongT0 = useRef(0);
+  const judgeTimers = useRef<number[]>([]);
+  const midiUnsub = useRef<(() => void) | null>(null);
   const [importOpen, setImportOpen] = useState(false);
   const [importText, setImportText] = useState(SCORE_TEMPLATE);
   const [importErrors, setImportErrors] = useState<string[]>([]);
@@ -131,15 +143,46 @@ export function SongView({ onExit, initialSongId }: SongViewProps) {
   );
   const passBars = useMemo(() => playedSections.flatMap((s) => expandPasses(s)), [playedSections]);
 
+  const bestKey = `op1playground.best.${score?.id}.${section?.id}.${tempoPct}`;
+
   useEffect(() => { setSectionIdx(0); setStepIdx(0); setTempoPct(100); }, [songId]);
   useEffect(() => { setStepIdx(0); setLoopFrom(0); setLoopTo(Infinity); }, [sectionIdx, songId]);
+  useEffect(() => {
+    setAlongStats(null);
+    try {
+      const stored = window.localStorage.getItem(bestKey);
+      setBestScore(stored === null ? null : Number(stored));
+    }
+    catch {
+      setBestScore(null);
+    }
+  }, [bestKey]);
 
   const stop = useCallback(() => {
     player.stop();
     setPlaying(false);
     setPlayingBar(null);
     setPlayingIndex(null);
-  }, []);
+    midiUnsub.current?.();
+    midiUnsub.current = null;
+    for (const t of judgeTimers.current) window.clearTimeout(t);
+    judgeTimers.current = [];
+    setJudge(new Map());
+    const grader = graderRef.current;
+    graderRef.current = null;
+    if (grader && grader.stats().hits + grader.stats().extras > 0) {
+      const accuracy = grader.accuracy;
+      setAlongStats({ ...grader.stats(), accuracy });
+      try {
+        const prev = Number(window.localStorage.getItem(bestKey) ?? -1);
+        if (accuracy > prev) {
+          window.localStorage.setItem(bestKey, String(accuracy));
+          setBestScore(accuracy);
+        }
+      }
+      catch { /* private browsing */ }
+    }
+  }, [bestKey]);
 
   // never let the sound and the display drift apart
   useEffect(() => { stop(); }, [chart, wholeSong, chordsOn, partOn, sectionIdx, tempoPct, metronome, countIn, loopFrom, loopTo, stop]);
@@ -163,6 +206,45 @@ export function SongView({ onExit, initialSongId }: SongViewProps) {
     const targetBar = Math.max(0, Math.min(section.bars.length - 1, moment.barIdx + dir));
     goToStep(firstMomentOfBar(moments, targetBar), true);
   }, [section, moment, moments, goToStep]);
+
+  /** One incoming press (QWERTY or hardware) while play-along is armed. */
+  const feedPress = useCallback((midi: number, sound: boolean) => {
+    const grader = graderRef.current;
+    if (!grader) return;
+    if (sound) void player.auditionNote(midi);
+    const relMs = performance.now() - alongT0.current;
+    const verdict = grader.play(relMs, midi);
+    setJudge((prev) => {
+      const next = new Map(prev);
+      next.set(verdict.index, verdict.kind);
+      return next;
+    });
+    const timer = window.setTimeout(() => {
+      setJudge((prev) => {
+        const next = new Map(prev);
+        next.delete(verdict.index);
+        return next;
+      });
+    }, 260);
+    judgeTimers.current.push(timer);
+    setAlongStats({ ...grader.stats(), accuracy: grader.accuracy });
+  }, []);
+
+  // QWERTY piano: active whenever play-along is running
+  useEffect(() => {
+    if (!playAlong || !playing) return;
+    const onKey = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement | null;
+      if (target && /^(INPUT|TEXTAREA|SELECT)$/.test(target.tagName)) return;
+      if (e.metaKey || e.ctrlKey || e.altKey || e.repeat) return;
+      const index = qwertyIndex(e.key);
+      if (index === undefined) return;
+      e.preventDefault();
+      feedPress(OP1_BASE_MIDI + index + 12 * shift, true);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [playAlong, playing, shift, feedPress]);
 
   // arrow keys drive the walk: ←/→ one moment, shift+←/→ one bar
   useEffect(() => {
@@ -203,14 +285,22 @@ export function SongView({ onExit, initialSongId }: SongViewProps) {
       ? playbackFor(playedSections)
       : practicePlayback(section, rangeLo, rangeHi);
     const practiceBars = wholeSong ? [] : section.bars.filter((b) => b.index >= rangeLo && b.index <= rangeHi);
+    if (playAlong && !wholeSong) {
+      graderRef.current = new Grader(expectedFor(section, rangeLo, rangeHi, practiceBpm));
+      setAlongStats(null);
+      const unsub = await webMidiIn.listen((midi) => feedPress(midi, false));
+      midiUnsub.current = unsub;
+      const names = await webMidiIn.inputNames();
+      setMidiInName(names[0] ?? null);
+    }
     await player.play({
       slots: spec.slots,
       melody: spec.melody,
       bpm: practiceBpm,
       swing: 0,
       arp: 'off',
-      chordsOn,
-      melodyOn: partOn,
+      chordsOn: playAlong ? false : chordsOn,
+      melodyOn: playAlong ? false : partOn,
       beatsPerBar: song.meter[0],
       countInBeats: countIn ? song.meter[0] : 0,
       click: metronome,
@@ -228,6 +318,9 @@ export function SongView({ onExit, initialSongId }: SongViewProps) {
       },
       onMelody: (midi) => setPlayingIndex(midi === null ? null : midi - OP1_BASE_MIDI - 12 * shift),
     });
+    // grading clock starts when the count-in ends (transport starts at +0.05s)
+    const countInMs = (countIn ? song.meter[0] : 0) * (60000 / practiceBpm);
+    alongT0.current = performance.now() + 50 + countInMs;
     if (token === playToken.current) setPlaying(true);
   };
 
@@ -397,7 +490,7 @@ export function SongView({ onExit, initialSongId }: SongViewProps) {
           </div>
 
           <div className="perform-keyboard">
-            <Op1Keyboard lit={displayLit} flashIndex={flashIndex} fluid />
+            <Op1Keyboard lit={displayLit} flashIndex={flashIndex} judge={judge} fluid />
           </div>
 
           <div className="perform-controls">
@@ -444,7 +537,42 @@ export function SongView({ onExit, initialSongId }: SongViewProps) {
             {tempoPct !== 100 && (
               <button className="tool-btn" onClick={() => setTempoPct(100)}>full speed</button>
             )}
+            {!wholeSong && (
+              <button className={`tool-btn${playAlong ? ' hw-on' : ''}`}
+                title="the app goes quiet except the click and grades what you play — OP-1 over USB MIDI, or the QWERTY piano"
+                onClick={() => setPlayAlong((v) => !v)}>
+                {playAlong ? '🎹 Play-along ON' : '🎹 Play-along'}
+              </button>
+            )}
           </div>
+
+          {playAlong && !wholeSong && (
+            <div className="along-panel">
+              <div className="meta-line">
+                {playing
+                  ? `listening — ${midiInName ?? 'no MIDI input'} · QWERTY piano armed (Z-row + Q-row)`
+                  : 'press ▶ Play: you get the count-in and the click, then the app listens and grades you'}
+              </div>
+              <div className="along-stats">
+                {alongStats ? (
+                  <>
+                    <span className="along-score">{alongStats.accuracy}%</span>
+                    <span>{alongStats.hits}/{alongStats.expected} notes</span>
+                    <span>{alongStats.extras} stray</span>
+                    <span>±{alongStats.avgAbsMs}ms feel</span>
+                  </>
+                ) : (
+                  <span className="meta-line">no take yet at this tempo</span>
+                )}
+                {bestScore !== null && <span className="along-best">best {bestScore}%</span>}
+              </div>
+              <div className="qwerty-hint">
+                {INDEX_TO_QWERTY.map((k, i) => (
+                  <span key={i} className={`qwerty-key${judge.get(i) ? ` q-${judge.get(i)}` : ''}`}>{k}</span>
+                ))}
+              </div>
+            </div>
+          )}
 
           {section.note && <p className="section-note">{section.note}</p>}
           {bar.figure && !playing && (

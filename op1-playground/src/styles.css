@@ -562,6 +562,8 @@ input, select, textarea {
 .op1-key-lit { fill: var(--accent); stroke: #a64516; }
 .op1-key-root { fill: var(--accent); stroke: #ffffff; stroke-width: 1.6; }
 .op1-key-flash { fill: var(--enc-blue); stroke: #dbeaff; stroke-width: 1.4; }
+.op1-key-hit { fill: var(--enc-green); stroke: #d9ffef; stroke-width: 1.4; }
+.op1-key-miss { fill: var(--danger); stroke: #ffd9d9; stroke-width: 1.4; }
 
 .op1-label {
   fill: #19110c;
@@ -776,3 +778,45 @@ input, select, textarea {
 .practice-range .mini-label { margin: 0; }
 
 .slot-looped { box-shadow: inset 0 0 0 1px var(--accent); }
+
+/* ---- play-along ---- */
+
+.along-panel {
+  margin-top: 10px;
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--enc-green);
+  border-radius: var(--radius);
+  background: var(--surface-2);
+  padding: 10px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.along-stats {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+  font-family: var(--mono);
+  font-size: 13px;
+}
+
+.along-score { font-size: 22px; font-weight: 900; color: var(--enc-green); }
+.along-best { color: var(--accent); }
+
+.qwerty-hint { display: flex; gap: 3px; flex-wrap: wrap; }
+
+.qwerty-key {
+  display: inline-grid;
+  place-items: center;
+  min-width: 22px;
+  height: 22px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.q-hit { border-color: var(--enc-green); color: var(--enc-green); }
+.q-miss { border-color: var(--danger); color: var(--danger); }
