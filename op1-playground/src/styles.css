@@ -992,3 +992,5 @@ input, select, textarea {
 @media (max-width: 900px) {
   .home-hero { grid-template-columns: minmax(0, 1fr); }
 }
+
+.drill-replay { margin-top: 8px; }

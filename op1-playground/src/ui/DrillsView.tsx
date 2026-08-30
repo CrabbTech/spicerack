@@ -159,6 +159,16 @@ export function DrillsView({ onNav, initialSongId }: DrillsViewProps) {
   const pressRef = useRef(press);
   useEffect(() => { pressRef.current = press; }, [press]);
 
+  // ear cards sound themselves as they are dealt
+  useEffect(() => {
+    if (cardIdx === null) return;
+    const audio = cards[cardIdx]?.audio;
+    if (audio) {
+      const t = window.setTimeout(() => void player.audition(audio), 180);
+      return () => window.clearTimeout(t);
+    }
+  }, [cardIdx, cards]);
+
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       const target = e.target as HTMLElement | null;
@@ -273,8 +283,12 @@ export function DrillsView({ onNav, initialSongId }: DrillsViewProps) {
                 <div className="drill-progress">
                   card {cardIdx! + 1}/{RUN_LENGTH} · {elapsed.toFixed(1)}s · {mistakes} wrong
                 </div>
-                <h1 className="drill-prompt">{card.prompt}</h1>
+                <h1 className="drill-prompt">{revealed && card.answer ? card.answer : card.prompt}</h1>
                 <div className="meta-line">{card.sub}</div>
+                {card.audio && !revealed && (
+                  <button className="tool-btn drill-replay" title="hear it again"
+                    onClick={() => void player.audition(card.audio!)}>🔊 replay</button>
+                )}
               </>
             ) : result ? (
               <>

@@ -8,12 +8,13 @@ import { OP1_BASE_MIDI, OP1_KEY_COUNT, Voicing, fitChord, keyTag } from '../op1/
 import { CompiledBar } from '../songs/compile';
 import { Rng } from '../lib/rng';
 
-export type DrillKind = 'chord' | 'keytag' | 'note';
+export type DrillKind = 'chord' | 'keytag' | 'note' | 'ear';
 
 export const DRILL_KINDS: { id: DrillKind; label: string; blurb: string }[] = [
   { id: 'chord', label: 'chord grabs', blurb: 'a chord name — press every tone, any octave, any order' },
   { id: 'keytag', label: 'key tags', blurb: 'a B/T key tag — press exactly that physical key' },
   { id: 'note', label: 'note names', blurb: 'a note name — press it on either octave' },
+  { id: 'ear', label: 'by ear', blurb: 'hear a chord — grab its tones before you see its name' },
 ];
 
 export interface DrillCard {
@@ -30,6 +31,10 @@ export interface DrillCard {
   targetIndexes?: number[];
   /** what to light up when the card is done */
   reveal: { index: number; label: string; isRoot: boolean }[];
+  /** midis to sound when the card is dealt (ear cards) */
+  audio?: number[];
+  /** the name kept hidden until the card is done (ear cards) */
+  answer?: string;
 }
 
 const revealFromVoicing = (voicing: Voicing, notes: string[], rootChroma: number) =>
@@ -71,12 +76,24 @@ export function makeCard(kind: DrillKind, key: KeySig, sevenths: boolean, rng: R
   const chord = parseToken(pick.numeral, key).chord;
   const chromas = [...new Set(chord.notes.map((n) => Note.chroma(n) ?? 0))];
   const voicing = fitChord(chord.notes, chord.intervals);
+  const reveal = revealFromVoicing(voicing, chord.notes, Note.chroma(chord.root) ?? 0);
+  if (kind === 'ear') {
+    return {
+      kind,
+      prompt: '🔊 listen',
+      sub: 'grab what you hear — any octave, any order',
+      targetChromas: chromas,
+      reveal,
+      audio: voicing.midis,
+      answer: chord.symbol,
+    };
+  }
   return {
     kind,
     prompt: chord.symbol,
     sub: `${pick.numeral} in ${prettyNote(key.tonic)} — every tone, any octave`,
     targetChromas: chromas,
-    reveal: revealFromVoicing(voicing, chord.notes, Note.chroma(chord.root) ?? 0),
+    reveal,
   };
 }
 

@@ -3,6 +3,12 @@
 All notable changes to `op1-playground`. Newest first. Dates are local;
 hashes refer to this repo's `main`.
 
+## 2026-08-30 · Ear training — `5a3bd14`
+- New drill kind **by ear**: the card sounds a diatonic chord (name hidden,
+  🔊 replay on tap); grab its tones by ear, any octave. The name reveals with
+  the voicing when you complete it. Sevenths toggle applies; bests persist
+  like every drill.
+
 ## 2026-08-30 · Home: streaks, records, a suggested session — `ba56f58`
 - New default view **OP-1 FIELD STUDIO**: practice-day log + day streak
   (yesterday-grace), song shelf with each song's best graded take, drill

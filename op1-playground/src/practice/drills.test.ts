@@ -41,6 +41,22 @@ describe('card generation', () => {
   });
 });
 
+describe('ear cards', () => {
+  it('hides the name, sounds the voicing, and reveals the answer', () => {
+    const rng = mulberry32(13);
+    for (let i = 0; i < 10; i++) {
+      const card = makeCard('ear', key, true, rng);
+      expect(card.audio!.length).toBeGreaterThanOrEqual(3);
+      expect(card.answer).toBeTruthy();
+      expect(card.prompt).not.toBe(card.answer);
+      expect(card.targetChromas!.length).toBeGreaterThanOrEqual(3);
+      // the audio spells exactly the target chromas
+      const audioChromas = new Set(card.audio!.map((m) => m % 12));
+      expect(audioChromas).toEqual(new Set(card.targetChromas));
+    }
+  });
+});
+
 describe('song-grab cards', () => {
   it('demands the exact keys of a bar voicing and reveals its key tags', async () => {
     const { compileScore } = await import('../songs/compile');
