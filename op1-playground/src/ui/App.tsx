@@ -345,7 +345,7 @@ export default function App() {
         <div className="brand">
           <div className="mark">F4</div>
           <div>
-            <div className="brand-name">OP-1 FIELD PLAYGROUND</div>
+            <div className="brand-name">OP-1 FIELD STUDIO</div>
             <div className="brand-sub">{keyLabel(key)} · keys {rangeLabel(octaveShift)} · {totalBars} bars</div>
           </div>
         </div>

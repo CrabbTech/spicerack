@@ -3,6 +3,15 @@
 All notable changes to `op1-playground`. Newest first. Dates are local;
 hashes refer to this repo's `main`.
 
+## 2026-08-30 · The beauty pass
+- Typography: Space Grotesk for display, IBM Plex Mono for the lab labels.
+- Motion: keys ease between states and pop on hits/misses; cards lift on
+  hover; visible focus rings throughout.
+- A beaten record glows: "★ new best" pulses on the play-along score and the
+  drill result.
+- The app is now the **OP-1 FIELD STUDIO** (title + brand), which is what it
+  has become.
+
 ## 2026-08-30 · Hands-separate practice
 - Songs with two written parts (the waltz) get a **hands** selector in the
   practice strip: both / right / left. It scopes playback *and* play-along

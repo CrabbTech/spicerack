@@ -119,6 +119,7 @@ export function SongView({ onNav, initialSongId }: SongViewProps) {
   const [playAlong, setPlayAlong] = useState(false);
   const [alongStats, setAlongStats] = useState<{ hits: number; expected: number; extras: number; avgAbsMs: number; accuracy: number } | null>(null);
   const [bestScore, setBestScore] = useState<number | null>(null);
+  const [newBest, setNewBest] = useState(false);
   const [judge, setJudge] = useState<Map<number, 'hit' | 'miss'>>(() => new Map());
   const [midiInName, setMidiInName] = useState<string | null>(null);
   const [troubleTick, setTroubleTick] = useState(0);
@@ -187,6 +188,8 @@ export function SongView({ onNav, initialSongId }: SongViewProps) {
         if (accuracy > prev) {
           window.localStorage.setItem(bestKey, String(accuracy));
           setBestScore(accuracy);
+          setNewBest(true);
+          window.setTimeout(() => setNewBest(false), 1600);
         }
       }
       catch { /* private browsing */ }
@@ -582,7 +585,7 @@ export function SongView({ onNav, initialSongId }: SongViewProps) {
               <div className="along-stats">
                 {alongStats ? (
                   <>
-                    <span className="along-score">{alongStats.accuracy}%</span>
+                    <span className={`along-score${newBest ? ' new-best' : ''}`}>{alongStats.accuracy}%</span>
                     <span>{alongStats.hits}/{alongStats.expected} notes</span>
                     <span>{alongStats.extras} stray</span>
                     <span>±{alongStats.avgAbsMs}ms feel</span>

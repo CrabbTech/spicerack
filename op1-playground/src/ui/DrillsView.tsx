@@ -40,6 +40,7 @@ export function DrillsView({ onNav, initialSongId }: DrillsViewProps) {
   const [elapsed, setElapsed] = useState(0);
   const [result, setResult] = useState<{ score: number; mistakes: number; seconds: number } | null>(null);
   const [best, setBest] = useState<number | null>(null);
+  const [newBest, setNewBest] = useState(false);
   const [judge, setJudge] = useState<Map<number, 'hit' | 'miss'>>(() => new Map());
   const startRef = useRef(0);
   const timerRef = useRef<number | null>(null);
@@ -115,6 +116,8 @@ export function DrillsView({ onNav, initialSongId }: DrillsViewProps) {
       if (score < prev) {
         window.localStorage.setItem(bestKey, String(score));
         setBest(score);
+        setNewBest(true);
+        window.setTimeout(() => setNewBest(false), 1600);
       }
     }
     catch { /* private browsing */ }
@@ -293,7 +296,7 @@ export function DrillsView({ onNav, initialSongId }: DrillsViewProps) {
             ) : result ? (
               <>
                 <div className="drill-progress">run complete</div>
-                <h1 className="drill-prompt">{result.score}s</h1>
+                <h1 className={`drill-prompt${newBest ? ' new-best' : ''}`}>{result.score}s</h1>
                 <div className="meta-line">
                   {result.seconds}s + {result.mistakes} wrong ×2s
                   {best !== null ? ` · best ${best}s` : ''}
