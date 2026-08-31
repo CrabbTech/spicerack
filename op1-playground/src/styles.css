@@ -1046,3 +1046,5 @@ input, select, textarea {
   stroke-linejoin: round;
   stroke-linecap: round;
 }
+
+.home-resume { width: 100%; margin-bottom: 12px; }

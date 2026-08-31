@@ -3,6 +3,11 @@
 All notable changes to `op1-playground`. Newest first. Dates are local;
 hashes refer to this repo's `main`.
 
+## 2026-08-30 · Resume where you left off
+- The studio remembers your last song, section, and practice tempo; Home's
+  session panel leads with "▶ Resume Waltz in D — STRAIN 2 @ 75%". Opening
+  that song restores the spot; opening a different one starts fresh.
+
 ## 2026-08-30 · Practice journal
 - Every graded play-along is logged (`op1playground.takes`, capped at 500):
   day, song, section, tempo, accuracy, hand scope.

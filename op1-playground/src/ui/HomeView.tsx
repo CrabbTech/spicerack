@@ -7,7 +7,7 @@ import { keyLabel } from '../theory/harmony';
 import { SONGS } from '../data/songs';
 import {
   collectProgress, dayStamp, readDays, readTakes, readTrouble, sparkPoints, storageEntries,
-  streakOf, suggestSession, takesFor, topTrouble,
+  readLast, streakOf, suggestSession, takesFor, topTrouble,
 } from '../practice/progress';
 import { keyTag } from '../op1/op1';
 import { NavTabs, ViewId } from './NavTabs';
@@ -59,6 +59,17 @@ export function HomeView({ onNav, onOpenSong }: HomeViewProps) {
             </span>
           </div>
           <div className="home-session">
+            {(() => {
+              const last = readLast();
+              const song = last && SONGS.find((s) => s.id === last.songId);
+              if (!song) return null;
+              const section = song.sections[last.sectionIdx] ?? song.sections[0];
+              return (
+                <button className="primary-btn home-resume" onClick={() => onOpenSong(song.id, 'songs')}>
+                  ▶ Resume {song.title} — {section.name} @ {last.tempoPct}%
+                </button>
+              );
+            })()}
             <h2>Today's session</h2>
             {steps.map((step, i) => (
               <button key={i} className="session-step"

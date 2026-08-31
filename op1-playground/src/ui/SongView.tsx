@@ -20,7 +20,7 @@ import { buildMidiFile, downloadBlob } from '../audio/midiExport';
 import { webMidiIn } from '../audio/webmidi';
 import { Grader, expectedFor } from '../practice/score';
 import { INDEX_TO_QWERTY, qwertyIndex } from '../practice/qwerty';
-import { clearTrouble, dayStamp, markPracticed, readTrouble, recordTake, recordTrouble, topTrouble } from '../practice/progress';
+import { clearTrouble, dayStamp, markPracticed, readLast, readTrouble, recordTake, recordTrouble, saveLast, topTrouble } from '../practice/progress';
 import { LitKey, Op1Keyboard } from './Op1Keyboard';
 import { NavTabs, ViewId } from './NavTabs';
 
@@ -101,7 +101,10 @@ export function SongView({ onNav, initialSongId }: SongViewProps) {
   const library = useMemo(() => [...SONGS, ...imported], [imported]);
   const [songId, setSongId] = useState(() =>
     (initialSongId && library.some((s) => s.id === initialSongId) ? initialSongId : library[0]?.id) ?? '');
-  const [sectionIdx, setSectionIdx] = useState(0);
+  const [sectionIdx, setSectionIdx] = useState(() => {
+    const last = readLast();
+    return last && last.songId === initialSongId ? last.sectionIdx : 0;
+  });
   const [stepIdx, setStepIdx] = useState(0);
   const [smooth, setSmooth] = useState(false);
   const [chordsOn, setChordsOn] = useState(true);
@@ -111,7 +114,11 @@ export function SongView({ onNav, initialSongId }: SongViewProps) {
   const [playingBar, setPlayingBar] = useState<number | null>(null);
   const [playingIndex, setPlayingIndex] = useState<number | null>(null);
   const [copied, setCopied] = useState<'tab' | 'json' | 'midi' | null>(null);
-  const [tempoPct, setTempoPct] = useState(100);
+  const [tempoPct, setTempoPct] = useState(() => {
+    const last = readLast();
+    return last && last.songId === initialSongId
+      ? Math.max(40, Math.min(120, last.tempoPct)) : 100;
+  });
   const [metronome, setMetronome] = useState(false);
   const [countIn, setCountIn] = useState(true);
   const [loopFrom, setLoopFrom] = useState(0);
@@ -150,7 +157,20 @@ export function SongView({ onNav, initialSongId }: SongViewProps) {
 
   const bestKey = `op1playground.best.${score?.id}.${section?.id}.${tempoPct}${partScope === 'both' ? '' : `~${partScope}`}`;
 
-  useEffect(() => { setSectionIdx(0); setStepIdx(0); setTempoPct(100); }, [songId]);
+  // switching songs inside the view starts the new song fresh (the mount
+  // initializers above handle restoring the song you came back for)
+  const mountedSong = useRef(songId);
+  useEffect(() => {
+    if (mountedSong.current !== songId) {
+      mountedSong.current = songId;
+      setSectionIdx(0);
+      setTempoPct(100);
+    }
+    setStepIdx(0);
+  }, [songId]);
+  useEffect(() => {
+    if (score) saveLast({ songId: score.id, sectionIdx, tempoPct });
+  }, [score, sectionIdx, tempoPct]);
   useEffect(() => { setStepIdx(0); setLoopFrom(0); setLoopTo(Infinity); setPartScope('both'); }, [sectionIdx, songId]);
   useEffect(() => {
     setAlongStats(null);

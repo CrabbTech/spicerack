@@ -83,6 +83,36 @@ export const storageEntries = (): [string, string][] => {
 };
 
 // ---------------------------------------------------------------------------
+// Where you left off: last song, section, and practice tempo.
+
+export interface LastSpot {
+  songId: string;
+  sectionIdx: number;
+  tempoPct: number;
+}
+
+const LAST_KEY = `${STORAGE_PREFIX}.last`;
+
+export function saveLast(spot: LastSpot): void {
+  try {
+    window.localStorage.setItem(LAST_KEY, JSON.stringify(spot));
+  }
+  catch { /* private browsing */ }
+}
+
+export function readLast(): LastSpot | undefined {
+  try {
+    const raw = JSON.parse(window.localStorage.getItem(LAST_KEY) ?? 'null');
+    if (raw && typeof raw.songId === 'string' &&
+        Number.isInteger(raw.sectionIdx) && Number.isFinite(raw.tempoPct)) {
+      return { songId: raw.songId, sectionIdx: raw.sectionIdx, tempoPct: raw.tempoPct };
+    }
+  }
+  catch { /* fall through */ }
+  return undefined;
+}
+
+// ---------------------------------------------------------------------------
 // The take journal: every graded play-along, in order.
 
 export interface Take {
