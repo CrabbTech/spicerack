@@ -83,6 +83,56 @@ export const storageEntries = (): [string, string][] => {
 };
 
 // ---------------------------------------------------------------------------
+// The take journal: every graded play-along, in order.
+
+export interface Take {
+  /** day stamp, YYYY-MM-DD */
+  d: string;
+  songId: string;
+  sectionId: string;
+  tempoPct: number;
+  accuracy: number;
+  scope?: 'melody' | 'left';
+}
+
+const TAKES_KEY = `${STORAGE_PREFIX}.takes`;
+
+export function readTakes(): Take[] {
+  try {
+    const raw = JSON.parse(window.localStorage.getItem(TAKES_KEY) ?? '[]');
+    if (!Array.isArray(raw)) return [];
+    return raw.filter((t): t is Take =>
+      t && typeof t === 'object' && typeof t.songId === 'string' &&
+      Number.isFinite(t.accuracy) && Number.isFinite(t.tempoPct));
+  }
+  catch {
+    return [];
+  }
+}
+
+export function recordTake(take: Take): void {
+  try {
+    const takes = readTakes();
+    takes.push(take);
+    window.localStorage.setItem(TAKES_KEY, JSON.stringify(takes.slice(-500)));
+  }
+  catch { /* private browsing */ }
+}
+
+export const takesFor = (takes: Take[], songId: string): Take[] =>
+  takes.filter((t) => t.songId === songId);
+
+/** SVG polyline points for an accuracy trend, newest right. */
+export function sparkPoints(values: number[], width: number, height: number): string {
+  if (values.length === 0) return '';
+  if (values.length === 1) return `0,${height / 2} ${width},${height / 2}`;
+  const step = width / (values.length - 1);
+  return values
+    .map((v, i) => `${Math.round(i * step * 10) / 10},${Math.round((height - (Math.max(0, Math.min(100, v)) / 100) * height) * 10) / 10}`)
+    .join(' ');
+}
+
+// ---------------------------------------------------------------------------
 // Trouble keys: which physical keys keep getting missed, per song.
 
 const troubleKey = (songId: string): string => `${STORAGE_PREFIX}.trouble.${songId}`;

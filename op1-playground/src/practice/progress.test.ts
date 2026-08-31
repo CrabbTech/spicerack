@@ -31,6 +31,26 @@ describe('record parsing', () => {
   });
 });
 
+describe('take journal', () => {
+  it('draws a spark path spanning the box, newest right', async () => {
+    const { sparkPoints } = await import('./progress');
+    const pts = sparkPoints([0, 50, 100], 84, 20);
+    expect(pts).toBe('0,20 42,10 84,0');
+    expect(sparkPoints([], 84, 20)).toBe('');
+    expect(sparkPoints([70], 84, 20)).toBe('0,10 84,10');
+  });
+
+  it('filters takes by song', async () => {
+    const { takesFor } = await import('./progress');
+    const takes = [
+      { d: '2026-08-30', songId: 'a', sectionId: 's', tempoPct: 80, accuracy: 60 },
+      { d: '2026-08-30', songId: 'b', sectionId: 's', tempoPct: 80, accuracy: 90 },
+      { d: '2026-08-30', songId: 'a', sectionId: 's', tempoPct: 90, accuracy: 70 },
+    ];
+    expect(takesFor(takes, 'a').map((t) => t.accuracy)).toEqual([60, 70]);
+  });
+});
+
 describe('trouble keys', () => {
   it('ranks the worst offenders first and caps the list', async () => {
     const { topTrouble } = await import('./progress');

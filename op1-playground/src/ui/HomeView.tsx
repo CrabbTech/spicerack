@@ -6,7 +6,8 @@ import { useMemo } from 'react';
 import { keyLabel } from '../theory/harmony';
 import { SONGS } from '../data/songs';
 import {
-  collectProgress, dayStamp, readDays, readTrouble, storageEntries, streakOf, suggestSession, topTrouble,
+  collectProgress, dayStamp, readDays, readTakes, readTrouble, sparkPoints, storageEntries,
+  streakOf, suggestSession, takesFor, topTrouble,
 } from '../practice/progress';
 import { keyTag } from '../op1/op1';
 import { NavTabs, ViewId } from './NavTabs';
@@ -18,6 +19,7 @@ export interface HomeViewProps {
 
 export function HomeView({ onNav, onOpenSong }: HomeViewProps) {
   const progress = useMemo(() => collectProgress(storageEntries()), []);
+  const takes = useMemo(() => readTakes(), []);
   const days = useMemo(() => readDays(), []);
   const streak = useMemo(() => streakOf(days, dayStamp()), [days]);
   const steps = useMemo(() => suggestSession(SONGS, progress), [progress]);
@@ -88,6 +90,16 @@ export function HomeView({ onNav, onOpenSong }: HomeViewProps) {
                   {best
                     ? <span className="shelf-best">best {best.accuracy}% @ {best.tempoPct}% tempo</span>
                     : <span className="shelf-best shelf-untried">no graded take yet</span>}
+                  {(() => {
+                    const history = takesFor(takes, song.id).slice(-12);
+                    if (history.length < 2) return null;
+                    return (
+                      <svg className="shelf-spark" viewBox="0 0 84 22" width={84} height={22}
+                        aria-label={`last ${history.length} takes`}>
+                        <polyline points={sparkPoints(history.map((t) => t.accuracy), 84, 20)} />
+                      </svg>
+                    );
+                  })()}
                   {(() => {
                     const worst = topTrouble(readTrouble(song.id), 2);
                     return worst.length

@@ -20,7 +20,7 @@ import { buildMidiFile, downloadBlob } from '../audio/midiExport';
 import { webMidiIn } from '../audio/webmidi';
 import { Grader, expectedFor } from '../practice/score';
 import { INDEX_TO_QWERTY, qwertyIndex } from '../practice/qwerty';
-import { clearTrouble, markPracticed, readTrouble, recordTrouble, topTrouble } from '../practice/progress';
+import { clearTrouble, dayStamp, markPracticed, readTrouble, recordTake, recordTrouble, topTrouble } from '../practice/progress';
 import { LitKey, Op1Keyboard } from './Op1Keyboard';
 import { NavTabs, ViewId } from './NavTabs';
 
@@ -179,9 +179,14 @@ export function SongView({ onNav, initialSongId }: SongViewProps) {
       const accuracy = grader.accuracy;
       setAlongStats({ ...grader.stats(), accuracy });
       markPracticed();
-      if (score) {
+      if (score && section) {
         recordTrouble(score.id, grader.missedByKey());
         setTroubleTick((t) => t + 1);
+        recordTake({
+          d: dayStamp(), songId: score.id, sectionId: section.id,
+          tempoPct, accuracy,
+          ...(partScope === 'both' ? {} : { scope: partScope }),
+        });
       }
       try {
         const prev = Number(window.localStorage.getItem(bestKey) ?? -1);

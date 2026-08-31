@@ -3,6 +3,12 @@
 All notable changes to `op1-playground`. Newest first. Dates are local;
 hashes refer to this repo's `main`.
 
+## 2026-08-30 · Practice journal
+- Every graded play-along is logged (`op1playground.takes`, capped at 500):
+  day, song, section, tempo, accuracy, hand scope.
+- Home shelf cards draw an accuracy sparkline over the last 12 takes, so a
+  week of practice reads as a rising line.
+
 ## 2026-08-30 · The beauty pass
 - Typography: Space Grotesk for display, IBM Plex Mono for the lab labels.
 - Motion: keys ease between states and pop on hits/misses; cards lift on

@@ -1038,3 +1038,11 @@ input, select, textarea {
 }
 
 .shelf-trouble { color: var(--danger); font-family: var(--mono); font-size: 11px; }
+
+.shelf-spark polyline {
+  fill: none;
+  stroke: var(--enc-green);
+  stroke-width: 1.6;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
