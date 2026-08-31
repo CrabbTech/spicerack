@@ -3,6 +3,17 @@
 All notable changes to `op1-playground`. Newest first. Dates are local;
 hashes refer to this repo's `main`.
 
+## 2026-08-30 · Genre packs: city pop, lofi, vaporwave
+- Nine researched presets in three new vibes. **City pop**: the 丸サ /
+  "Just the Two of Us" changes (IVmaj7–III7–vi7–I7), a dorian Plastic-Love
+  cruise, ninths with a borrowed ♭VIImaj7. **Lofi**: ii9–V9–Imaj9–vi9 at
+  76, minor ninths ending on a sus, a two-chord maj9 nap. **Vaporwave**:
+  the Royal Road at 62 BPM (the genre's literal origin story), an
+  unresolving ii9–V13 escalator, maj9s dimmed by a borrowed iv.
+- Royal Road tagged city pop; Backdoor Cadence tagged lofi.
+- New preset integrity suite: every token of every preset must parse and
+  voice cleanly across keys.
+
 ## 2026-08-30 · Resume where you left off
 - The studio remembers your last song, section, and practice tempo; Home's
   session panel leads with "▶ Resume Waltz in D — STRAIN 2 @ 75%". Opening

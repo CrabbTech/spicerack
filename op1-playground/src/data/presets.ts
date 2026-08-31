@@ -71,7 +71,7 @@ export const PRESETS: Preset[] = [
     tokens: [T('I', 2), T('III', 2), T('IV', 2), T('iv', 2)],
   },
   {
-    id: 'royal-road', name: 'Royal Road', vibe: ['pop', 'dreamy'], mode: 'major', bpm: 108,
+    id: 'royal-road', name: 'Royal Road', vibe: ['pop', 'dreamy', 'city pop'], mode: 'major', bpm: 108,
     blurb: 'IVmaj7–V7–iii7–vi: the J-pop chord highway.',
     tokens: [T('IVmaj7'), T('V7'), T('iii7'), T('vi7')],
   },
@@ -86,7 +86,7 @@ export const PRESETS: Preset[] = [
     tokens: [T('i'), T('bVII'), T('bVI'), T('bVII')],
   },
   {
-    id: 'backdoor', name: 'Backdoor Cadence', vibe: ['soul', 'jazz'], mode: 'major', bpm: 88,
+    id: 'backdoor', name: 'Backdoor Cadence', vibe: ['soul', 'jazz', 'lofi'], mode: 'major', bpm: 88,
     blurb: 'iv7–bVII7 sneaks home without ringing the V doorbell.',
     tokens: [T('Imaj7'), T('iv7'), T('bVII7'), T('Imaj7')],
   },
@@ -124,6 +124,63 @@ export const PRESETS: Preset[] = [
     id: 'sunshine-stairs', name: 'Sunshine Stairs', vibe: ['pop', 'dreamy'], mode: 'major', bpm: 92,
     blurb: 'Diatonic sevenths climbing the first four steps.',
     tokens: [T('Imaj7'), T('ii7'), T('iii7'), T('IVmaj7')],
+  },
+
+  // -------------------------------------------------------------------------
+  // City pop: late-70s Tokyo jazz-funk — almost no plain triads, every chord
+  // carries a 7th or 9th, secondary dominants doing the smiling-through-it ache.
+  {
+    id: 'marunouchi', name: 'Marunouchi Ache', vibe: ['city pop', 'jazz'], mode: 'major', bpm: 104,
+    blurb: 'The 丸サ / "Just the Two of Us" changes: III7 aches into vi, I7 pulls the loop back around.',
+    tokens: [T('IVmaj7'), T('III7'), T('vi7'), T('I7')],
+  },
+  {
+    id: 'plastic-groove', name: 'Plastic Groove', vibe: ['city pop', 'funk'], mode: 'dorian', bpm: 102,
+    blurb: 'A dorian four-bar cruise in the Plastic Love lane — minor but neon-lit.',
+    tokens: [T('i7'), T('IV7'), T('ii7'), T('v7')],
+  },
+  {
+    id: 'terminal-lounge', name: 'Terminal Lounge', vibe: ['city pop', 'dreamy'], mode: 'major', bpm: 96,
+    blurb: 'Ninths and a borrowed ♭VIImaj7 — departure-gate wistfulness with the seatbelt sign off.',
+    tokens: [T('Imaj9'), T('bVIImaj7'), T('vi9'), T('V7sus4')],
+  },
+
+  // -------------------------------------------------------------------------
+  // Lofi hip hop: jazz changes at porch-swing tempo, 9ths on everything,
+  // two-to-four chords that each get to sit and be beautiful.
+  {
+    id: 'study-loop', name: 'Study Loop', vibe: ['lofi', 'jazz'], mode: 'major', bpm: 76,
+    blurb: 'ii–V–I with 9ths everywhere — the beats-to-relax-to skeleton.',
+    tokens: [T('ii9'), T('V9'), T('Imaj9'), T('vi9')],
+  },
+  {
+    id: 'rainy-window', name: 'Rainy Window', vibe: ['lofi', 'sad'], mode: 'minor', bpm: 72,
+    blurb: 'Minor ninths and a borrowed ♭VImaj7, unresolved on a sus — rain on glass.',
+    tokens: [T('i9'), T('iv9'), T('bVImaj7'), T('V7sus4')],
+  },
+  {
+    id: 'half-asleep', name: 'Half Asleep', vibe: ['lofi', 'dreamy'], mode: 'major', bpm: 68,
+    blurb: 'Two maj9 chords rocking slowly — the loop equivalent of a nap in the sun.',
+    tokens: [T('Imaj9', 2), T('IVmaj9', 2)],
+  },
+
+  // -------------------------------------------------------------------------
+  // Vaporwave: city pop and smooth jazz slowed 20–40% until the gloss turns
+  // uncanny — same lush chords, stretched until the mall empties out.
+  {
+    id: 'vhs-sunset', name: 'VHS Sunset', vibe: ['vaporwave', 'retro'], mode: 'major', bpm: 62,
+    blurb: 'The Royal Road at 70% speed — which is the whole origin story of the genre.',
+    tokens: [T('IVmaj7', 2), T('V7', 2), T('iii7', 2), T('vi7', 2)],
+  },
+  {
+    id: 'mallsoft', name: 'Mallsoft Escalator', vibe: ['vaporwave', 'dreamy'], mode: 'major', bpm: 64,
+    blurb: 'A ii–V that never lands, riding an escalator between floors forever.',
+    tokens: [T('ii9', 2), T('V13', 2)],
+  },
+  {
+    id: 'plaza-closing', name: 'Plaza at Closing Time', vibe: ['vaporwave', 'sad'], mode: 'major', bpm: 66,
+    blurb: 'Lush major ninths, then the borrowed iv dims the food-court lights.',
+    tokens: [T('Imaj9'), T('vi9'), T('IVmaj7'), T('iv7')],
   },
 ];
 
