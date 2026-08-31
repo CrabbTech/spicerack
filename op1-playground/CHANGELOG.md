@@ -3,6 +3,17 @@
 All notable changes to `op1-playground`. Newest first. Dates are local;
 hashes refer to this repo's `main`.
 
+## 2026-08-30 · The tape machine, and vaporwave reframed
+- Vaporwave's essence corrected (thanks Tyler): not slowed city pop but a
+  funeral for a past that never existed — American consumer memory,
+  commercials and muzak dubbed into generation loss. The pack's copy now
+  says so, and **Infomercial Heaven** joins it: a chipper jingle cadence
+  (I–VI7–ii7–V7) at 56 BPM — operators standing by, forever.
+- 📼 **Tape machine**: wow/flutter (slow Vibrato) and a dubbed-down top end
+  (filters drop to 1.4k/1.9k) on everything the studio plays. Toggle in the
+  Playground transport and Songs header; loading any vaporwave preset
+  engages it automatically.
+
 ## 2026-08-30 · Genre packs: city pop, lofi, vaporwave
 - Nine researched presets in three new vibes. **City pop**: the 丸サ /
   "Just the Two of Us" changes (IVmaj7–III7–vi7–I7), a dorian Plastic-Love

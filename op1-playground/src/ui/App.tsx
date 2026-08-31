@@ -134,6 +134,7 @@ export default function App() {
   const [copied, setCopied] = useState<'chart' | 'midi' | null>(null);
   const [midiOutputs, setMidiOutputs] = useState<MidiOutInfo[]>([]);
   const [midiOutId, setMidiOutId] = useState<string>('');
+  const [tapeOn, setTapeOn] = useState(() => player.tape);
   const playToken = useRef(0);
 
   const key: KeySig = useMemo(() => ({ tonic: TONIC_CHOICES[tonicIdx], mode }), [tonicIdx, mode]);
@@ -260,11 +261,18 @@ export default function App() {
     setSlots(slots.map((s) => (s.id === id ? { ...s, bars } : s)));
   };
 
+  const setTape = (on: boolean) => {
+    setTapeOn(on);
+    player.setTape(on);
+  };
+
   const loadPreset = (preset: Preset) => {
     setMode(preset.mode);
     setBpm(preset.bpm);
     syncSlots(preset.tokens.map((t) => makeSlot(t.t, t.bars ?? 1)));
     setSelectedIdx(0);
+    // vaporwave arrives pre-degraded; other genres leave the tape as you set it
+    if (preset.vibe.includes('vaporwave')) setTape(true);
   };
 
   const onDice = () => {
@@ -375,6 +383,11 @@ export default function App() {
             <option value="down">arp down</option>
             <option value="updown">arp up-down</option>
           </select>
+          <button className={`tool-btn${tapeOn ? ' hw-on' : ''}`}
+            title="the tape machine: wow, flutter, and a dubbed-down top end on everything the studio plays"
+            onClick={() => setTape(!tapeOn)}>
+            📼 tape
+          </button>
           <button className={`primary-btn${playing ? ' stop' : ''}`}
             onClick={playing ? stopPlayback : () => void startPlayback()}>
             {playing ? '■ Stop' : '▶ Play'}

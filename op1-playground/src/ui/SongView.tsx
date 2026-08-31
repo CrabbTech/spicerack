@@ -130,6 +130,7 @@ export function SongView({ onNav, initialSongId }: SongViewProps) {
   const [judge, setJudge] = useState<Map<number, 'hit' | 'miss'>>(() => new Map());
   const [midiInName, setMidiInName] = useState<string | null>(null);
   const [troubleTick, setTroubleTick] = useState(0);
+  const [tapeOn, setTapeOn] = useState(() => player.tape);
   const [partScope, setPartScope] = useState<'both' | PartId>('both');
   const graderRef = useRef<Grader | null>(null);
   const alongT0 = useRef(0);
@@ -446,6 +447,8 @@ export function SongView({ onNav, initialSongId }: SongViewProps) {
             <input type="checkbox" checked={wholeSong} onChange={(e) => setWholeSong(e.target.checked)} />
             whole song
           </label>
+          <button className={`tool-btn${tapeOn ? ' hw-on' : ''}`} title="tape machine: wow, flutter, dubbed-down top end"
+            onClick={() => { setTapeOn(!tapeOn); player.setTape(!tapeOn); }}>📼</button>
           <button className={`primary-btn${playing ? ' stop' : ''}`} onClick={playing ? stop : () => void start()}>
             {playing ? '■ Stop' : '▶ Play'}
           </button>

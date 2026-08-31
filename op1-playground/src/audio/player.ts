@@ -119,6 +119,11 @@ class Player {
   private chordSynth: Tone.PolySynth | null = null;
   private melodySynth: Tone.Synth | null = null;
   private clickSynth: Tone.Synth | null = null;
+  private chordFilter: Tone.Filter | null = null;
+  private melodyFilter: Tone.Filter | null = null;
+  private chordWow: Tone.Vibrato | null = null;
+  private melodyWow: Tone.Vibrato | null = null;
+  private tapeOn = false;
   private parts: Tone.Part[] = [];
   private started = false;
 
@@ -128,26 +133,55 @@ class Player {
       this.started = true;
     }
     if (!this.chordSynth) {
-      const filter = new Tone.Filter(2600, 'lowpass');
+      this.chordFilter = new Tone.Filter(2600, 'lowpass');
+      this.chordWow = new Tone.Vibrato(0.5, 0.008);
+      this.chordWow.wet.value = 0;
       const chordVol = new Tone.Volume(-11);
       this.chordSynth = new Tone.PolySynth(Tone.Synth, {
         oscillator: { type: 'triangle' },
         envelope: { attack: 0.015, decay: 0.25, sustain: 0.55, release: 0.35 },
-      }).chain(filter, chordVol, Tone.getDestination());
+      }).chain(this.chordWow, this.chordFilter, chordVol, Tone.getDestination());
 
       const delay = new Tone.PingPongDelay('8n', 0.18);
       delay.wet.value = 0.12;
       const leadVol = new Tone.Volume(-8);
+      this.melodyFilter = new Tone.Filter(3800, 'lowpass');
+      this.melodyWow = new Tone.Vibrato(0.4, 0.006);
+      this.melodyWow.wet.value = 0;
       this.melodySynth = new Tone.Synth({
         oscillator: { type: 'square' },
         envelope: { attack: 0.01, decay: 0.18, sustain: 0.35, release: 0.2 },
-      }).chain(new Tone.Filter(3800, 'lowpass'), delay, leadVol, Tone.getDestination());
+      }).chain(this.melodyWow, this.melodyFilter, delay, leadVol, Tone.getDestination());
+      this.applyTape();
 
       this.clickSynth = new Tone.Synth({
         oscillator: { type: 'sine' },
         envelope: { attack: 0.001, decay: 0.05, sustain: 0, release: 0.03 },
       }).chain(new Tone.Volume(-9), Tone.getDestination());
     }
+  }
+
+  /**
+   * The tape machine: slow wow, flutter, and a dubbed-down top end — the
+   * generation-loss patina vaporwave is made of. Applies to everything the
+   * studio plays until switched off.
+   */
+  setTape(on: boolean): void {
+    this.tapeOn = on;
+    this.applyTape();
+  }
+
+  get tape(): boolean {
+    return this.tapeOn;
+  }
+
+  private applyTape(): void {
+    if (!this.chordWow || !this.melodyWow || !this.chordFilter || !this.melodyFilter) return;
+    const t = 0.4;
+    this.chordWow.wet.rampTo(this.tapeOn ? 1 : 0, t);
+    this.melodyWow.wet.rampTo(this.tapeOn ? 1 : 0, t);
+    this.chordFilter.frequency.rampTo(this.tapeOn ? 1400 : 2600, t);
+    this.melodyFilter.frequency.rampTo(this.tapeOn ? 1900 : 3800, t);
   }
 
   async audition(midis: number[], midiSend?: PlaySpec['midiSend']): Promise<void> {

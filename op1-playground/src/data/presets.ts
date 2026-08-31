@@ -165,22 +165,29 @@ export const PRESETS: Preset[] = [
   },
 
   // -------------------------------------------------------------------------
-  // Vaporwave: city pop and smooth jazz slowed 20–40% until the gloss turns
-  // uncanny — same lush chords, stretched until the mall empties out.
+  // Vaporwave: a funeral for a past that never existed. Commercials, theme
+  // songs and muzak taped off the air, dubbed until the gloss turns uncanny —
+  // the sound of American promise, slowed enough to hear it grieve.
+  // Loading any of these engages the studio's 📼 tape machine.
   {
     id: 'vhs-sunset', name: 'VHS Sunset', vibe: ['vaporwave', 'retro'], mode: 'major', bpm: 62,
-    blurb: 'The Royal Road at 70% speed — which is the whole origin story of the genre.',
+    blurb: 'Golden-hour changes taped off late-night TV, a generation too many dubs deep.',
     tokens: [T('IVmaj7', 2), T('V7', 2), T('iii7', 2), T('vi7', 2)],
   },
   {
     id: 'mallsoft', name: 'Mallsoft Escalator', vibe: ['vaporwave', 'dreamy'], mode: 'major', bpm: 64,
-    blurb: 'A ii–V that never lands, riding an escalator between floors forever.',
+    blurb: 'A ii–V that never resolves — muzak still playing for a mall with no shoppers left.',
     tokens: [T('ii9', 2), T('V13', 2)],
   },
   {
     id: 'plaza-closing', name: 'Plaza at Closing Time', vibe: ['vaporwave', 'sad'], mode: 'major', bpm: 66,
     blurb: 'Lush major ninths, then the borrowed iv dims the food-court lights.',
     tokens: [T('Imaj9'), T('vi9'), T('IVmaj7'), T('iv7')],
+  },
+  {
+    id: 'infomercial-heaven', name: 'Infomercial Heaven', vibe: ['vaporwave', 'retro'], mode: 'major', bpm: 56,
+    blurb: 'A chipper jingle cadence at funeral tempo — operators standing by, forever.',
+    tokens: [T('I'), T('VI7'), T('ii7'), T('V7')],
   },
 ];
 
