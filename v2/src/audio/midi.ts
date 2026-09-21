@@ -1,15 +1,19 @@
-// Standard MIDI File (type 1) writer: chords + bass + optional drums, using
-// the same groove the play button uses, so what you drag into the DAW is what
-// you heard. Pure TS, no deps.
+// Standard MIDI File (type 1) writer: chords + bass + optional drums and demo
+// lick, built from the same bar events the play button schedules — so meters,
+// the gear-change repeat and the groove all land in the DAW as you heard them.
+// Pure TS, no deps.
 
-import { mod12 } from '../theory/notes';
 import { DrumPattern, StrumHit } from '../data/genres';
+import { LeadNote } from '../theory/lick';
 import { InstrumentId } from './engine';
+import { Meter, barEvents, beatsPerBar, swung, timeSignature } from './groove';
 
 export interface MidiExportSlot {
   midis: number[];
   bars: number;
   rootPc: number;
+  /** this slot's own meter, when a song strings together sections in different meters */
+  meter?: Meter;
 }
 
 export interface MidiExportOptions {
@@ -21,6 +25,11 @@ export interface MidiExportOptions {
   includeDrums: boolean;
   arp: boolean;
   instrument: InstrumentId;
+  meter?: Meter;
+  /** truck-driver repeat: write the loop twice, the second time up this many semitones */
+  modulate?: number | null;
+  /** demo lick to include as its own track */
+  lead?: LeadNote[] | null;
 }
 
 const TPQ = 480;
@@ -71,14 +80,14 @@ class TrackBuilder {
   }
 }
 
-const swungBeat = (beat: number, swing: number): number =>
-  beat + (Math.abs((beat % 1) - 0.5) < 0.01 ? swing / 6 : 0);
+const DRUM_NOTE = { kick: 36, snare: 38, hat: 42 } as const;
 
 export function buildMidiFile(slots: MidiExportSlot[], opts: MidiExportOptions): Uint8Array {
+  const sig = timeSignature(opts.meter);
   const meta = new TrackBuilder();
   meta.meta(0x03, ascii(opts.name));
   meta.meta(0x51, [...u32(Math.round(60_000_000 / opts.bpm)).slice(1)]); // 3-byte µs/quarter
-  meta.meta(0x58, [4, 2, 24, 8]); // 4/4
+  meta.meta(0x58, [sig.numerator, sig.denomPow, sig.denomPow === 3 ? 36 : 24, 8]);
 
   const PROGRAMS: Record<InstrumentId, number> = { guitar: 25, bass: 33, piano: 0, op1: 4 };
   const chords = new TrackBuilder();
@@ -92,69 +101,58 @@ export function buildMidiFile(slots: MidiExportSlot[], opts: MidiExportOptions):
   const drums = new TrackBuilder();
   drums.meta(0x03, ascii('Drums'));
 
+  const lead = new TrackBuilder();
+  lead.meta(0x03, ascii('Lead (demo lick)'));
+  lead.program(2, opts.instrument === 'guitar' ? 27 : opts.instrument === 'bass' ? 33 : 80); // clean electric / bass / square lead
+
+  const perBar = beatsPerBar(opts.meter);
+  const ticks = (beats: number): number => Math.round(beats * TPQ);
+  // the same passes the play button makes: once at pitch, then the gear change
+  const passes = opts.modulate ? [0, opts.modulate] : [0];
   let cursor = 0;
-  for (const slot of slots) {
-    const totalBeats = slot.bars * 4;
-    for (let b0 = 0; b0 < totalBeats - 1e-6; b0 += 4) {
-      const span = Math.min(4, totalBeats - b0); // < 4 for fractional-bar slots
-      const barStart = cursor + Math.round(b0 * TPQ);
-      if (opts.instrument === 'bass' && slot.midis.length) {
-        // mirror the play button: root/fifth on pattern hits, or an R-5-8-5 walk
-        const root = slot.midis[0];
-        const fifth = slot.midis[1] ?? root;
-        const octave = slot.midis[2] ?? root;
-        if (opts.arp) {
-          const seq = [root, fifth, octave, fifth];
-          const steps = Math.round(span * 2);
-          for (let step = 0; step < steps; step++) {
-            const tick = barStart + Math.round(swungBeat(step / 2, opts.swing) * TPQ);
-            chords.note(0, seq[step % seq.length], tick, TPQ * 0.5, step % 2 === 0 ? 104 : 80);
-          }
-        }
-        else {
-          for (const hit of opts.pattern) {
-            if (hit.beat >= span - 1e-6) continue;
-            const tick = barStart + Math.round(swungBeat(hit.beat, opts.swing) * TPQ);
-            chords.note(0, hit.beat < 2 ? root : fifth, tick, hit.durBeats * TPQ, hit.vel * 112);
-          }
-        }
+  let sigNow = sig;
+  for (const transpose of passes) {
+    const passStart = cursor;
+    for (const slot of slots) {
+      const slotMeter = slot.meter ?? opts.meter;
+      const slotBar = slot.meter ? beatsPerBar(slot.meter) : perBar;
+      const slotSig = timeSignature(slotMeter);
+      if (slotSig.numerator !== sigNow.numerator || slotSig.denomPow !== sigNow.denomPow) {
+        sigNow = slotSig;
+        meta.meta(0x58, [slotSig.numerator, slotSig.denomPow, slotSig.denomPow === 3 ? 36 : 24, 8], cursor);
       }
-      else if (opts.arp && slot.midis.length) {
-        const seq = [...slot.midis].sort((a, b) => a - b);
-        const steps = Math.round(span * 2);
-        for (let step = 0; step < steps; step++) {
-          const tick = barStart + Math.round(swungBeat(step / 2, opts.swing) * TPQ);
-          chords.note(0, seq[step % seq.length], tick, TPQ * 0.5, step % 2 === 0 ? 100 : 74);
+      const totalBeats = slot.bars * slotBar;
+      const sounding = { midis: slot.midis.map((m) => m + transpose), rootPc: slot.rootPc + transpose };
+      for (let b0 = 0; b0 < totalBeats - 1e-6; b0 += slotBar) {
+        const span = Math.min(slotBar, totalBeats - b0); // shorter for fractional-bar slots
+        const barStart = cursor + ticks(b0);
+        const ev = barEvents(sounding, span, {
+          pattern: opts.pattern, drums: opts.drums, swing: opts.swing, arp: opts.arp,
+          instrument: opts.instrument, meter: slotMeter,
+        });
+        for (const h of [...ev.chords, ...ev.pad]) {
+          for (const m of h.midis) chords.note(0, m, barStart + ticks(h.beat), ticks(h.dur), h.vel * 112);
+        }
+        for (const h of ev.bass) bass.note(1, h.midi, barStart + ticks(h.beat), ticks(h.dur), h.vel * 112);
+        if (opts.includeDrums) {
+          for (const d of ev.drums) drums.note(9, DRUM_NOTE[d.drum], barStart + ticks(d.beat), d.drum === 'hat' ? 40 : 60, d.vel * (d.drum === 'hat' ? 80 : 110));
         }
       }
-      else {
-        for (const hit of opts.pattern) {
-          if (hit.beat >= span - 1e-6) continue;
-          const tick = barStart + Math.round(swungBeat(hit.beat, opts.swing) * TPQ);
-          for (const m of slot.midis) {
-            chords.note(0, m, tick, hit.durBeats * TPQ, hit.vel * 112);
-          }
-        }
-      }
-      if (opts.instrument !== 'bass') {
-        const bassMidi = 28 + mod12(slot.rootPc - 4); // E1..D#2
-        bass.note(1, bassMidi, barStart, Math.min(1.9, span) * TPQ, 98);
-        if (span > 2) bass.note(1, bassMidi, barStart + 2 * TPQ, TPQ * 1.9, 88);
-      }
-      if (opts.includeDrums && opts.drums) {
-        for (const b of opts.drums.kick) if (b < span) drums.note(9, 36, barStart + Math.round(b * TPQ), 60, 112);
-        for (const b of opts.drums.snare) if (b < span) drums.note(9, 38, barStart + Math.round(b * TPQ), 60, 102);
-        for (const b of opts.drums.hat) {
-          if (b >= span) continue;
-          drums.note(9, 42, barStart + Math.round(swungBeat(b, opts.swing) * TPQ), 40, Math.abs((b % 1) - 0.5) < 0.01 ? 64 : 80);
-        }
-      }
+      cursor += ticks(totalBeats);
     }
-    cursor += Math.round(totalBeats * TPQ);
+    for (const n of opts.lead ?? []) {
+      const at = passStart + ticks(opts.meter ? n.beat : swung(n.beat, opts.swing));
+      if (at < cursor) lead.note(2, n.midi + transpose, at, ticks(n.dur), n.vel * 118);
+    }
   }
 
   // when the instrument *is* the bass, the chords track already carries the low end
-  const trackList = [meta, chords, ...(opts.instrument === 'bass' ? [] : [bass]), ...(opts.includeDrums && opts.drums ? [drums] : [])];
+  const trackList = [
+    meta, chords,
+    ...(opts.instrument === 'bass' ? [] : [bass]),
+    ...(opts.includeDrums && opts.drums ? [drums] : []),
+    ...(opts.lead?.length ? [lead] : []),
+  ];
   const body = trackList.flatMap((t) => encodeTrack(t.events));
   const header = [...ascii('MThd'), ...u32(6), ...u16(1), ...u16(trackList.length), ...u16(TPQ)];
   return new Uint8Array([...header, ...body]);

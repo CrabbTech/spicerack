@@ -1,6 +1,7 @@
 // One chord in the progression: numeral, symbol, diagram, voicing controls
 // and per-chord spice actions.
 
+import { MouseEvent } from 'react';
 import { RealizedSlot } from '../theory/progression';
 import { Chord, chordToneLabels, chordTones } from '../theory/chords';
 import { prettyNumeral } from '../theory/roman';
@@ -25,9 +26,13 @@ export interface ChordCardProps {
   pianoVoicing?: PianoVoicing;
   bassShape?: BassShape;
   isActive: boolean;
+  /** the solo lab is pointed at this chord */
+  isFocus?: boolean;
+  /** when a practice loop is set: is this card inside it? */
+  loopState?: 'in' | 'out';
   apps: SpiceApplication[];
   canRemove: boolean;
-  onStrum: () => void;
+  onStrum: (e: MouseEvent) => void;
   onCycleVoicing: (dir: 1 | -1) => void;
   onCycleBars: () => void;
   onApply: (app: SpiceApplication) => void;
@@ -65,7 +70,7 @@ export function ChordCard(p: ChordCardProps) {
     : new Map<number, LitKey>();
 
   return (
-    <div className={`card func-${chord.func}${p.isActive ? ' card-active' : ''}${slot.spiceId ? ' card-spiced' : ''}`}
+    <div className={`card func-${chord.func}${p.isActive ? ' card-active' : ''}${p.isFocus ? ' card-focus' : ''}${slot.spiceId ? ' card-spiced' : ''}${p.loopState ? ` card-loop-${p.loopState}` : ''}`}
       onClick={p.onStrum} role="button" tabIndex={0}>
       <div className="card-head">
         <span className={`numeral numeral-${chord.func}`}>{prettyNumeral(slot.numeral)}</span>
@@ -75,6 +80,7 @@ export function ChordCard(p: ChordCardProps) {
           ×{slot.bars === 0.5 ? '½' : slot.bars}
         </button>
         {slot.spiceId && <span className="spice-tag" title="added by spice">🌶</span>}
+        {p.loopState === 'in' && <span className="spice-tag" title="in the practice loop">🔁</span>}
       </div>
       <div className="card-symbol">{p.symbol}</div>
       <div className="card-tones">{chordToneLabels(chord).join(' · ')}</div>

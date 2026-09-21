@@ -18,8 +18,10 @@ export interface ProgressionTemplate {
   /** bars per slot; defaults to 1 each */
   bars?: number[];
   note?: string;
-  /** display-only meter suggestion (prog gets weird) */
+  /** meter label shown next to the key (prog gets weird) */
   meter?: string;
+  /** the meter's accent groups in eighth notes — 7/8 (2+2+3) = [2, 2, 3]; omitted = 4/4 */
+  groups?: number[];
 }
 
 export interface ScaleRec {
@@ -180,23 +182,23 @@ export const GENRES: Record<GenreId, Genre> = {
         note: 'The II chord is the ♯4 talking — Satriani & Vai live here. Nothing resolves; that’s the point.',
       },
       {
-        name: 'Sevens staircase', mode: 'lydian', numerals: ['Imaj7', 'II', 'iii', 'II'], meter: '7/8 (2+2+3)',
+        name: 'Sevens staircase', mode: 'lydian', numerals: ['Imaj7', 'II', 'iii', 'II'], meter: '7/8 (2+2+3)', groups: [2, 2, 3],
         note: 'Count it 1-2,1-2,1-2-3 until your foot stops fighting you.',
       },
       {
-        name: 'Odyssey vamp', mode: 'dorian', numerals: ['i7', 'IV7'], bars: [2, 2], meter: '7/4',
+        name: 'Odyssey vamp', mode: 'dorian', numerals: ['i7', 'IV7'], bars: [2, 2], meter: '7/4 (4+3)', groups: [4, 4, 6],
         note: '"So What" changes wearing a Pink Floyd shirt.',
       },
       {
-        name: 'Schism climber', mode: 'dorian', numerals: ['i', 'bVII', 'IV', 'i'], meter: '5/8 + 7/8',
+        name: 'Schism climber', mode: 'dorian', numerals: ['i', 'bVII', 'IV', 'i'], meter: '5/8 + 7/8', groups: [3, 2, 2, 2, 3],
         note: 'Tool-flavored: keep the bass droning and shift the accents every pass.',
       },
       {
-        name: 'Harmonic labyrinth', mode: 'minor', numerals: ['i', 'bVI', 'V7', 'i'], meter: '9/8 (2+2+2+3)',
+        name: 'Harmonic labyrinth', mode: 'minor', numerals: ['i', 'bVI', 'V7', 'i'], meter: '9/8 (2+2+2+3)', groups: [2, 2, 2, 3],
         note: 'Harmonic-minor gravity in a meter that limps beautifully.',
       },
       {
-        name: 'Solsbury stomp', mode: 'mixolydian', numerals: ['I', 'bVII', 'IV', 'I'], meter: '7/4',
+        name: 'Solsbury stomp', mode: 'mixolydian', numerals: ['I', 'bVII', 'IV', 'I'], meter: '7/4 (4+3)', groups: [4, 4, 6],
         note: 'Peter Gabriel energy: joyful, slightly off-balance, impossible to clap to.',
       },
     ],
@@ -534,7 +536,7 @@ export const GENRES: Record<GenreId, Genre> = {
     templates: [
       { name: 'Front porch', mode: 'major', numerals: ['I', 'IV', 'I', 'V'], note: 'The whole genre in four bars. Add a dog and a sunset.' },
       { name: 'Highway 8-bar', mode: 'major', numerals: ['I', 'I', 'IV', 'IV', 'I', 'V', 'I', 'V'], note: 'Eight bars of cruise control — Hank-approved.' },
-      { name: 'Nashville waltz', mode: 'major', numerals: ['I', 'IV', 'V', 'I'], meter: '3/4 — count it in your hat', note: 'Same chords, but they sway instead of march.' },
+      { name: 'Nashville waltz', mode: 'major', numerals: ['I', 'IV', 'V', 'I'], meter: '3/4 — count it in your hat', groups: [2, 2, 2], note: 'Same chords, but they sway instead of march.' },
       { name: 'Outlaw shuffle', mode: 'major', numerals: ['I7', 'IV7', 'I7', 'V7'], note: 'Blues bones wearing a bolo tie.' },
     ],
     spices: ['secondary-dominant', 'sus-tension', 'passing-dim', 'truck-driver', 'extensions', 'borrowed-iv', 'common-tone-dim', 'deceptive-cadence'],
@@ -630,7 +632,7 @@ export const GENRES: Record<GenreId, Genre> = {
       { name: 'Festival four', mode: 'major', numerals: ['IV', 'I', 'V', 'vi'], note: 'The axis progression rotated to start on IV — instantly 40% more festival.' },
       { name: 'Creep lurch', mode: 'major', numerals: ['I', 'III', 'IV', 'iv'], note: 'The major III (a secondary dominant out of uniform) then the borrowed iv. One progression, two thefts, one classic.' },
       { name: 'Canon fodder', mode: 'major', numerals: ['I', 'V', 'vi', 'iii', 'IV'], note: 'Pachelbel’s ghost plays bass in every indie band. Five chords of respectable yearning.' },
-      { name: 'Twee waltz', mode: 'major', numerals: ['I', 'vi', 'ii', 'V'], meter: '3/4 — sway accordingly', note: 'Cardigan-core. Count it in three and mean every downbeat.' },
+      { name: 'Twee waltz', mode: 'major', numerals: ['I', 'vi', 'ii', 'V'], meter: '3/4 — sway accordingly', groups: [2, 2, 2], note: 'Cardigan-core. Count it in three and mean every downbeat.' },
       { name: 'Strokes strut', mode: 'minor', numerals: ['i', 'bIII', 'bVII', 'IV'], note: 'Minor but smirking — the Dorian IV is the leather jacket on a school night.' },
       { name: 'Bedroom eyes', mode: 'minor', numerals: ['i7', 'bVImaj7', 'bIII', 'bVII'], note: 'Lo-fi gloom with 7ths left ringing; mumble the verse, mean the chorus.' },
     ],

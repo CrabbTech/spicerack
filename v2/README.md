@@ -18,6 +18,63 @@ scales for solos, as a full-neck fretboard map or lit-up OP-1 keys.
 - **OP-1 Field mode**: the real 24-key F-to-E layout (3-2-3-2 black keys), one-hand chord fittings with inversions, scale key-maps, octave shift, copyable key chart
 - **Sound**: Karplus-Strong plucked strings for guitar, a soft synth voice for OP-1, per-genre strum patterns with swing — click any chord to hear it, or play the whole loop
 - **Teaching palette**: every diatonic chord in the key, plus a "borrow shelf" of idiomatic out-of-key chords that explain themselves when used
+### Three workspaces
+
+- **🎓 Learn** — six paths of short steps (*Fretboard grammar*, *Solo over four chords*, *Hear the borrowed chords*, *Write an eight-bar melody*, *Play the twelve-bar blues*, *Triads on three strings*). Each step stages the bench (genre, progression, drill, even the open transition) and sends you to the workspace where the doing happens. Steps the app can measure finish themselves: a graded play-along pass, the melody coach showing ✓ on every chord, or an ear-quiz streak. Also here: the **ear quiz** (a loop from your genre plays twice, one chord spiced — which one changed? the reveal is the spice's own explanation), drill records, and a practice streak
+- **🎸 Jam** — instrument in hand. Cards shrink to a chord chart, the big diagram belongs to the **Solo Lab**, the **Triad Lab** or the **Neck Drills**, and the app **listens**
+- **✍️ Write** — key & genre, song sections, the chord bench with every harmonic tool, the melody workbench, and the reasons alongside
+
+### Solo lab
+
+- The scale diagram follows the chord changes. Over each chord every note is painted by what it *means* — root, chord tone, color, passing (a half step over a chord tone), rub, or **spice** (a chord tone the scale doesn't own: add Dm in A major and F♮ lights up while F♯ stands down). A dashed ring marks the landing note for the *next* chord. Click any note to hear it and ring every copy of it
+- **Drill ladder**: roots only → one note/all rhythm → land on the 3rd → chord tones only → guide tones → three-note call & response → full map. **▶ Demo lick** plays a seeded phrase that obeys the drill, with a cursor walking the diagram (🎲 for another)
+- **Connected neck positions**: the home box plus the four boxes that join it up the neck (pentatonic shapes / CAGED windows); drills, demo licks and melody tab follow the box you pick. **Lefty** mirrors the neck
+- **Guitar + OP-1 at once**: "Both" shows the same map on fretboard and OP-1 keys, cursor and pinned notes in sync
+
+### Fretboard fluency (guitar & bass)
+
+Built for the player with a big vocabulary of shapes and licks and no grammar: the goal is instant retrieval of *relationships*, not more material.
+
+- **123 / ABC**: every diagram can speak in numbers counted from the chord that's sounding (R, ♭3, 5, ♭7…) instead of letters. The same fret changes number as the chords change — that *is* the lesson. Strings default to numbers, keys to letters
+- **The grip you already know**: in any neck position the Solo Lab finds the chord grip from the shape library that lives there, boxes it on the map, names its CAGED form, and spells your fingers — "Here D is the A-shape you already play… R 5 R 3 5". Walk the five positions and one chord goes E → D → C → A → G shape
+- **🧠 Neck drills** (third Jam tool): ten-card timed sprints — *interval from a root*, *name that degree*, *chord tone in position*, *same note next string*, *note names*. Click the neck or **play the answer on your guitar** through Listen. A miss stops and shows the rule as a movement of the hand ("1 string higher, 1 fret back toward the nut — one fret further than usual, because it crosses onto the B string"); missed tags are dealt more often until they stop being missed. Score = accuracy, with the last 20 points earned by speed (under 3 s a card = you've stopped counting frets)
+- **Tab with numbers**: in Write, the melody is always shown as tab with each note's degree against its chord on a line underneath
+- **Lick lab** (in the melody workbench): bring in a lick you already play — **📋 paste its ASCII tab** (hammer-ons/slides read as plain notes, two-digit frets and double-stops understood, one column = one grid step) or arm **✏️ Step entry** and click it in on the fretboard (←/→ move the cursor, Backspace takes one back, strings are remembered). Read it as numbers, flip the tab between **🖐 as played** and **📦 re-fingered in the chosen neck position**, move it with **🎯 Same numbers → next bar** (transposed by the distance between the chord roots so every degree is unchanged; a major 3rd bends over a minor chord, the blue ♭3 is left alone), and **⭐ save it to the Lick shelf as numbers** — a saved lick forgets its key and frets and drops onto any chord in any key. Five starter licks ("♭7 5 4 ♭3 R"…) are there to show the idea
+- Learn opens with the **Fretboard grammar** path: your grips in numbers → intervals as shapes → recognise a degree → a 3rd near your hand → five grips, one chord → same note elsewhere → roots have names → your licks, in numbers
+
+### Triad lab
+
+- Every chord as **three notes on three adjacent strings** (E-A-D, A-D-G, D-G-B, G-B-e; two sets on bass) or under one hand inside the OP-1 / piano window. The neck view shows all of the focused chord's close-voiced shapes climbing the neck — root position, 1st and 2nd inversion, coloured by root / 3rd / 5th — with the path's choice lit, the **next chord's shape ghosted in**, and an arrow along each string that has to move (a double ring = that voice holds)
+- A **path solver** voice-leads the whole progression: *Stay close* (least total movement), *Climb* / *Descend* (the top voice becomes a melody), and *Root position* as the baseline — with the fret count for both, e.g. "18 frets per loop — root position would travel 42". **Click any shape to pin it** and the rest of the path re-routes around your choice
+- **3-5-7**: over seventh chords, the simpler triad hiding in the top three notes ("Dm7 — play an F triad")
+- **▶ Demo arpeggio** rolls each shape over the loop with a cursor on the dots; **🔊 Comp with these** makes the band play the voice-led triads; Listen lights the dots you play and grades them as chord tones
+- The strip underneath is the whole path: mini grids per chord, and between them what each voice does (`=` holds, `↑1`, `↓2`)
+
+### Listen — play along and get told something useful
+
+- Sources: **🎤 mic** (guitar, bass, voice, the OP-1's speaker — YIN pitch tracking, one note at a time; headphones keep the backing out of it), **🎹 MIDI** (OP-1 field over USB; Chromium browsers — the desktop shell's WKWebView has no Web MIDI), **⌨️ computer keyboard** (Z/Q rows, key caps printed on the diagram)
+- What you play lights up on every diagram. Each pass of the loop is placed on the transport clock and **graded against the drill**: ✓/✗ per chord change, % of notes inside the drill, and a specific line — "Dm: you arrived on F♯ — aim for F". Best scores per drill persist
+
+### Melody workbench
+
+- A piano roll whose **background is the harmony**: under every chord, rows are tinted by role, and notes take their role's colour. Click to add, drag to move/stretch, double-click to delete, lock notes you never want to lose; 8th or 16th grid; **⏺ Record a pass** captures from any Listen source and quantizes
+- **Motif tools** (chord-aware): Sequence → next bar (lands on the new chord's target — F♮ over Dm, not F♯), Answer (contour turned over, rests on the root), New pitches, Change ending (lean into the next chord / come to rest), Stretch ×2, Squeeze ×½, Invert, Fix clashes, octave ±
+- **Coach**: reads the melody against the chords — which changes land, what's parked on a rub, whether it breathes, whether a motif repeats — naming the bar, the note and the fix
+- **Reharmonize**: for the selected bar, other chords that would carry the same melody (simple / suspended / richer / borrowed) with a fit meter and how each melody note functions
+- Copy as **guitar tab** (fingered inside the chosen neck position) or an **OP-1 key chart**; the melody plays as the lead and exports to MIDI
+
+### Writing chords
+
+- **What next?** — continuations grouped by intention (settle / build tension / brighten / darken / surprise), each with a reason that names the actual notes
+- **Transition explainer**: click the arrow between any two cards (or ↻ for the loop seam) — which voices hold, which slide, what the bass does, what the move *is*, a one-line thing to play, and a demo that plays the change one voice at a time. "Loop this change" drills just those two chords
+- **A/B listening**: after any spice, 🔀 A/B loops the previous version then the new one in the same groove, changed chords marked
+- **Song sections**: A/B/C… each with its own chords, melody and meter; an arrangement row (A A B A); **▶ Play song** walks the bench through the sections; MIDI exports the whole song
+- **Library** keeps whole songs (every section + melody), with names, tags, notes, search, and JSON export/import. The session itself is saved continuously — relaunch and you're where you left off
+
+### Transport
+
+- Count-in, tempo ramp (70% → 100%, +5% a pass), shift-click cards to loop a section, a backing band (chords / bass / drums / melody) you can mute live, and a choice of which sound plays the chords
+- **What you hear is what the lesson says**: odd-meter templates (7/8, 7/4, 9/8, 5+7, 3/4) play in their real meter with accent-group grooves; the truck-driver repeat actually goes up a whole step every other pass (and the solo lab moves with it); MIDI export carries the meter, the gear change and the lead
 
 All music theory is computed (correct enharmonic spelling per key — B♭ in F, C♯ in A),
 and the chord-shape library is interval-verified by the test suite.
@@ -28,7 +85,7 @@ and the chord-shape library is interval-verified by the test suite.
 npm install
 npm run tauri dev      # development app window
 npm run tauri build    # release .app + .dmg (in src-tauri/target/release/bundle/)
-npm test               # 51 theory/voicing/layout tests
+npm test               # ~200 theory/voicing/groove/input/practice tests
 npm run dev            # UI only, in a browser
 ```
 
@@ -37,13 +94,31 @@ npm run dev            # UI only, in a browser
 Tauri 2 (native shell) · React 19 + TypeScript + Vite · SVG diagrams ·
 Web Audio (no samples) · Vitest. No runtime dependencies beyond React.
 
-## Layout
+## Architecture
 
 ```
-src/theory/   notes, scales, chords, roman numerals, progressions, spices
-src/data/     the genre book (progressions, spice lists, scale recs, grooves)
-src/guitar/   shape library + voicing engine + tab rendering
-src/op1/      OP-1 Field key layout + chord fitting
-src/audio/    Karplus-Strong + synth + pattern scheduler
-src/ui/       React components
+src/state/    reducer.ts   — the document: key, genre, sections (chords + melody), undo, view
+              controller.tsx — useAppController(): all behaviour in one hook (derived music,
+                             playback, input capture + grading, lessons, persistence)
+              AppContext.tsx — useApp(); views stay dumb
+              session.ts   — resume-where-you-left-off
+src/theory/   notes, scales, chords, roman numerals, progressions, spices, compose
+              solo.ts (note roles + drills) · lick.ts (demo licks) · transitions.ts
+              melody.ts (motif moves + coach) · suggest.ts (next-chord intents, reharmonize)
+              triads.ts (inversions on string sets / key windows + the voice-leading path solver)
+src/audio/    engine.ts (voices, buses, backing-band scheduler, transport clock)
+              groove.ts (bar events shared by playback AND midi.ts) · midi.ts
+src/input/    pitch.ts (YIN + note tracker) · mic.ts · midiIn.ts · qwerty.ts
+src/practice/ grade.ts (takes vs drills) · fretDrills.ts (fluency sprints) · progress.ts · earQuiz.ts
+src/data/     genres.ts (the genre book) · lessons.ts (learning paths) · customGenres.ts
+src/guitar/   shapes, voicings, tab, positions.ts (connected boxes), caged.ts (form + known grip), melodyTab.ts,
+              licks.ts (tab parser + licks stored as numbers)
+src/op1/ src/piano/ src/bass/   instrument layouts + chord fitting
+src/ui/       App.tsx (shell) · TopBar · views/{Learn,Jam,Write}View · SoloLab · MelodyRoll
+              MelodyWorkbench · ListenPanel · ProgressionPanel · TransitionPanel · …
 ```
+
+Rule of thumb: music logic is pure and tested (`src/theory`, `src/practice`, `src/input/pitch.ts`,
+`src/audio/groove.ts`); the controller wires it to React; components only render.
+
+Debug deep links (skip session resume): `?genre=blues&tonic=E&instrument=op1&view=jam&prog=I,iv,V7,IV&lens=thirds&focus=1&xfer=0&scale=1&both=1&modulate=2&tool=triads|drills&drill=interval&labels=numbers`
