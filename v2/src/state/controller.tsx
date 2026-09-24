@@ -41,6 +41,7 @@ import { LeadNote } from '../theory/lick';
 import { CrabMode, analyzeCanon, crabProof, mirrorLead, mirrorSpec, movedNotes } from '../theory/crab';
 import { TakeGrade, gradeTake } from '../practice/grade';
 import { Progress, loadProgress, recordLesson, recordPass, recordSprint, saveProgress } from '../practice/progress';
+import { storageKey } from './storage';
 import { EarRound, buildEarRound } from '../practice/earQuiz';
 import { ALL_STEPS, LessonStep } from '../data/lessons';
 import { neckPositions } from '../guitar/positions';
@@ -68,7 +69,9 @@ export interface PracticeSettings {
   backing: 'same' | InstrumentId;
 }
 
-const PRACTICE_KEY = 'spicerack2.practice';
+const PRACTICE_KEY = storageKey('practice');
+const LABELS_KEY = storageKey('labels');
+const LEFTY_KEY = storageKey('lefty');
 export const RAMP = { startPct: 70, stepPct: 5 };
 
 function loadPractice(): PracticeSettings {
@@ -159,7 +162,7 @@ export function useAppController() {
   const [lastSprint, setLastSprint] = useState<SprintResult | null>(null);
   // how diagrams talk: letters, or numbers (intervals against the chord in focus). Strings default to numbers — that's the grammar.
   const [labelPref, setLabelPref] = useState<'names' | 'numbers' | null>(() => {
-    const saved = linkParam('labels') ?? localStorage.getItem('spicerack2.labels');
+    const saved = linkParam('labels') ?? localStorage.getItem(LABELS_KEY);
     return saved === 'names' || saved === 'numbers' ? saved : null;
   });
   const [triadSet, setTriadSet] = useState<number | undefined>(undefined);
@@ -168,7 +171,7 @@ export function useAppController() {
   const [triadComp, setTriadComp] = useState(false);
   const [triadPins, setTriadPins] = useState<Record<number, number>>({});
   const [position, setPosition] = useState(0);
-  const [lefty, setLefty] = useState(() => localStorage.getItem('spicerack2.lefty') === '1');
+  const [lefty, setLefty] = useState(() => localStorage.getItem(LEFTY_KEY) === '1');
   const [grid, setGrid] = useState<0.5 | 0.25>(0.5);
   // step entry: the instrument diagram writes into the melody at this beat
   const [stepEntry, setStepEntry] = useState(false);
@@ -191,7 +194,7 @@ export function useAppController() {
   const songRef = useRef(false);
 
   useEffect(() => saveProgress(progress), [progress]);
-  useEffect(() => localStorage.setItem('spicerack2.lefty', lefty ? '1' : '0'), [lefty]);
+  useEffect(() => localStorage.setItem(LEFTY_KEY, lefty ? '1' : '0'), [lefty]);
 
   useEffect(() => {
     audio.setMix({ chords: practice.chords, bass: practice.bass, drums: state.drumsOn });
@@ -366,7 +369,7 @@ export function useAppController() {
   const labelMode: 'names' | 'numbers' = labelPref ?? (state.instrument === 'guitar' || state.instrument === 'bass' ? 'numbers' : 'names');
   const setLabelMode = (mode: 'names' | 'numbers') => {
     setLabelPref(mode);
-    localStorage.setItem('spicerack2.labels', mode);
+    localStorage.setItem(LABELS_KEY, mode);
   };
 
   const finishSprint = (result: SprintResult, cards: { tag: string; right: boolean }[]) => {

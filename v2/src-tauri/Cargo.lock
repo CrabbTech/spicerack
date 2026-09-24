@@ -3172,7 +3172,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "spicerack2"
+name = "quire"
 version = "2.0.0"
 dependencies = [
  "serde",

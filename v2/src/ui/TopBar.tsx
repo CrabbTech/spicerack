@@ -8,6 +8,7 @@ import { op1RangeLabel } from '../op1/op1';
 import { pianoRangeLabel } from '../piano/piano';
 import { streak } from '../practice/progress';
 import { PixelCrab } from './PixelCrab';
+import { BRAND } from '../brand';
 
 const VIEWS: { id: ViewId; name: string }[] = [
   { id: 'learn', name: 'Learn' },
@@ -21,8 +22,8 @@ export function TopBar() {
   return (
     <header className="topbar">
       <div className="brand">
-        <PixelCrab size={44} title="Spicerack" />
-        <span className="brand-name">SPICERACK <span className="brand-two">2</span></span>
+        <PixelCrab size={44} title={BRAND.name} />
+        <span className="brand-name">{BRAND.mark}</span>
         <div className="seg view-seg">
           {VIEWS.map((v) => (
             <button key={v.id} className={state.view === v.id ? 'seg-on' : ''} onClick={() => dispatch({ type: 'view', view: v.id })}>

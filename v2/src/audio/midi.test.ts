@@ -65,6 +65,6 @@ describe('midi writer', () => {
   });
 
   it('builds sane filenames', () => {
-    expect(midiFilename('Night drive', 'A minor')).toBe('spicerack-night-drive-a-minor.mid');
+    expect(midiFilename('Night drive', 'A minor')).toBe('quire-night-drive-a-minor.mid');
   });
 });

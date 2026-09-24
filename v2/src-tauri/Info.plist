@@ -3,6 +3,6 @@
 <plist version="1.0">
 <dict>
   <key>NSMicrophoneUsageDescription</key>
-  <string>Spicerack listens to your guitar (or voice, or OP-1) so it can show the notes you play on the diagrams and grade play-along drills. Audio never leaves this computer.</string>
+  <string>Quire listens to your guitar (or voice, or OP-1) so it can show the notes you play on the diagrams and grade play-along drills. Audio never leaves this computer.</string>
 </dict>
 </plist>

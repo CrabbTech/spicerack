@@ -9,6 +9,7 @@
 import { mod12 } from '../theory/notes';
 import { simpleInterval } from '../theory/solo';
 import { LickSegment } from '../theory/lick';
+import { storageKey } from '../state/storage';
 import { MelNote, MelodyContext, fitQuality, newNoteId, notesInBar, segmentAt } from '../theory/melody';
 
 // --- pasted tab ------------------------------------------------------------------
@@ -147,7 +148,7 @@ export const STARTER_LICKS: Lick[] = [
   L('6th-to-root pickup', 'the BB King turn: 5, 6, up to the root', [0, 0.5, 7], [0.5, 0.5, 9], [1, 1.5, 12], [3, 0.5, 9], [3.5, 0.5, 7]),
 ];
 
-const KEY = 'spicerack2.licks';
+const KEY = storageKey('licks');
 
 export function loadLicks(): Lick[] {
   try {

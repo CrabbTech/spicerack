@@ -3,6 +3,7 @@
 
 import { GENRES, Genre, GenreId, ProgressionTemplate } from './genres';
 import { SpiceId } from '../theory/spices';
+import { storageKey } from '../state/storage';
 
 export interface CustomGenreData {
   id: string; // "custom-<slug>"
@@ -16,7 +17,7 @@ export interface CustomGenreData {
   spices: SpiceId[];
 }
 
-const KEY = 'spicerack2.customGenres';
+const KEY = storageKey('customGenres');
 
 export function loadCustomGenres(): CustomGenreData[] {
   try {

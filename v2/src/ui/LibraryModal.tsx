@@ -2,6 +2,8 @@
 
 import { useState } from 'react';
 import { MelNote } from '../theory/melody';
+import { BRAND } from '../brand';
+import { storageKey } from '../state/storage';
 
 type SavedSlot = { numeral: string; bars: number; annotation?: string; spiceId?: string; pedalBass?: boolean };
 
@@ -41,7 +43,7 @@ export interface SavedProgression {
   summary: string;
 }
 
-const KEY = 'spicerack2.library';
+const KEY = storageKey('library');
 
 export function loadLibrary(): SavedProgression[] {
   try {
@@ -104,7 +106,7 @@ export function LibraryModal({ items, genreName, onLoad, onDelete, onUpdate, onI
       setMessage(`Imported ${list.length} song${list.length === 1 ? '' : 's'}.`);
     }
     catch {
-      setMessage('That file isn’t a Spicerack export.');
+      setMessage(`That file isn’t a ${BRAND.name} export.`);
     }
   };
 
@@ -115,7 +117,7 @@ export function LibraryModal({ items, genreName, onLoad, onDelete, onUpdate, onI
           <h2>Library</h2>
           <input className="text-input" placeholder="search names, chords, tags, notes…" value={query} onChange={(e) => setQuery(e.target.value)} />
           <button className="btn" disabled={!items.length}
-            onClick={() => download(`spicerack-library-${new Date().toISOString().slice(0, 10)}.json`, JSON.stringify(items, null, 2))}>Export all</button>
+            onClick={() => download(`${BRAND.fileSlug}-library-${new Date().toISOString().slice(0, 10)}.json`, JSON.stringify(items, null, 2))}>Export all</button>
           <label className="file-btn">
             Import
             <input type="file" accept="application/json,.json" onChange={(e) => { const f = e.target.files?.[0]; if (f) void importFile(f); e.target.value = ''; }} />
@@ -165,7 +167,7 @@ export function LibraryModal({ items, genreName, onLoad, onDelete, onUpdate, onI
                 <button className="btn" onClick={() => { onLoad(item); onClose(); }}>Load</button>
                 <button className={`btn ${editing === item.id ? 'btn-on' : ''}`} onClick={() => setEditing(editing === item.id ? null : item.id)}>Edit</button>
                 <button className="btn"
-                  onClick={() => download(`${item.name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}.spicerack.json`, JSON.stringify(item, null, 2))}>Export</button>
+                  onClick={() => download(`${item.name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}.${BRAND.fileSlug}.json`, JSON.stringify(item, null, 2))}>Export</button>
                 {confirming === item.id
                   ? <button className="btn btn-danger" onClick={() => { onDelete(item.id); setConfirming(null); }}>Sure?</button>
                   : <button className="btn" onClick={() => setConfirming(item.id)}>Delete</button>}

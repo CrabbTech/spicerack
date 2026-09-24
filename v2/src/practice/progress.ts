@@ -2,6 +2,7 @@
 // drill, which lesson steps are finished, and which days had practice in them.
 
 import { LensId } from '../theory/solo';
+import { storageKey } from '../state/storage';
 
 export interface Progress {
   /** best graded pass per drill, 0..100 */
@@ -19,7 +20,7 @@ export interface Progress {
   fretMisses: Record<string, number>;
 }
 
-const KEY = 'spicerack2.progress';
+const KEY = storageKey('progress');
 const EMPTY: Progress = { drillBest: {}, drillPasses: {}, lessons: [], days: [], fretBest: {}, fretRuns: {}, fretMisses: {} };
 
 export function loadProgress(): Progress {

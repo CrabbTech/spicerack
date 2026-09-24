@@ -3,6 +3,7 @@
 // and picked up again on the next launch (unless a deep link says otherwise).
 
 import { SavedSection } from '../ui/LibraryModal';
+import { storageKey } from './storage';
 
 export interface SavedSession {
   tonicIdx: number;
@@ -18,7 +19,7 @@ export interface SavedSession {
   sections: SavedSection[];
 }
 
-const KEY = 'spicerack2.session';
+const KEY = storageKey('session');
 
 export function saveSession(session: SavedSession): void {
   try {

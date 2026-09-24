@@ -6,6 +6,7 @@
 import { DrumPattern, StrumHit } from '../data/genres';
 import { LeadNote } from '../theory/lick';
 import { InstrumentId } from './engine';
+import { BRAND } from '../brand';
 import { Meter, barEvents, beatsPerBar, swung, timeSignature } from './groove';
 
 export interface MidiExportSlot {
@@ -158,8 +159,8 @@ export function buildMidiFile(slots: MidiExportSlot[], opts: MidiExportOptions):
   return new Uint8Array([...header, ...body]);
 }
 
-/** Suggested filename, e.g. "spicerack-night-drive-a-minor.mid". */
+/** Suggested filename, e.g. "quire-night-drive-a-minor.mid". */
 export function midiFilename(template: string, keyLabel: string): string {
   const slug = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
-  return `spicerack-${slug(template)}-${slug(keyLabel)}.mid`;
+  return `${BRAND.fileSlug}-${slug(template)}-${slug(keyLabel)}.mid`;
 }
