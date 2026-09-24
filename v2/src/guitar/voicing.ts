@@ -101,12 +101,16 @@ export function scaleFretboard(tonicPc: PitchClass, pcs: PitchClass[], maxFret =
   return out;
 }
 
-/** The "position 1" box: a 5-fret window anchored on the lowest string's root fret. */
-export function scaleBox(tonicPc: PitchClass, pcs: PitchClass[], openPcs: number[] = OPEN_PC): FretboardNote[] {
+/** Fret window of the "position 1" box: five frets anchored on the lowest string's root. */
+export function boxWindow(tonicPc: PitchClass, openPcs: number[] = OPEN_PC): { lo: number; hi: number } {
   let rootFret = mod12(tonicPc - openPcs[0]);
   if (rootFret === 0) rootFret = 12;
-  const lo = rootFret - 1;
-  const hi = rootFret + 3;
+  return { lo: rootFret - 1, hi: rootFret + 3 };
+}
+
+/** The "position 1" box: a 5-fret window anchored on the lowest string's root fret. */
+export function scaleBox(tonicPc: PitchClass, pcs: PitchClass[], openPcs: number[] = OPEN_PC): FretboardNote[] {
+  const { lo, hi } = boxWindow(tonicPc, openPcs);
   return scaleFretboard(tonicPc, pcs, MAX_FRET, openPcs).filter((n) => n.fret >= lo && n.fret <= hi);
 }
 

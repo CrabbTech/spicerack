@@ -1,0 +1,114 @@
+# Changelog — OP-1 Field Studio
+
+All notable changes to `op1-playground`. Newest first. Dates are local;
+hashes refer to this repo's `main`.
+
+## 2026-08-30 · The tape machine, and vaporwave reframed
+- Vaporwave's essence corrected (thanks Tyler): not slowed city pop but a
+  funeral for a past that never existed — American consumer memory,
+  commercials and muzak dubbed into generation loss. The pack's copy now
+  says so, and **Infomercial Heaven** joins it: a chipper jingle cadence
+  (I–VI7–ii7–V7) at 56 BPM — operators standing by, forever.
+- 📼 **Tape machine**: wow/flutter (slow Vibrato) and a dubbed-down top end
+  (filters drop to 1.4k/1.9k) on everything the studio plays. Toggle in the
+  Playground transport and Songs header; loading any vaporwave preset
+  engages it automatically.
+
+## 2026-08-30 · Genre packs: city pop, lofi, vaporwave
+- Nine researched presets in three new vibes. **City pop**: the 丸サ /
+  "Just the Two of Us" changes (IVmaj7–III7–vi7–I7), a dorian Plastic-Love
+  cruise, ninths with a borrowed ♭VIImaj7. **Lofi**: ii9–V9–Imaj9–vi9 at
+  76, minor ninths ending on a sus, a two-chord maj9 nap. **Vaporwave**:
+  the Royal Road at 62 BPM (the genre's literal origin story), an
+  unresolving ii9–V13 escalator, maj9s dimmed by a borrowed iv.
+- Royal Road tagged city pop; Backdoor Cadence tagged lofi.
+- New preset integrity suite: every token of every preset must parse and
+  voice cleanly across keys.
+
+## 2026-08-30 · Resume where you left off
+- The studio remembers your last song, section, and practice tempo; Home's
+  session panel leads with "▶ Resume Waltz in D — STRAIN 2 @ 75%". Opening
+  that song restores the spot; opening a different one starts fresh.
+
+## 2026-08-30 · Practice journal
+- Every graded play-along is logged (`op1playground.takes`, capped at 500):
+  day, song, section, tempo, accuracy, hand scope.
+- Home shelf cards draw an accuracy sparkline over the last 12 takes, so a
+  week of practice reads as a rising line.
+
+## 2026-08-30 · The beauty pass
+- Typography: Space Grotesk for display, IBM Plex Mono for the lab labels.
+- Motion: keys ease between states and pop on hits/misses; cards lift on
+  hover; visible focus rings throughout.
+- A beaten record glows: "★ new best" pulses on the play-along score and the
+  drill result.
+- The app is now the **OP-1 FIELD STUDIO** (title + brand), which is what it
+  has become.
+
+## 2026-08-30 · Hands-separate practice
+- Songs with two written parts (the waltz) get a **hands** selector in the
+  practice strip: both / right / left. It scopes playback *and* play-along
+  grading to that part, with separate best scores per hand
+  (`…best.<song>.<section>.<pct>~melody`). Sections with one part are
+  untouched.
+
+## 2026-08-30 · Trouble keys
+- Play-along now remembers which physical keys you miss, per song
+  (`Grader.missedByKey` folded into localStorage after every graded take).
+- The play-along panel shows the worst offenders as chips (`T4 ×5`) with a
+  reset; the home shelf warns "watch T4 · T2" on each song's card.
+
+## 2026-08-30 · Ear training — `735dc91`
+- New drill kind **by ear**: the card sounds a diatonic chord (name hidden,
+  🔊 replay on tap); grab its tones by ear, any octave. The name reveals with
+  the voicing when you complete it. Sevenths toggle applies; bests persist
+  like every drill.
+
+## 2026-08-30 · Home: streaks, records, a suggested session — `ba56f58`
+- New default view **OP-1 FIELD STUDIO**: practice-day log + day streak
+  (yesterday-grace), song shelf with each song's best graded take, drill
+  records, three-step suggested session (warm-up grabs → play-along goal that
+  raises tempo only past 85% accuracy → keep-warm pass).
+- Session steps and shelf cards deep-link into Songs/Drills with the song
+  preselected. Graded finishes (play-along, drill runs) log the practice day.
+
+## 2026-08-30 · Unified nav + song-sourced drills — `6d2b202`
+- One segmented **HOME / PLAYGROUND / SONGS / DRILLS** nav in every header
+  (HOME added in `ba56f58`).
+- Drills gain a source picker: "any key" (diatonic) or any song — cards deal
+  **exact grabs from the song's compiled bars** (octave-strict, reveals B/T
+  key tags), best per song persisted.
+
+## 2026-08-30 · Drills — `e4228d5`
+- Third view (`?view=drills`): 10-card sprints against the clock in any
+  key/mode. Chord grabs (any octave; triads/sevenths), key-tag recall
+  (exact B/T key), note names (either octave).
+- QWERTY piano or MIDI input; wrong presses +2s; completed cards reveal the
+  fitted voicing; best per config in localStorage.
+
+## 2026-08-30 · Play-along mode — `55632c1`
+- 🎹 Play-along in the practice strip: backing mutes to the click, every
+  press graded against the tab (±250ms window, octave-tolerant).
+- Input from OP-1 Field over USB (Web MIDI note-ons) or the built-in QWERTY
+  piano (Z/Q rows mirror the 3-2-3-2 layout, on-screen keycap hints).
+- Live accuracy % / notes / strays / ±ms feel; hits green, strays red on the
+  keyboard; best score per song/section/tempo persisted.
+
+## 2026-08-30 · Practice engine — `37a02f0`
+- Practice strip in Songs: tempo slider (40–120% of song BPM), one-bar
+  count-in the loop skips on repeats, meter-aware metronome (3/4 correct),
+  A/B bar-range looping with looped bars outlined.
+
+## 2026-08-30 · Song tabs (checkpoint) — `cb2959e`
+- Score schema + compiler: voicings honoring the printed bass, per-section
+  octave switch, repeat/volta expansion, octave folding marked `*`.
+- Practice-stand Songs view: source screenshot above a full-width OP-1
+  keyboard that follows stepping (←/→, shift+←/→) and playback.
+- Measured transcription pipeline (`tools/read_notes.py`: staff-line +
+  notehead detection from pixels; probe mode; bass/treble clefs).
+- Four transcribed songs with images; adaptive-grid text tabs (quarters →
+  thirty-seconds, triplets); MIDI export; JSON import (localStorage);
+  integrity test suite over every registered song.
+
+## Earlier (same repo)
+- `8b0b887` Spicerack v1/v2 chord-progression workshops + GitHub Pages deploy.

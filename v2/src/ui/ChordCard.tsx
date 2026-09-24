@@ -1,6 +1,7 @@
 // One chord in the progression: numeral, symbol, diagram, voicing controls
 // and per-chord spice actions.
 
+import { MouseEvent } from 'react';
 import { RealizedSlot } from '../theory/progression';
 import { Chord, chordToneLabels, chordTones } from '../theory/chords';
 import { prettyNumeral } from '../theory/roman';
@@ -25,9 +26,13 @@ export interface ChordCardProps {
   pianoVoicing?: PianoVoicing;
   bassShape?: BassShape;
   isActive: boolean;
+  /** the solo lab is pointed at this chord */
+  isFocus?: boolean;
+  /** when a practice loop is set: is this card inside it? */
+  loopState?: 'in' | 'out';
   apps: SpiceApplication[];
   canRemove: boolean;
-  onStrum: () => void;
+  onStrum: (e: MouseEvent) => void;
   onCycleVoicing: (dir: 1 | -1) => void;
   onCycleBars: () => void;
   onApply: (app: SpiceApplication) => void;
@@ -65,16 +70,16 @@ export function ChordCard(p: ChordCardProps) {
     : new Map<number, LitKey>();
 
   return (
-    <div className={`card func-${chord.func}${p.isActive ? ' card-active' : ''}${slot.spiceId ? ' card-spiced' : ''}`}
+    <div className={`card func-${chord.func}${p.isActive ? ' card-active' : ''}${p.isFocus ? ' card-focus' : ''}${slot.spiceId ? ' card-spiced' : ''}${p.loopState ? ` card-loop-${p.loopState}` : ''}`}
       onClick={p.onStrum} role="button" tabIndex={0}>
       <div className="card-head">
         <span className={`numeral numeral-${chord.func}`}>{prettyNumeral(slot.numeral)}</span>
         <span className="func-tag">{FUNC_LABEL[chord.func]}</span>
-        <button className="bars-tag" title="bars — click to cycle ½ / 1 / 2 / 4"
-          onClick={(e) => { e.stopPropagation(); p.onCycleBars(); }}>
+        <button className="bars-tag" title="bars" onClick={(e) => { e.stopPropagation(); p.onCycleBars(); }}>
           ×{slot.bars === 0.5 ? '½' : slot.bars}
         </button>
-        {slot.spiceId && <span className="spice-tag" title="added by spice">🌶</span>}
+        {slot.spiceId && <span className="spice-tag">spiced</span>}
+        {p.loopState === 'in' && <span className="spice-tag">loop</span>}
       </div>
       <div className="card-symbol">{p.symbol}</div>
       <div className="card-tones">{chordToneLabels(chord).join(' · ')}</div>
@@ -87,15 +92,13 @@ export function ChordCard(p: ChordCardProps) {
       </div>
       {p.instrument === 'guitar' && p.guitarVoicing && (
         <div className="card-voicing" onClick={(e) => e.stopPropagation()}>
-          <button className="mini" onClick={() => p.onCycleVoicing(-1)} disabled={p.guitarVoicingCount < 2} title="previous voicing">‹</button>
+          <button className="mini" onClick={() => p.onCycleVoicing(-1)} disabled={p.guitarVoicingCount < 2}>‹</button>
           <span>{p.guitarVoicing.label}</span>
-          <button className="mini" onClick={() => p.onCycleVoicing(1)} disabled={p.guitarVoicingCount < 2} title="next voicing">›</button>
+          <button className="mini" onClick={() => p.onCycleVoicing(1)} disabled={p.guitarVoicingCount < 2}>›</button>
         </div>
       )}
       {p.instrument === 'bass' && p.bassShape && (
-        <div className="card-voicing">
-          <span>R · 5 · 8 — {p.bassShape.label}</span>
-        </div>
+        <div className="card-voicing"><span>R · 5 · 8 — {p.bassShape.label}</span></div>
       )}
       {p.instrument === 'piano' && p.pianoVoicing && (
         <div className="card-voicing">
@@ -115,26 +118,12 @@ export function ChordCard(p: ChordCardProps) {
       )}
       <div className="card-actions" onClick={(e) => e.stopPropagation()}>
         {p.apps.map((app) => (
-          <button key={app.spiceId + app.label} className="chip chip-action" title={`${app.spiceName}: ${app.label}`}
-            onClick={() => p.onApply(app)}>
-            {appIcon(app)}
+          <button key={app.spiceId + app.label} className="chip chip-action" title={app.spiceName} onClick={() => p.onApply(app)}>
+            {app.label}
           </button>
         ))}
-        {p.canRemove && (
-          <button className="chip chip-remove" title="remove chord" onClick={p.onRemove}>×</button>
-        )}
+        {p.canRemove && <button className="chip chip-remove" onClick={p.onRemove}>×</button>}
       </div>
     </div>
   );
-}
-
-function appIcon(app: SpiceApplication): string {
-  const icons: Record<string, string> = {
-    'secondary-dominant': '🎯', 'tritone-sub': '🃏', 'half-step-slide': '🛝',
-    'sus-tension': '⏳', 'passing-dim': '🪜', 'borrowed-iv': '🌧',
-    'flat-seven': '🍺', 'mario': '🍄', 'picardy': '🌅', 'andalusian': '💃',
-    'backdoor': '🚪', 'line-cliche': '🕵️', 'phrygian-bite': '🦈',
-    'tritone-riff': '😈', 'harmonic-minor-v': '🧛',
-  };
-  return icons[app.spiceId] ?? '🌶';
 }
