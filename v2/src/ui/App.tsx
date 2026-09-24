@@ -19,7 +19,7 @@ import { ComposeModal } from './ComposeModal';
 const SHORTCUTS: Record<string, string> = {
   learn: '⌨ space play · j jam · t themes',
   jam: '⌨ space play · l demo lick · j back to write · d drums · b bass · m mute · 1-4 instrument · esc clear focus',
-  write: '⌨ space play · n new · c compose · s spice · u undo · x A/B · r reset · l demo lick · j jam · d drums · b bass · m mute · 1-4 instrument · t themes',
+  write: '⌨ space play · n new · c compose · s spice · u undo · x A/B · r reset · l demo lick · k crab · j jam · d drums · b bass · m mute · 1-4 instrument · t themes',
 };
 
 export default function App() {

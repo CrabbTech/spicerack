@@ -39,6 +39,7 @@ import {
   MelNote, MelodyContext, analyzeMelody, newNoteId, quantize, sortNotes, toLead,
 } from '../theory/melody';
 import { LeadNote } from '../theory/lick';
+import { CrabMode, analyzeCanon, crabProof, mirrorLead, mirrorSpec, movedNotes } from '../theory/crab';
 import { TakeGrade, gradeTake } from '../practice/grade';
 import { Progress, loadProgress, recordLesson, recordPass, recordSprint, saveProgress } from '../practice/progress';
 import { EarRound, buildEarRound } from '../practice/earQuiz';
@@ -92,6 +93,9 @@ export type JamTool = 'solo' | 'triads' | 'drills';
 
 /** seconds between playing a note and the app hearing about it, per source */
 const INPUT_LATENCY: Record<InputSource, number> = { off: 0, qwerty: 0.03, midi: 0.012, mic: 0.03 };
+
+/** the crab canon's second voice plays on a different sound from the line it mirrors, so the two readings can be told apart */
+const CRAB_VOICE: Record<InstrumentId, InstrumentId> = { guitar: 'op1', bass: 'piano', piano: 'op1', op1: 'piano' };
 
 type TakeNote = MelNote & { pass: number };
 
@@ -148,6 +152,9 @@ export function useAppController() {
 
   // write: melody, neck position, handedness
   const [melodyOn, setMelodyOn] = useState(true);
+  // the crab canon: a second voice reads the written line from the end
+  const [crabOn, setCrabOn] = useState(false);
+  const [crabMode, setCrabMode] = useState<CrabMode>('crab');
   // jam: which tool has the big diagram, and the triad lab's choices
   const [jamTool, setJamToolState] = useState<JamTool>(() => (['solo', 'triads', 'drills'] as const).find((t) => t === linkParam('tool')) ?? 'solo');
   const [drillKind, setDrillKind] = useState<FretDrillKind>(() => FRET_DRILLS.find((d) => d.id === linkParam('drill'))?.id ?? 'interval');
@@ -332,6 +339,18 @@ export function useAppController() {
     return out;
   }, [state.melody, order, realized, perBar]);
 
+  // the crab canon: the same line read from the end, on a sound of its own — over the looped slice when one is set
+  const loopBeats = order ? order.reduce((n, i) => n + realized[i].slot.bars * perBar, 0) : melodyCtx?.totalBeats ?? 0;
+  const crabLead: LeadNote[] = useMemo(() => {
+    if (!crabOn || !melodyCtx || !melodyLead.length) return [];
+    const spec = mirrorSpec(melodyCtx, state.melody, crabMode, loopBeats);
+    return mirrorLead(melodyLead, spec).map((n) => ({ ...n, vel: n.vel * 0.8, voice: CRAB_VOICE[state.instrument] }));
+  }, [crabOn, melodyCtx, melodyLead, state.melody, crabMode, loopBeats, state.instrument]);
+  const crabReport = useMemo(
+    () => (melodyCtx && state.melody.length ? analyzeCanon(state.melody, melodyCtx, crabMode) : undefined),
+    [melodyCtx, state.melody, crabMode],
+  );
+
   // the engine reads these at the top of every pass, so edits land without a restart
   // --- triad lab: three notes per chord, voice-led through the changes ---
   const triads = useMemo(() => buildTriadModel({
@@ -368,7 +387,7 @@ export function useAppController() {
   };
 
   const leadRef = useRef<LeadNote[] | null>(null);
-  leadRef.current = demoOn ? (triadsUp ? triadLead : baseSolo?.lick ?? null) : melodyLead;
+  leadRef.current = demoOn ? (triadsUp ? triadLead : baseSolo?.lick ?? null) : crabLead.length ? [...melodyLead, ...crabLead] : melodyLead;
   const demoRef = useRef(leadOn);
   demoRef.current = leadOn;
 
@@ -725,10 +744,12 @@ export function useAppController() {
       bars: r.slot.bars,
       rootPc: rootPcOf(r.chord),
     }));
+    // with the crab in, the lead track carries both readings of the line
+    const canon = crabOn && melodyCtx ? mirrorLead(toLead(state.melody), mirrorSpec(melodyCtx, state.melody, crabMode)) : [];
     const bytes = buildMidiFile(slots, {
       meter: song ? undefined : meter,
       modulate: song ? null : state.modulate,
-      lead: song ? song.lead : demoOn && !order ? baseSolo?.lick : melodyOn ? toLead(state.melody) : null,
+      lead: song ? song.lead : demoOn && !order ? baseSolo?.lick : melodyOn ? [...toLead(state.melody), ...canon] : null,
       name: `${state.templateName} — ${keyLabel(key)} (${genre.name})`,
       bpm: Math.max(40, Math.min(244, bpm)),
       swing: genre.swing ?? 0,
@@ -820,6 +841,7 @@ export function useAppController() {
       switch (e.key) {
         case 'Escape': setXfer(null); setFocusId(null); break;
         case 'l': setDemoOn((on) => !on); break;
+        case 'k': setCrabOn((on) => !on); break;
         case 'j': dispatch({ type: 'view', view: jam ? 'write' : 'jam' }); break;
         case 'b': setPractice((cur) => ({ ...cur, bass: !cur.bass })); break;
         case 'x': if (ab) stopPlayback(); else startAB(); break;
@@ -1051,6 +1073,22 @@ export function useAppController() {
     });
   };
 
+  // --- the crab canon: make the line agree with itself, or make the harmony a palindrome ---
+  const crabProofNow = () => {
+    if (!melodyCtx || !crabReport) return;
+    const fixed = crabProof(state.melody, melodyCtx, crabMode);
+    const moved = movedNotes(state.melody, fixed);
+    const after = analyzeCanon(fixed, melodyCtx, crabMode).score;
+    dispatch({
+      type: 'melody', notes: sortNotes(fixed),
+      log: entry('🩹', moved ? `Crab-proofed: ${moved} note${moved === 1 ? '' : 's'} moved` : 'Already crab-proof',
+        moved
+          ? `Each one now sits on a pitch that works over its own chord and over the chord its mirror lands on. The crab scores ${after} — it was ${crabReport.score}.`
+          : `Every unlocked note already works in both directions; the crab scores ${crabReport.score}. Unlock a note, or move one by hand, and try again.`),
+    });
+  };
+  const mirrorChords = () => dispatch({ type: 'mirror-slots' });
+
   // --- song: the sections in arrangement order, each in its own meter ---
   /** Every section in arrangement order: slots (each in its section's meter), who owns them, and the melodies end to end. */
   const flattenSong = () => {
@@ -1145,6 +1183,7 @@ export function useAppController() {
     if (goal.kind === 'coach' && melodyReport && melodyReport.noteCount >= goal.notes && melodyReport.landings.every((l) => l.hit)) completeLesson(lesson.id);
     if (goal.kind === 'quiz' && quizStreak >= goal.streak) completeLesson(lesson.id);
     if (goal.kind === 'fret' && lastSprint && lastSprint.kind === goal.drill && lastSprint.score >= goal.min) completeLesson(lesson.id);
+    if (goal.kind === 'crab' && crabReport && crabReport.score >= goal.min && crabReport.together >= 0.25) completeLesson(lesson.id);
   }); // eslint-disable-line react-hooks/exhaustive-deps
 
   // a drill needs a chord in focus to mean anything
@@ -1228,6 +1267,8 @@ export function useAppController() {
     melodyCtx, melodyReport, melodyOn, setMelodyOn, setMelody, grid, setGrid, recording, startRecording,
     stepEntry, setStepEntry, stepBeat, setStepBeat, addStepNote,
     playSong, songAt, nextOptions, addNextChord, harmonyFor, reharmonize, slotAtBeat, slotStarts,
+    // the crab canon
+    melodyLead, loopBeats, crabOn, setCrabOn, crabMode, setCrabMode, crabReport, crabLead, crabProofNow, mirrorChords,
     // listening
     inputSource, setInputSource, inputStatus, held, micLevel, grade, scores, progress,
     // learn

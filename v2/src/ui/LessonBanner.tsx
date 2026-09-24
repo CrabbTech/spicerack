@@ -4,7 +4,7 @@ import { useApp } from '../state/AppContext';
 import { PATHS } from '../data/lessons';
 
 export function LessonBanner() {
-  const { lesson, lessonDone, completeLesson, startLesson, setLessonId, dispatch, grade, lens, quizStreak, lastSprint } = useApp();
+  const { lesson, lessonDone, completeLesson, startLesson, setLessonId, dispatch, grade, lens, quizStreak, lastSprint, crabReport } = useApp();
   if (!lesson) return null;
   const path = PATHS.find((p) => p.steps.some((s) => s.id === lesson.id))!;
   const at = path.steps.findIndex((s) => s.id === lesson.id);
@@ -35,6 +35,13 @@ export function LessonBanner() {
           </div>
         )}
         {goal.kind === 'coach' && <div className="lesson-goal">done when the coach shows ✓ on every chord</div>}
+        {goal.kind === 'crab' && (
+          <div className="lesson-goal">
+            crab score <strong>{crabReport?.score ?? '—'}</strong> / {goal.min}
+            {crabReport && <> · voices overlap <strong>{Math.round(crabReport.together * 100)}%</strong> (need 25)</>}
+            <div className="practice-hint">the verdict is under the melody workbench</div>
+          </div>
+        )}
         {goal.kind === 'quiz' && <div className="lesson-goal">streak <strong>{quizStreak}</strong> / {goal.streak}</div>}
         <div className="panel-actions">
           {!done && <button className="btn" onClick={() => completeLesson(lesson.id)} title="no instrument handy? be honest">✓ I did it</button>}

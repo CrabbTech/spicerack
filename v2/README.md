@@ -20,9 +20,9 @@ scales for solos, as a full-neck fretboard map or lit-up OP-1 keys.
 - **Teaching palette**: every diatonic chord in the key, plus a "borrow shelf" of idiomatic out-of-key chords that explain themselves when used
 ### Three workspaces
 
-- **🎓 Learn** — six paths of short steps (*Fretboard grammar*, *Solo over four chords*, *Hear the borrowed chords*, *Write an eight-bar melody*, *Play the twelve-bar blues*, *Triads on three strings*). Each step stages the bench (genre, progression, drill, even the open transition) and sends you to the workspace where the doing happens. Steps the app can measure finish themselves: a graded play-along pass, the melody coach showing ✓ on every chord, or an ear-quiz streak. Also here: the **ear quiz** (a loop from your genre plays twice, one chord spiced — which one changed? the reveal is the spice's own explanation), drill records, and a practice streak
+- **🎓 Learn** — seven paths of short steps (*Fretboard grammar*, *Solo over four chords*, *Hear the borrowed chords*, *Write an eight-bar melody*, *Play the twelve-bar blues*, *Triads on three strings*, *Meet the crab*). Each step stages the bench (genre, progression, drill, even the open transition) and sends you to the workspace where the doing happens. Steps the app can measure finish themselves: a graded play-along pass, the melody coach showing ✓ on every chord, or an ear-quiz streak. Also here: the **ear quiz** (a loop from your genre plays twice, one chord spiced — which one changed? the reveal is the spice's own explanation), drill records, and a practice streak
 - **🎸 Jam** — instrument in hand. Cards shrink to a chord chart, the big diagram belongs to the **Solo Lab**, the **Triad Lab** or the **Neck Drills**, and the app **listens**
-- **✍️ Write** — key & genre, song sections, the chord bench with every harmonic tool, the melody workbench, and the reasons alongside
+- **✍️ Write** — key & genre, song sections, the chord bench with every harmonic tool, the melody workbench, the crab canon, and the reasons alongside
 
 ### Solo lab
 
@@ -63,6 +63,14 @@ Built for the player with a big vocabulary of shapes and licks and no grammar: t
 - **Reharmonize**: for the selected bar, other chords that would carry the same melody (simple / suspended / richer / borrowed) with a fit meter and how each melody note functions
 - Copy as **guitar tab** (fingered inside the chosen neck position) or an **OP-1 key chart**; the melody plays as the lead and exports to MIDI
 
+### Crab canon 🦀
+
+- Your melody, met by itself walking backwards — Bach's *canon cancrizans* (Musical Offering, 1747) over your own chords. **🦀 Let the crab in** (or `k`) and a second voice plays the written line from the end, on a sound of its own; **🪞 Table** also turns it upside down along the scale (the sheet as the player across the table sees it)
+- The line is drawn on a **Möbius strip** — one surface, one side — and while the loop runs two readers walk it: the playhead going round, the crab going the other way, reading the same notes from the end
+- The **verdict** scores how well the line agrees with itself: does the backwards voice land on friendly notes over the chords it now sits on, and where the two voices overlap, do they grind? Every miss is named the coach's way — "Bar 2: read backwards, the F♯ from bar 3 lands over Dm and is the note Dm bends out of shape. Try F in bar 3 — it works both ways" — under a Cancrizans / Walks nicely / Pinchy / Lost at sea rating
+- **🪞 Mirror the chords** turns the section into a palindrome (I–IV–V → I–IV–V–IV–I), so any note that fits going forward fits going back by construction. **🩹 Make it crab-proof** moves each unlocked note to the nearest pitch that works over its own chord, over the chord its mirror lands on, and against the other voice — locked notes stay, and it never hands back a worse score than it was given
+- The crab's voice rides along in the MIDI export, and Learn has a three-step **Meet the crab** path that finishes itself once the canon scores 85 with the voices overlapping
+
 ### Writing chords
 
 - **What next?** — continuations grouped by intention (settle / build tension / brighten / darken / surprise), each with a reason that names the actual notes
@@ -85,7 +93,7 @@ and the chord-shape library is interval-verified by the test suite.
 npm install
 npm run tauri dev      # development app window
 npm run tauri build    # release .app + .dmg (in src-tauri/target/release/bundle/)
-npm test               # ~200 theory/voicing/groove/input/practice tests
+npm test               # ~250 theory/voicing/groove/input/practice tests
 npm run dev            # UI only, in a browser
 ```
 
@@ -105,6 +113,7 @@ src/state/    reducer.ts   — the document: key, genre, sections (chords + melo
 src/theory/   notes, scales, chords, roman numerals, progressions, spices, compose
               solo.ts (note roles + drills) · lick.ts (demo licks) · transitions.ts
               melody.ts (motif moves + coach) · suggest.ts (next-chord intents, reharmonize)
+              crab.ts (the crab canon: mirror voice, verdict, crab-proof solver, palindrome chords)
               triads.ts (inversions on string sets / key windows + the voice-leading path solver)
 src/audio/    engine.ts (voices, buses, backing-band scheduler, transport clock)
               groove.ts (bar events shared by playback AND midi.ts) · midi.ts
@@ -115,7 +124,8 @@ src/guitar/   shapes, voicings, tab, positions.ts (connected boxes), caged.ts (f
               licks.ts (tab parser + licks stored as numbers)
 src/op1/ src/piano/ src/bass/   instrument layouts + chord fitting
 src/ui/       App.tsx (shell) · TopBar · views/{Learn,Jam,Write}View · SoloLab · MelodyRoll
-              MelodyWorkbench · ListenPanel · ProgressionPanel · TransitionPanel · …
+              MelodyWorkbench · CrabCanon + MobiusStrip (mobius.ts is the geometry) · ListenPanel
+              ProgressionPanel · TransitionPanel · …
 ```
 
 Rule of thumb: music logic is pure and tested (`src/theory`, `src/practice`, `src/input/pitch.ts`,

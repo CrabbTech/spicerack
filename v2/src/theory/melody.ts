@@ -99,7 +99,7 @@ function fold(ctx: MelodyContext, midi: number): number {
   return Math.min(ctx.hi, Math.max(ctx.lo, m));
 }
 
-const isStrong = (ctx: MelodyContext, beat: number): boolean => {
+export const isStrong = (ctx: MelodyContext, beat: number): boolean => {
   const inBarBeat = beat % ctx.beatsPerBar;
   return Math.abs(inBarBeat - Math.round(inBarBeat)) < 1e-6 && Math.round(inBarBeat) % 2 === 0;
 };

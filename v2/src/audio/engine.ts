@@ -506,7 +506,8 @@ class AudioEngine {
         const at = passStart + (opts.meter ? n.beat : swung(n.beat, swing)) * beat;
         if (at >= cursor - 1e-6) continue;
         const midi = n.midi + transpose;
-        this.voice(midi, at, n.dur * beat, n.vel, opts.instrument, 'lead');
+        this.voice(midi, at, n.dur * beat, n.vel, n.voice ?? opts.instrument, 'lead');
+        if (n.voice) continue; // a second voice is heard, not followed: the cursor stays with the line itself
         this.after(at, () => opts.onLead?.(midi));
         this.after(at + n.dur * beat, () => opts.onLead?.(null));
       }

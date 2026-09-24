@@ -1062,3 +1062,39 @@ text.mr-chord { font-weight: 800; font-size: 12.5px; fill: currentColor; }
 .lick-row { display: flex; align-items: center; gap: 8px; }
 .lick-info { flex: 1; min-width: 0; font-size: 13px; }
 .lick-numbers { font-family: var(--mono); font-size: 12.5px; color: var(--dominant); margin-left: 6px; }
+
+/* ---------- crab canon ---------- */
+
+.crab-body {
+  display: grid;
+  grid-template-columns: minmax(280px, 1.15fr) minmax(260px, 1fr);
+  gap: calc(14px * var(--sp));
+  align-items: start;
+}
+@media (max-width: 900px) { .crab-body { grid-template-columns: 1fr; } }
+.mobius {
+  width: 100%; height: auto; display: block;
+  background: var(--panel-2);
+  border: 1px solid var(--line);
+  border-radius: calc(var(--radius) * 0.8);
+}
+.mobius-face { stroke-width: .6; stroke-linejoin: round; }
+.mobius-front { fill: var(--accent); stroke: var(--accent); }
+.mobius-back { fill: var(--tonic); stroke: var(--tonic); }
+.mobius-tick { stroke: var(--bg); stroke-width: 1.2; opacity: .55; }
+.mobius-seam { stroke: var(--text); stroke-width: 1.6; opacity: .8; }
+.mobius-dot { fill: var(--text); stroke: var(--bg); stroke-width: 1; }
+.mobius-dot-hot { fill: var(--dominant); }
+.mobius-dot-read { fill: var(--subdominant); }
+.mobius-dot-ghost { fill: var(--borrowed); opacity: .6; }
+.mobius-play { fill: none; stroke: var(--dominant); stroke-width: 2; filter: drop-shadow(0 0 4px var(--dominant)); }
+.mobius-crab { pointer-events: none; }
+.crab-verdict { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.crab-score { display: flex; align-items: center; gap: 10px; }
+.crab-icon { font-size: 26px; letter-spacing: -6px; }
+.crab-grade { font-weight: 700; font-size: 15px; }
+.crab-number { font-family: var(--mono); color: var(--accent); margin-left: 6px; }
+.crab-meter { display: block; width: 100%; height: 5px; border-radius: 3px; background: var(--line); overflow: hidden; }
+.crab-meter i { display: block; height: 100%; background: var(--accent); border-radius: 3px; transition: width .25s; }
+.crab-stats { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; font-family: var(--mono); font-size: 11px; color: var(--dim); }
+.crab-stats strong { color: var(--text); }

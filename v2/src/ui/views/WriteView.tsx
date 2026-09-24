@@ -7,6 +7,7 @@ import { MODE_NAMES, TONIC_CHOICES } from '../../theory/scales';
 import { ProgressionPanel } from '../ProgressionPanel';
 import { SectionBar } from '../SectionBar';
 import { MelodyWorkbench } from '../MelodyWorkbench';
+import { CrabCanon } from '../CrabCanon';
 import { LogPanel, NextChordPanel, PalettePanel } from '../SidePanels';
 import { SoloPanel } from '../SoloPanel';
 
@@ -66,6 +67,7 @@ export function WriteView() {
           <SectionBar />
           <ProgressionPanel editing />
           <MelodyWorkbench />
+          <CrabCanon />
           <SoloPanel compact />
         </div>
         <div className="col-right">

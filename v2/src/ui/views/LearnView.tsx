@@ -98,7 +98,7 @@ export function LearnView() {
                       <span className="step-mark">{lessonDone(step.id) ? '✓' : step === upNext ? '▶' : '○'}</span>
                       <span className="step-title">{step.title}</span>
                       <span className="step-goal">
-                        {step.goal.kind === 'score' ? `🎤 ${step.goal.min}+` : step.goal.kind === 'fret' ? `🧠 ${step.goal.min}+` : step.goal.kind === 'coach' ? '🧑‍🏫 coach' : step.goal.kind === 'quiz' ? '👂 quiz' : '☑ check'}
+                        {step.goal.kind === 'score' ? `🎤 ${step.goal.min}+` : step.goal.kind === 'fret' ? `🧠 ${step.goal.min}+` : step.goal.kind === 'crab' ? `🦀 ${step.goal.min}+` : step.goal.kind === 'coach' ? '🧑‍🏫 coach' : step.goal.kind === 'quiz' ? '👂 quiz' : '☑ check'}
                       </span>
                     </button>
                   </li>

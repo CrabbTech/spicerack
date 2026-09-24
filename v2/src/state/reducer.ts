@@ -11,6 +11,7 @@ import { resolveNumeral } from '../theory/roman';
 import { RealizedSlot, Slot, newSlot } from '../theory/progression';
 import { ProgressionPatch, SPICES, SpiceId } from '../theory/spices';
 import { ComposedResult } from '../theory/compose';
+import { mirrorSlots, slotsArePalindrome } from '../theory/crab';
 import { GENRES, GENRE_LIST, Genre, GenreId, ProgressionTemplate, pickTemplate } from '../data/genres';
 import { loadCustomGenres, materializeGenre } from '../data/customGenres';
 import { InstrumentId } from '../audio/engine';
@@ -182,7 +183,9 @@ export type Action =
   | { type: 'bpm'; bpm: number | null }
   | { type: 'load-save'; item: SavedProgression; genre: Genre }
   | { type: 'set-numeral'; slotId: number; numeral: string; log?: LogEntry }
-  | { type: 'melody'; notes: MelNote[]; undoable?: boolean }
+  | { type: 'melody'; notes: MelNote[]; undoable?: boolean; log?: LogEntry }
+  /** the crab canon's palindrome: the progression comes back the way it went */
+  | { type: 'mirror-slots' }
   | { type: 'stage'; genre: Genre; mode: ModeId; template?: ProgressionTemplate; view: ViewId; scale?: number }
   | { type: 'view'; view: ViewId }
   | { type: 'section-add'; copy: boolean; genre: Genre }
@@ -441,7 +444,22 @@ export function reducer(state: AppState, action: Action): AppState {
         log: action.log ? [action.log, ...state.log].slice(0, 40) : state.log,
       };
     case 'melody':
-      return { ...state, melody: action.notes, history: action.undoable === false ? state.history : pushHistory(state) };
+      return {
+        ...state, melody: action.notes, history: action.undoable === false ? state.history : pushHistory(state),
+        log: action.log ? [action.log, ...state.log].slice(0, 40) : state.log,
+      };
+    case 'mirror-slots': {
+      if (slotsArePalindrome(state.slots)) return state;
+      const slots = mirrorSlots(state.slots);
+      const key: Key = { tonic: TONIC_CHOICES[state.tonicIdx], mode: state.mode };
+      const symbols = (list: Slot[]) => list.map((s) => chordSymbol(resolveNumeral(s.numeral, key))).join(' — ');
+      return {
+        ...state, slots,
+        history: pushHistory(state), voicingSel: {},
+        templateName: state.templateName.endsWith(' (mirrored)') ? state.templateName : `${state.templateName} (mirrored)`,
+        log: [entry('🪞', 'Mirrored the chords', `${symbols(state.slots)} → ${symbols(slots)}. The harmony now reads the same from either end, so a line that fits going forward fits going back — the ground every crab canon stands on. Your melody stays in the first half; write into the second and the two voices meet.`, 'spice'), ...state.log].slice(0, 40),
+      };
+    }
     case 'view':
       return { ...state, view: action.view };
     case 'stage': {

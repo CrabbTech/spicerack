@@ -6,12 +6,16 @@
 import { PitchClass, mod12 } from './notes';
 import { LensId, SoloMap } from './solo';
 
+export type LeadVoice = 'guitar' | 'bass' | 'piano' | 'op1';
+
 export interface LeadNote {
   /** beats from the top of the loop */
   beat: number;
   dur: number;
   midi: number;
   vel: number;
+  /** a second voice inside the lead line (the crab canon's mirror) plays on its own sound */
+  voice?: LeadVoice;
 }
 
 export interface LickSegment {

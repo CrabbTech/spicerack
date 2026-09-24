@@ -17,6 +17,8 @@ export type LessonGoal =
   | { kind: 'quiz'; streak: number }
   /** finish a ten-card fretboard sprint of this drill with at least this score */
   | { kind: 'fret'; drill: FretDrillKind; min: number }
+  /** the crab canon scores at least `min`, with the two voices overlapping for a quarter of the loop */
+  | { kind: 'crab'; min: number }
   /** nothing the app can measure — the player ticks it off */
   | { kind: 'check' };
 
@@ -340,6 +342,33 @@ export const PATHS: LearningPath[] = [
         task: 'Switch on "3-5-7" and read the names that appear on each card. Play those triads over the loop and hear the sevenths without ever fretting a seventh chord.',
         setup: { view: 'jam', genre: 'neo-soul', prog: { name: 'Seventh heaven', numerals: ['ii7', 'V7', 'Imaj7', 'vi7'] }, mode: 'major', triads: { mode: 'close', upper: true, comp: true } },
         goal: { kind: 'check' },
+      },
+    ],
+  },
+  {
+    id: 'crab', icon: '🦀', name: 'Meet the crab',
+    blurb: 'Bach\'s trick from 1747: one line of music that accompanies itself when a second player reads it from the end. Three steps from "what?" to a canon that scores.',
+    steps: [
+      {
+        id: 'crab.hear', title: 'A line that walks backwards',
+        teach: 'The crab canon is a single melody played forwards and, at the same time, from the end — crabs walk sideways, the line walks backwards. For it to work, every note has to do two jobs: fit its own chord, and fit the chord its mirror image lands on. Most melodies fail the second job spectacularly, which is the fun part.',
+        task: 'Seed a melody in the workbench (🌱), press 🦀 Let the crab in, and play. Watch the crab walk the Möbius strip the other way, then read the verdict: it names every place the backwards voice steps on something.',
+        setup: { view: 'write', genre: 'pop', mode: 'major', prog: { name: 'Four chords', numerals: ['I', 'vi', 'IV', 'V'] } },
+        goal: { kind: 'check' },
+      },
+      {
+        id: 'crab.mirror', title: 'Harmony that reads both ways',
+        teach: 'Read backwards, bar 1 lands over bar 4\'s chord — unless the progression is a palindrome. I–vi–IV–vi–I meets itself in the middle, so any note that fit going forward fits going back, by construction. Bach\'s crab canon leans on almost exactly this: its harmony is nearly symmetrical.',
+        task: 'Press 🪞 Mirror the chords. The section doubles, reading the same from either end. Play it — your line, then the crab answering it. Then write into the second half so the two voices overlap.',
+        setup: { view: 'write' },
+        goal: { kind: 'check' },
+      },
+      {
+        id: 'crab.proof', title: 'Agree with yourself',
+        teach: 'Where the voices overlap they can grind: a half step, a tritone, a 7th on a strong beat. 🩹 Make it crab-proof moves each unlocked note to the nearest pitch that works over both chords and against the other voice — the fix a canon writer makes by hand, one note at a time. Lock any note you refuse to give up and the solver works around it.',
+        task: 'Work the verdict\'s notes and crab-proof the line until the crab scores 85 with the voices overlapping for at least a quarter of the loop.',
+        setup: { view: 'write' },
+        goal: { kind: 'crab', min: 85 },
       },
     ],
   },
