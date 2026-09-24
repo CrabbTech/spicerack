@@ -170,7 +170,7 @@ export function FretDrills() {
   if (!strings) {
     return (
       <section className="panel scale-panel">
-        <div className="panel-head"><div><h2>Neck drills</h2><div className="panel-sub">fretboard fluency, in ten-card sprints</div></div></div>
+        <div className="panel-head"><div><h2>Neck drills</h2></div></div>
         <div className="listen-idle">
           These drills live on a fretboard.{' '}
           <button className="chip" onClick={() => dispatch({ type: 'instrument', id: 'guitar' })}>Switch to guitar</button>{' '}
@@ -185,28 +185,27 @@ export function FretDrills() {
       <div className="panel-head">
         <div>
           <h2>Neck drills</h2>
-          <div className="panel-sub">you know the shapes — these make the <em>relationships</em> automatic. Ten cards, against the clock; misses come back until they stop being misses.</div>
         </div>
         <div className="panel-actions">
           {best !== undefined && <span className="quiz-streak">best <strong>{best}</strong></span>}
-          <button className="btn btn-spice" onClick={start}>{card || done ? '↻ Restart sprint' : '▶ Start sprint'}</button>
+          <button className="btn btn-spice" onClick={start}>{card || done ? 'Restart sprint' : 'Start sprint'}</button>
         </div>
       </div>
 
       <div className="triad-controls">
         {FRET_DRILLS.map((d) => (
           <button key={d.id} className={`chip ${d.id === drillKind ? 'chip-on' : ''}`} title={d.blurb} onClick={() => setDrillKind(d.id)}>
-            {d.icon} {d.name}{progress.fretBest[d.id] !== undefined ? ` · ${progress.fretBest[d.id]}` : ''}
+            {d.name}{progress.fretBest[d.id] !== undefined ? ` · ${progress.fretBest[d.id]}` : ''}
           </button>
         ))}
       </div>
 
       {!card && !done && (
         <div className="drill-intro">
-          <strong>{drill.icon} {drill.name}.</strong> {drill.blurb}
+          <strong>{drill.name}.</strong> {drill.blurb}
           <div className="practice-hint">
-            Click the fretboard{inputSource === 'off' ? ' — or pick a source in Listen and answer on your guitar' : `, or play the answer (${inputSource})`}.
-            {trouble.length > 0 && <> Still sticky for you: <strong>{trouble.join(' · ')}</strong> — expect more of those.</>}
+            Click the fretboard{inputSource === 'off' ? ', or answer on your instrument through Listen' : `, or play the answer (${inputSource})`}.
+            {trouble.length > 0 && <> Still sticky: <strong>{trouble.join(' · ')}</strong>.</>}
           </div>
         </div>
       )}

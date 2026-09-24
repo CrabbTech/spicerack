@@ -134,11 +134,11 @@ export function keyboardTriads(spec: TriadSpec, baseMidi: number, keyCount: numb
 
 export type PathMode = 'close' | 'climb' | 'descend' | 'root';
 
-export const PATH_MODES: { id: PathMode; icon: string; name: string; blurb: string }[] = [
-  { id: 'close', icon: '🤏', name: 'Stay close', blurb: 'the smallest total movement — each voice goes to the nearest note of the next chord' },
-  { id: 'climb', icon: '↗', name: 'Climb', blurb: 'the top voice rises with every chord: comping that builds' },
-  { id: 'descend', icon: '↘', name: 'Descend', blurb: 'the top voice falls with every chord: comping that settles' },
-  { id: 'root', icon: '🧱', name: 'Root position', blurb: 'the same shape everywhere — what most people play, and the baseline to beat' },
+export const PATH_MODES: { id: PathMode; name: string; blurb: string }[] = [
+  { id: 'close', name: 'Stay close', blurb: 'the smallest total movement — each voice goes to the nearest note of the next chord' },
+  { id: 'climb', name: 'Climb', blurb: 'the top voice rises with every chord: comping that builds' },
+  { id: 'descend', name: 'Descend', blurb: 'the top voice falls with every chord: comping that settles' },
+  { id: 'root', name: 'Root position', blurb: 'the same shape everywhere — what most people play, and the baseline to beat' },
 ];
 
 /** Semitones the three voices travel between two voicings (on one string set: frets). */

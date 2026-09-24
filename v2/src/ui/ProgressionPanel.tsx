@@ -9,6 +9,8 @@ import { ChordCard } from './ChordCard';
 import { PracticeStrip } from './PracticeStrip';
 import { TransitionPanel } from './TransitionPanel';
 
+const HEAT = ['Mild', 'Medium', 'Hot'];
+
 export function ProgressionPanel({ editing }: { editing: boolean }) {
   const app = useApp();
   const {
@@ -30,47 +32,37 @@ export function ProgressionPanel({ editing }: { editing: boolean }) {
         </div>
         {editing && (
           <div className="panel-actions">
-            <button className="btn" onClick={() => app.setModal('compose')} title="generate a progression from harmonic function">✨ Compose</button>
-            <select
-              className="tpl-select"
-              title="pick a progression"
+            <button className="btn" onClick={() => app.setModal('compose')}>Compose</button>
+            <select className="tpl-select"
               value={templatesForMode.some((t) => t.name === state.templateName) ? state.templateName : ''}
               onChange={(e) => {
                 const t = templatesForMode.find((x) => x.name === e.target.value);
                 if (t) dispatch({ type: 'pick-template', template: t });
               }}>
-              <option value="" disabled>— pick a progression —</option>
+              <option value="" disabled>Progression…</option>
               {templatesForMode.map((t) => (
                 <option key={t.name} value={t.name}>
                   {t.name} · {t.numerals.slice(0, 6).join(' ')}{t.numerals.length > 6 ? '…' : ''}
                 </option>
               ))}
             </select>
-            <button className="btn" onClick={() => dispatch({ type: 'new-progression', genre })}>🎲 New</button>
-            <button className="btn btn-spice" onClick={app.spiceItUp}>🌶 Spice it up</button>
-            <div className="seg heat-seg" title="spice heat: mild / medium / heavy (heavy chains two moves)">
+            <button className="btn" onClick={() => dispatch({ type: 'new-progression', genre })}>New</button>
+            <button className="btn btn-spice" onClick={app.spiceItUp}>Spice it up</button>
+            <div className="seg heat-seg">
               {([1, 2, 3] as const).map((h) => (
-                <button key={h} className={state.heat === h ? 'seg-on' : ''} onClick={() => dispatch({ type: 'heat', heat: h })}>
-                  {'🌶'.repeat(h)}
-                </button>
+                <button key={h} className={state.heat === h ? 'seg-on' : ''} onClick={() => dispatch({ type: 'heat', heat: h })}>{HEAT[h - 1]}</button>
               ))}
             </div>
-            <button className="btn" onClick={() => dispatch({ type: 'undo' })}
-              disabled={state.history.length === 0} title="undo the last change — chords or melody (u)">↩ Undo</button>
-            <button className={`btn ${ab ? 'btn-on' : ''}`} onClick={ab ? app.stopPlayback : app.startAB}
-              disabled={state.history.length === 0}
-              title="before / after: loop the previous version, then this one, in the same groove (x)">
-              {ab ? '■ A/B' : '🔀 A/B'}
+            <button className="btn" onClick={() => dispatch({ type: 'undo' })} disabled={state.history.length === 0}>Undo</button>
+            <button className={`btn ${ab ? 'btn-on' : ''}`} onClick={ab ? app.stopPlayback : app.startAB} disabled={state.history.length === 0}>
+              {ab ? '■ A/B' : 'A/B'}
             </button>
-            <button className="btn" onClick={() => dispatch({ type: 'reset-spice' })}
-              disabled={state.slots === state.baseSlots && state.modulate === null}>↺ Reset</button>
-            {state.instrument === 'guitar' && <button className="btn" onClick={app.copyTab}>{copied === 'tab' ? '✓ Copied' : '📋 Copy tab'}</button>}
-            {state.instrument === 'bass' && <button className="btn" onClick={app.copyBassTab}>{copied === 'tab' ? '✓ Copied' : '📋 Copy tab'}</button>}
-            {(state.instrument === 'piano' || state.instrument === 'op1') && <button className="btn" onClick={app.copyChart}>{copied === 'chart' ? '✓ Copied' : '📋 Copy chart'}</button>}
-            <button className="btn" onClick={app.exportMidi} title={state.sections.length > 1 ? 'the whole song, in arrangement order' : 'chords, bass, drums and melody'}>
-              {copied === 'midi' ? '✓ Saved' : '🎹 MIDI'}
-            </button>
-            <button className="btn" onClick={app.saveToLibrary}>{copied === 'saved' ? '✓ Saved' : '💾 Save'}</button>
+            <button className="btn" onClick={() => dispatch({ type: 'reset-spice' })} disabled={state.slots === state.baseSlots && state.modulate === null}>Reset</button>
+            {state.instrument === 'guitar' && <button className="btn" onClick={app.copyTab}>{copied === 'tab' ? 'Copied' : 'Copy tab'}</button>}
+            {state.instrument === 'bass' && <button className="btn" onClick={app.copyBassTab}>{copied === 'tab' ? 'Copied' : 'Copy tab'}</button>}
+            {(state.instrument === 'piano' || state.instrument === 'op1') && <button className="btn" onClick={app.copyChart}>{copied === 'chart' ? 'Copied' : 'Copy chart'}</button>}
+            <button className="btn" onClick={app.exportMidi}>{copied === 'midi' ? 'Saved' : 'MIDI'}</button>
+            <button className="btn" onClick={app.saveToLibrary}>{copied === 'saved' ? 'Saved' : 'Save'}</button>
           </div>
         )}
       </div>
@@ -103,7 +95,6 @@ export function ProgressionPanel({ editing }: { editing: boolean }) {
             />
             {realized.length > 1 && (
               <button className={`xfer-btn ${xfer === i ? 'xfer-btn-on' : ''}`}
-                title={`what happens between ${chordSymbol(r.chord)} and ${chordSymbol(realized[(i + 1) % realized.length].chord)}?`}
                 onClick={() => { setXfer(xfer === i ? null : i); setXferTag(null); }}>
                 {i === realized.length - 1 ? '↻' : '→'}
               </button>
@@ -119,19 +110,17 @@ export function ProgressionPanel({ editing }: { editing: boolean }) {
         <div className="ab-banner">
           {(['A', 'B'] as const).map((side) => (
             <div key={side} className={`ab-row ${ab.side === side ? 'ab-live' : ''}`}>
-              <span className="ab-side">{side} · {side === 'A' ? 'before' : 'after'}</span>
+              <span className="ab-side">{side === 'A' ? 'before' : 'after'}</span>
               {(side === 'A' ? ab.before : ab.after).map((c, i) => (
                 <span key={i} className={`ab-chip ${c.changed ? 'ab-changed' : ''} ${ab.side === side && ab.idx === i ? 'ab-now' : ''}`}>{c.symbol}</span>
               ))}
             </div>
           ))}
-          <div className="ab-hint">Same groove, same tempo — only the highlighted chords differ. Listen for the moment the color changes.</div>
         </div>
       )}
       {modulatedPreview && (
         <div className={`modulation-banner ${transposeNow ? 'modulation-live' : ''}`}>
-          🚚 {transposeNow ? 'Gear change! Now up a whole step:' : 'Every other pass goes up a whole step:'} <strong>{modulatedPreview}</strong>
-          {transposeNow ? ' — the solo lab has moved up with it.' : ''}
+          {transposeNow ? 'Up a whole step: ' : 'Every other pass goes up a whole step: '}<strong>{modulatedPreview}</strong>
         </div>
       )}
     </section>

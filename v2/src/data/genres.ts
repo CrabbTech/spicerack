@@ -49,7 +49,7 @@ export interface DrumPattern {
 export interface Genre {
   id: string;
   name: string;
-  emoji: string;
+
   tagline: string;
   /** selectable modes; first is the default */
   modes: ModeId[];
@@ -84,7 +84,7 @@ const BACKBEAT: DrumPattern = { kick: [0, 2], snare: [1, 3], hat: HAT8 };
 
 export const GENRES: Record<GenreId, Genre> = {
   'classic-rock': {
-    id: 'classic-rock', name: 'Classic Rock', emoji: '🎸',
+    id: 'classic-rock', name: 'Classic Rock',
     tagline: 'Open chords, borrowed ♭VII, tube amp optional.',
     modes: ['major', 'dorian'],
     templates: [
@@ -119,7 +119,7 @@ export const GENRES: Record<GenreId, Genre> = {
   },
 
   'eighties-rock': {
-    id: 'eighties-rock', name: "80's Rock", emoji: '📼',
+    id: 'eighties-rock', name: "80's Rock",
     tagline: 'Big choruses, bigger hair, mandatory key change.',
     modes: ['minor', 'major'],
     templates: [
@@ -146,7 +146,7 @@ export const GENRES: Record<GenreId, Genre> = {
   },
 
   thrash: {
-    id: 'thrash', name: 'Thrash Metal', emoji: '⚡',
+    id: 'thrash', name: 'Thrash Metal',
     tagline: 'Power chords, palm mutes, Phrygian everything.',
     modes: ['minor', 'phrygian'],
     templates: [
@@ -173,7 +173,7 @@ export const GENRES: Record<GenreId, Genre> = {
   },
 
   prog: {
-    id: 'prog', name: 'Prog', emoji: '🌀',
+    id: 'prog', name: 'Prog',
     tagline: 'Odd meters, Lydian shimmer, chords with middle names.',
     modes: ['lydian', 'dorian', 'minor', 'mixolydian'],
     templates: [
@@ -221,7 +221,7 @@ export const GENRES: Record<GenreId, Genre> = {
   },
 
   lofi: {
-    id: 'lofi', name: 'Lofi Hip-Hop', emoji: '🌧',
+    id: 'lofi', name: 'Lofi Hip-Hop',
     tagline: 'Jazz chords on a rainy loop. Beats to spice chords to.',
     modes: ['major', 'minor'],
     templates: [
@@ -260,7 +260,7 @@ export const GENRES: Record<GenreId, Genre> = {
   },
 
   'neo-soul': {
-    id: 'neo-soul', name: 'Neo-Soul', emoji: '🍷',
+    id: 'neo-soul', name: 'Neo-Soul',
     tagline: 'Gospel hands, Dilla time, chords that smell like incense.',
     modes: ['major', 'dorian', 'minor'],
     templates: [
@@ -319,7 +319,7 @@ export const GENRES: Record<GenreId, Genre> = {
   },
 
   funk: {
-    id: 'funk', name: 'Funk', emoji: '🕺',
+    id: 'funk', name: 'Funk',
     tagline: 'One chord, sixteen ways to hit it.',
     modes: ['dorian', 'mixolydian'],
     templates: [
@@ -356,7 +356,7 @@ export const GENRES: Record<GenreId, Genre> = {
   },
 
   blues: {
-    id: 'blues', name: 'Blues', emoji: '🌙',
+    id: 'blues', name: 'Blues',
     tagline: 'Twelve bars, three chords, one lifetime.',
     modes: ['major', 'minor'],
     templates: [
@@ -398,7 +398,7 @@ export const GENRES: Record<GenreId, Genre> = {
   },
 
   'pop-punk': {
-    id: 'pop-punk', name: 'Pop Punk', emoji: '🛹',
+    id: 'pop-punk', name: 'Pop Punk',
     tagline: 'Four chords, downstrokes, feelings.',
     modes: ['major'],
     templates: [
@@ -422,7 +422,7 @@ export const GENRES: Record<GenreId, Genre> = {
   },
 
   shoegaze: {
-    id: 'shoegaze', name: 'Shoegaze', emoji: '🌫',
+    id: 'shoegaze', name: 'Shoegaze',
     tagline: 'Chords with the edges sanded off by reverb.',
     modes: ['major', 'minor'],
     templates: [
@@ -454,7 +454,7 @@ export const GENRES: Record<GenreId, Genre> = {
   },
 
   pop: {
-    id: 'pop', name: 'Pop', emoji: '🫧',
+    id: 'pop', name: 'Pop',
     tagline: 'Four chords and the chorus of the summer.',
     modes: ['major'],
     templates: [
@@ -479,7 +479,7 @@ export const GENRES: Record<GenreId, Genre> = {
   },
 
   grunge: {
-    id: 'grunge', name: 'Grunge', emoji: '🧥',
+    id: 'grunge', name: 'Grunge',
     tagline: 'Power chords that read poetry.',
     modes: ['minor', 'major'],
     templates: [
@@ -505,7 +505,7 @@ export const GENRES: Record<GenreId, Genre> = {
   },
 
   reggae: {
-    id: 'reggae', name: 'Reggae', emoji: '🌴',
+    id: 'reggae', name: 'Reggae',
     tagline: 'The chord lives on 2 and 4. The bass owns the rest.',
     modes: ['major', 'minor'],
     templates: [
@@ -530,7 +530,7 @@ export const GENRES: Record<GenreId, Genre> = {
   },
 
   country: {
-    id: 'country', name: 'Country', emoji: '🤠',
+    id: 'country', name: 'Country',
     tagline: 'Three chords and the truth, plus a V of V.',
     modes: ['major'],
     templates: [
@@ -555,7 +555,7 @@ export const GENRES: Record<GenreId, Genre> = {
   },
 
   synthwave: {
-    id: 'synthwave', name: 'Synthwave', emoji: '🏎',
+    id: 'synthwave', name: 'Synthwave',
     tagline: 'Minor chords at 100mph through a neon tunnel.',
     modes: ['minor', 'major'],
     templates: [
@@ -589,7 +589,7 @@ export const GENRES: Record<GenreId, Genre> = {
   },
 
   surf: {
-    id: 'surf', name: 'Surf', emoji: '🏄',
+    id: 'surf', name: 'Surf',
     tagline: 'Wet reverb, dry humor, double-picked everything.',
     modes: ['major', 'minor', 'phrygian'],
     templates: [
@@ -624,7 +624,7 @@ export const GENRES: Record<GenreId, Genre> = {
   },
 
   indie: {
-    id: 'indie', name: 'Indie', emoji: '🚲',
+    id: 'indie', name: 'Indie',
     tagline: 'Jangle, shrug, repeat.',
     modes: ['major', 'minor'],
     templates: [
@@ -654,7 +654,7 @@ export const GENRES: Record<GenreId, Genre> = {
   },
 
   vaporwave: {
-    id: 'vaporwave', name: 'Vaporwave', emoji: '🛒',
+    id: 'vaporwave', name: 'Vaporwave',
     tagline: 'Smooth-jazz luxury at 80% speed, behind glass.',
     modes: ['major', 'minor'],
     templates: [
@@ -687,7 +687,7 @@ export const GENRES: Record<GenreId, Genre> = {
   },
 
   claude: {
-    id: 'claude', name: 'Claude', emoji: '✳️',
+    id: 'claude', name: 'Claude',
     tagline: 'Warm, curious harmony that shows its work. (Debussy was also named Claude. Coincidence?)',
     modes: ['lydian', 'major', 'dorian'],
     templates: [

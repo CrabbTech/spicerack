@@ -1,5 +1,5 @@
 // WRITE: key and genre, the song's sections, the chord bench with every
-// harmonic tool, and the melody workbench — with the reasons alongside.
+// harmonic tool, the melody workbench and the crab canon — with the reasons alongside.
 
 import { useApp } from '../../state/AppContext';
 import { noteLabel } from '../../theory/notes';
@@ -16,42 +16,30 @@ export function KeyGenreControls() {
   return (
     <section className="controls">
       <div className="control-row">
-        <span className="control-label">KEY</span>
+        <span className="control-label">Key</span>
         <div className="key-picker">
           {TONIC_CHOICES.map((t, i) => (
-            <button key={i} className={i === state.tonicIdx ? 'key-on' : ''} onClick={() => dispatch({ type: 'tonic', idx: i })}>
-              {noteLabel(t)}
-            </button>
+            <button key={i} className={i === state.tonicIdx ? 'key-on' : ''} onClick={() => dispatch({ type: 'tonic', idx: i })}>{noteLabel(t)}</button>
           ))}
         </div>
         <div className="mode-picker">
           {genre.modes.map((m) => (
-            <button key={m} className={`chip ${m === state.mode ? 'chip-on' : ''}`} onClick={() => dispatch({ type: 'mode', mode: m, genre })}>
-              {MODE_NAMES[m]}
-            </button>
+            <button key={m} className={`chip ${m === state.mode ? 'chip-on' : ''}`} onClick={() => dispatch({ type: 'mode', mode: m, genre })}>{MODE_NAMES[m]}</button>
           ))}
         </div>
       </div>
       <div className="control-row">
-        <span className="control-label">GENRE</span>
+        <span className="control-label">Genre</span>
         <div className="genre-picker">
           {allGenres.map((g) => (
-            <button key={g.id} className={`chip genre-chip ${g.id === state.genreId ? 'chip-on' : ''}`}
-              onClick={() => dispatch({ type: 'genre', genre: g })} title={g.tagline}>
-              {g.emoji} {g.name}
+            <button key={g.id} className={`chip genre-chip ${g.id === state.genreId ? 'chip-on' : ''}`} onClick={() => dispatch({ type: 'genre', genre: g })} title={g.tagline}>
+              {g.name}
               {g.id.startsWith('custom-') && (
-                <span className="chip-edit" title="edit in Genre Lab"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setLabEditing(customGenres.find((c) => c.id === g.id));
-                    setModal('lab');
-                  }}> ✎</span>
+                <span className="chip-edit" onClick={(e) => { e.stopPropagation(); setLabEditing(customGenres.find((c) => c.id === g.id)); setModal('lab'); }}>edit</span>
               )}
             </button>
           ))}
-          <button className="chip chip-lab" onClick={() => { setLabEditing(undefined); setModal('lab'); }} title="cook up your own genre">
-            🧪 Genre Lab
-          </button>
+          <button className="chip chip-lab" onClick={() => { setLabEditing(undefined); setModal('lab'); }}>Genre lab</button>
         </div>
       </div>
     </section>

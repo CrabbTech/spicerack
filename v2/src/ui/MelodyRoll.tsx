@@ -197,7 +197,7 @@ export function MelodyRoll(p: MelodyRollProps) {
             onDoubleClick={(e) => { e.stopPropagation(); if (!n.locked) p.onChange(p.notes.filter((x) => x.id !== n.id)); }}>
             <rect x={xOf(n.beat) + 0.5} y={yOf(n.midi) + 1} width={Math.max(4, n.dur * beatW - 1.5)} height={ROW - 2} rx={3}
               className={`mn mn-${kindOf(ctx, n.beat, n.midi)}${n.id === p.selectedId ? ' mn-sel' : ''}${n.locked ? ' mn-locked' : ''}`} />
-            {n.locked && <text x={xOf(n.beat) + 3} y={yOf(n.midi) + ROW - 3.5} className="mn-lock">🔒</text>}
+            {n.locked && <text x={xOf(n.beat) + 3} y={yOf(n.midi) + ROW - 3.5} className="mn-lock">L</text>}
           </g>
         ))}
         {p.stepBeat != null && <line x1={xOf(p.stepBeat) + 1} x2={xOf(p.stepBeat) + 1} y1={HEAD - 16} y2={height} className="mr-stepcursor" />}

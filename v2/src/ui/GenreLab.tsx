@@ -18,8 +18,6 @@ export interface GenreLabProps {
 
 const MODES: ModeId[] = ['major', 'minor', 'dorian', 'phrygian', 'lydian', 'mixolydian'];
 
-const EMOJIS = ['🦀', '🎷', '🚀', '🌋', '🧊', '🐊', '🪩', '🌵', '👾', '🎻', '🛸', '🍄', '⛺', '🌊', '🔮'];
-
 interface TemplateLineResult {
   line: string;
   template?: ProgressionTemplate;
@@ -41,7 +39,7 @@ function parseTemplateLine(line: string): TemplateLineResult {
       resolveNumeral(n, { tonic: { letter: 'C', alter: 0 }, mode });
     }
     catch {
-      return { line, error: `can't read "${n}" — try things like I, vi, bVII, V7/vi, iiø7` };
+      return { line, error: `can't read "${n}" — try I, vi, bVII, V7/vi, iiø7` };
     }
   }
   return { line, template: { name: name || 'Untitled', mode, numerals, note } };
@@ -68,7 +66,6 @@ function surprise(): CustomGenreData {
   return {
     id: newCustomId(),
     name: `${SURPRISE_ADJ[Math.floor(Math.random() * SURPRISE_ADJ.length)]} ${SURPRISE_NOUN[Math.floor(Math.random() * SURPRISE_NOUN.length)]}`,
-    emoji: EMOJIS[Math.floor(Math.random() * EMOJIS.length)],
     baseId: base.id as GenreId,
     bpm: 70 + Math.floor(Math.random() * 110),
     powerChords: Math.random() < 0.25 ? 'plain' : undefined,
@@ -81,7 +78,6 @@ export function GenreLab({ editing, onSave, onDelete, onClose }: GenreLabProps) 
   const [data, setData] = useState<CustomGenreData>(editing ?? {
     id: newCustomId(),
     name: '',
-    emoji: '🦀',
     baseId: 'classic-rock',
     bpm: 120,
     templates: [],
@@ -107,51 +103,38 @@ export function GenreLab({ editing, onSave, onDelete, onClose }: GenreLabProps) 
     <div className="modal-backdrop" onClick={onClose}>
       <div className="modal modal-wide" onClick={(e) => e.stopPropagation()}>
         <div className="modal-head">
-          <h2>🧪 Genre Lab</h2>
-          <button className="btn" onClick={rollSurprise}>🎰 Surprise me</button>
-          <button className="btn" onClick={onClose}>✕ Close</button>
+          <h2>Genre lab</h2>
+          <button className="btn" onClick={rollSurprise}>Surprise me</button>
+          <button className="btn" onClick={onClose}>×</button>
         </div>
 
         <div className="setting-row">
           <span className="setting-label">Name</span>
-          <input className="text-input" value={data.name} placeholder="e.g. Desert Slowcore"
-            onChange={(e) => setData({ ...data, name: e.target.value })} />
-          <span className="setting-label">Badge</span>
-          <div className="chip-row">
-            {EMOJIS.map((e) => (
-              <button key={e} className={`chip chip-emoji ${data.emoji === e ? 'chip-on' : ''}`}
-                onClick={() => setData({ ...data, emoji: e })}>{e}</button>
-            ))}
-          </div>
-        </div>
-
-        <div className="setting-row">
+          <input className="text-input" value={data.name} placeholder="Desert Slowcore" onChange={(e) => setData({ ...data, name: e.target.value })} />
           <span className="setting-label">Grooves like</span>
           <select value={data.baseId} onChange={(e) => setData({ ...data, baseId: e.target.value as GenreId })}>
             {GENRE_LIST.map((g) => <option key={g.id} value={g.id}>{g.name}</option>)}
           </select>
           <span className="setting-label">BPM</span>
-          <input className="text-input bpm-input" type="number" min={40} max={244} value={data.bpm}
-            onChange={(e) => setData({ ...data, bpm: Number(e.target.value) || 120 })} />
+          <input className="text-input bpm-input" type="number" min={40} max={244} value={data.bpm} onChange={(e) => setData({ ...data, bpm: Number(e.target.value) || 120 })} />
           <span className="setting-label">Power chords</span>
           <div className="seg">
-            <button className={!data.powerChords ? 'seg-on' : ''} onClick={() => setData({ ...data, powerChords: undefined })}>OFF</button>
-            <button className={data.powerChords === 'plain' ? 'seg-on' : ''} onClick={() => setData({ ...data, powerChords: 'plain' })}>PLAIN</button>
-            <button className={data.powerChords === 'all' ? 'seg-on' : ''} onClick={() => setData({ ...data, powerChords: 'all' })}>ALL</button>
+            <button className={!data.powerChords ? 'seg-on' : ''} onClick={() => setData({ ...data, powerChords: undefined })}>Off</button>
+            <button className={data.powerChords === 'plain' ? 'seg-on' : ''} onClick={() => setData({ ...data, powerChords: 'plain' })}>Plain</button>
+            <button className={data.powerChords === 'all' ? 'seg-on' : ''} onClick={() => setData({ ...data, powerChords: 'all' })}>All</button>
           </div>
         </div>
 
         <div className="lab-templates">
-          <div className="setting-label">Progressions — one per line: <code>Name | mode | I vi IV V | note</code></div>
-          <textarea value={templateText} spellCheck={false} rows={6}
-            onChange={(e) => setTemplateText(e.target.value)} />
+          <div className="setting-label">Progressions, one per line: <code>Name | mode | I vi IV V | note</code></div>
+          <textarea value={templateText} spellCheck={false} rows={6} onChange={(e) => setTemplateText(e.target.value)} />
           {errors.length > 0 && (
             <div className="lab-errors">
-              {errors.slice(0, 3).map((l, i) => <div key={i}>⚠️ “{l.line.trim().slice(0, 40)}…”: {l.error}</div>)}
+              {errors.slice(0, 3).map((l, i) => <div key={i}>“{l.line.trim().slice(0, 40)}…”: {l.error}</div>)}
             </div>
           )}
           {!errors.length && templates.length > 0 && (
-            <div className="lab-ok">✓ {templates.length} progression{templates.length > 1 ? 's' : ''} ready · modes: {[...new Set(templates.map((t) => t.mode))].join(', ')}</div>
+            <div className="lab-ok">{templates.length} progression{templates.length > 1 ? 's' : ''} · {[...new Set(templates.map((t) => t.mode))].join(', ')}</div>
           )}
         </div>
 
@@ -159,22 +142,16 @@ export function GenreLab({ editing, onSave, onDelete, onClose }: GenreLabProps) 
           <div className="setting-label">Spice rack</div>
           <div className="chip-row">
             {ALL_SPICES.map((id) => (
-              <button key={id} className={`chip ${data.spices.includes(id) ? 'chip-on' : ''}`}
-                title={SPICES[id].blurb} onClick={() => toggleSpice(id)}>
-                {SPICES[id].icon} {SPICES[id].name}
+              <button key={id} className={`chip ${data.spices.includes(id) ? 'chip-on' : ''}`} title={SPICES[id].blurb} onClick={() => toggleSpice(id)}>
+                {SPICES[id].name}
               </button>
             ))}
           </div>
         </div>
 
         <div className="modal-foot">
-          {editing && onDelete && (
-            <button className="btn btn-danger" onClick={() => { onDelete(editing.id); onClose(); }}>🗑 Delete genre</button>
-          )}
-          <button className="btn btn-spice" disabled={!canSave}
-            onClick={() => { onSave({ ...data, templates }); onClose(); }}>
-            ✓ Save genre
-          </button>
+          {editing && onDelete && <button className="btn btn-danger" onClick={() => { onDelete(editing.id); onClose(); }}>Delete genre</button>}
+          <button className="btn btn-spice" disabled={!canSave} onClick={() => { onSave({ ...data, templates }); onClose(); }}>Save genre</button>
         </div>
       </div>
     </div>

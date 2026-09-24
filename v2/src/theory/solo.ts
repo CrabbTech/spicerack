@@ -225,7 +225,6 @@ export type LensId = 'map' | 'roots' | 'rhythm' | 'thirds' | 'arps' | 'guide' | 
 
 export interface Lens {
   id: LensId;
-  icon: string;
   name: string;
   /** rung on the ladder; 0 = the unconstrained map */
   level: number;
@@ -233,13 +232,13 @@ export interface Lens {
 }
 
 export const LENSES: Lens[] = [
-  { id: 'map', icon: '🗺', name: 'Full map', level: 0, goal: 'Everything at once: land on the bright notes, travel through the rest, and leave some air between phrases.' },
-  { id: 'roots', icon: '🎯', name: 'Roots only', level: 1, goal: 'One note per chord: its root, right as the chord changes. Any rhythm you like. If you can find every root in time, you can never get lost.' },
-  { id: 'rhythm', icon: '🥁', name: 'One note, all rhythm', level: 2, goal: 'A single note for the whole loop. With pitch off the table, the only thing left to play with is WHEN — push it, delay it, repeat it, leave holes.' },
-  { id: 'thirds', icon: '🥉', name: 'Land on the 3rd', level: 3, goal: 'Play whatever you want during the bar, but beat 1 of every chord is its 3rd (ringed). The 3rd is the note that tells the ear which chord just arrived.' },
-  { id: 'arps', icon: '🔺', name: 'Chord tones only', level: 4, goal: 'Only the notes of the chord that is sounding. It feels like a cage for a minute — then you notice the solo is spelling the harmony by itself.' },
-  { id: 'guide', icon: '🧭', name: 'Guide tones', level: 5, goal: 'Just 3rds and 7ths, held long, moving to the nearest one when the chord changes. The thinnest line that still carries the whole progression.' },
-  { id: 'three', icon: '🤏', name: 'Three-note answer', level: 6, goal: 'Call and response with only three notes. The demo plays a call in one bar and goes silent in the next — that silence is yours. Steal its rhythm, change its ending.' },
+  { id: 'map', name: 'Full map', level: 0, goal: 'Everything at once: land on the bright notes, travel through the rest, and leave some air between phrases.' },
+  { id: 'roots', name: 'Roots only', level: 1, goal: 'One note per chord: its root, right as the chord changes. Any rhythm you like. If you can find every root in time, you can never get lost.' },
+  { id: 'rhythm', name: 'One note, all rhythm', level: 2, goal: 'A single note for the whole loop. With pitch off the table, the only thing left to play with is WHEN — push it, delay it, repeat it, leave holes.' },
+  { id: 'thirds', name: 'Land on the 3rd', level: 3, goal: 'Play whatever you want during the bar, but beat 1 of every chord is its 3rd (ringed). The 3rd is the note that tells the ear which chord just arrived.' },
+  { id: 'arps', name: 'Chord tones only', level: 4, goal: 'Only the notes of the chord that is sounding. It feels like a cage for a minute — then you notice the solo is spelling the harmony by itself.' },
+  { id: 'guide', name: 'Guide tones', level: 5, goal: 'Just 3rds and 7ths, held long, moving to the nearest one when the chord changes. The thinnest line that still carries the whole progression.' },
+  { id: 'three', name: 'Three-note answer', level: 6, goal: 'Call and response with only three notes. The demo plays a call in one bar and goes silent in the next — that silence is yours. Steal its rhythm, change its ending.' },
 ];
 
 export interface LensView {

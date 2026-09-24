@@ -8,6 +8,7 @@ import { LeadNote } from '../theory/lick';
 import { CrabMode, MirrorSpec, mirrorPitch } from '../theory/crab';
 import { audio } from '../audio/engine';
 import { StripView, stripFacets, stripPoint } from './mobius';
+import { PixelCrabGlyph } from './PixelCrab';
 
 export interface MobiusStripProps {
   /** the written line, in loop beats */
@@ -106,14 +107,14 @@ export function MobiusStrip(p: MobiusStripProps) {
       {items.map((it, i) => {
         switch (it.kind) {
           case 'facet':
-            return <polygon key={i} points={it.points} className={`mobius-face ${it.front ? 'mobius-front' : 'mobius-back'}`} style={{ opacity: 0.3 + 0.6 * it.shade }} />;
+            return <polygon key={i} points={it.points} className={`mobius-face ${it.front ? 'mobius-front' : 'mobius-back'}`} style={{ opacity: 0.45 + 0.5 * it.shade }} />;
           case 'tick':
             return <line key={i} x1={it.x1} y1={it.y1} x2={it.x2} y2={it.y2} className={`mobius-tick${it.seam ? ' mobius-seam' : ''}`} />;
           case 'dot':
             return <circle key={i} cx={it.x} cy={it.y} r={it.r} className={it.cls} />;
           case 'cursor':
             return it.crab
-              ? <text key={i} x={it.x} y={it.y} className="mobius-crab" textAnchor="middle" dominantBaseline="central" style={{ fontSize: 18 * it.scale }}>🦀</text>
+              ? <PixelCrabGlyph key={i} x={it.x} y={it.y} width={26 * it.scale} />
               : <circle key={i} cx={it.x} cy={it.y} r={7 * it.scale} className="mobius-play" />;
         }
       })}

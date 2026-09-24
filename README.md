@@ -2,9 +2,10 @@
 
 Two desktop chord-progression workshops live here:
 
-- **`v2/` — Spicerack 2** ← the good one. Vaporwave crab logo, 15 genres + a
-  Genre Lab for building your own, 9 themes + a custom theme editor, drum
-  machine, MIDI export, progression library, keyboard shortcuts.
+- **`v2/` — Spicerack 2** ← the good one. A pixel crab, a field-manual look
+  (paper, ink, one orange), 19 genres + a Genre Lab for building your own,
+  drum machine, MIDI export, progression library, keyboard shortcuts, and a
+  crab canon.
 - **`v1/`** — the original: 9 genres, guitar + OP-1 Field modes, the spice
   system, scale maps, audio preview.
 

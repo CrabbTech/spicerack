@@ -191,26 +191,19 @@ export function SoloLab(p: SoloLabProps) {
       <div className="panel-head">
         <div>
           <h2>{p.compact ? 'On the instrument' : 'Solo lab'}</h2>
-          <div className="panel-sub">{p.compact ? 'where the melody lives under your fingers — it follows playback' : 'what to play over this progression — and when'}</div>
         </div>
         <div className="panel-actions">
-          <button className={`btn ${p.demoOn ? 'btn-on' : ''}`} onClick={p.onDemo} disabled={!solo}
-            title="play the loop with a demo lick for this exercise (l)">
-            {p.demoOn ? '■ Demo lick' : '▶ Demo lick'}
-          </button>
-          {p.demoOn && <button className="btn" onClick={p.onReroll} title="a different lick, same rules">🎲</button>}
+          <button className={`btn ${p.demoOn ? 'btn-on' : ''}`} onClick={p.onDemo} disabled={!solo}>{p.demoOn ? '■ Demo lick' : '▶ Demo lick'}</button>
+          {p.demoOn && <button className="btn" onClick={p.onReroll}>Another</button>}
           <button className="btn" onClick={p.onHearScale} disabled={!solo}>▶ Hear scale</button>
           {p.onLabelMode && (
-            <div className="seg" title="what the dots say: note names, or numbers counted from the chord that's sounding (R, ♭3, 5…) — the same fret changes number as the chords change, and that is the lesson">
+            <div className="seg">
               <button className={!numbers ? 'seg-on' : ''} onClick={() => p.onLabelMode!('names')}>ABC</button>
               <button className={numbers ? 'seg-on' : ''} onClick={() => p.onLabelMode!('numbers')}>123</button>
             </div>
           )}
-          <button className={`btn ${p.both ? 'btn-on' : ''}`} onClick={p.onBoth}
-            title="show the same notes on strings and keys at once">
-            🎸+🎹 Both
-          </button>
-          {p.onCopyTab && solo && <button className="btn" onClick={p.onCopyTab}>{p.copied ? '✓ Copied' : '📋 Copy tab'}</button>}
+          <button className={`btn ${p.both ? 'btn-on' : ''}`} onClick={p.onBoth}>Both</button>
+          {p.onCopyTab && solo && <button className="btn" onClick={p.onCopyTab}>{p.copied ? 'Copied' : 'Copy tab'}</button>}
         </div>
       </div>
 
@@ -231,17 +224,17 @@ export function SoloLab(p: SoloLabProps) {
           </div>}
 
           {!p.compact && <div className="lens-row">
-            <span className="control-label">DRILL</span>
+            <span className="control-label">Drill</span>
             {LENSES.map((l) => (
               <button key={l.id} className={`chip lens-chip ${l.id === p.lens ? 'chip-on' : ''}`} onClick={() => p.onLens(l.id)} title={l.goal}>
-                {l.level > 0 && <span className="lens-level">{l.level}</span>}{l.icon} {l.name}
+                {l.level > 0 && <span className="lens-level">{l.level}</span>}{l.name}
               </button>
             ))}
           </div>}
-          {!p.compact && lens.level > 0 && <div className="lens-goal"><strong>{lens.icon} {lens.name}.</strong> {lens.goal}</div>}
+          {!p.compact && lens.level > 0 && <div className="lens-goal"><strong>{lens.name}.</strong> {lens.goal}</div>}
 
           <div className="follow-row">
-            <span className="control-label">{p.playing ? 'NOW' : 'OVER'}</span>
+            <span className="control-label">{p.playing ? 'Now' : 'Over'}</span>
             {p.realized.map((r, i) => (
               <button key={r.slot.id} className={`chip follow-chip numeral-${r.chord.func} ${i === p.focusIdx ? 'follow-on' : ''}`}
                 onClick={() => p.onFocus(i === p.focusIdx && !p.playing ? null : i)}>
@@ -249,7 +242,7 @@ export function SoloLab(p: SoloLabProps) {
               </button>
             ))}
             {!p.playing && p.focusIdx !== null && (
-              <button className="chip" onClick={() => p.onFocus(null)} title="back to the plain scale">whole loop</button>
+              <button className="chip" onClick={() => p.onFocus(null)}>whole loop</button>
             )}
           </div>
 
@@ -281,27 +274,23 @@ export function SoloLab(p: SoloLabProps) {
             </div>
           ) : (
             <div className="solo-now solo-now-idle">
-              Press play — or pick a chord above — and the map re-colors itself for that chord: where home is, what rubs, and where to land next.
+              Press play, or pick a chord, and the map re-colours itself for it.
             </div>
           )}
 
           {p.positions && p.positions.length > 1 && p.onPosition && (
             <div className="position-row">
-              <span className="control-label">NECK</span>
+              <span className="control-label">Neck</span>
               {p.positions.map((pos, i) => (
-                <button key={i} className={`chip ${i === (p.position ?? 0) ? 'chip-on' : ''}`} onClick={() => p.onPosition!(i)}
-                  title={i === 0 ? 'the home box, on the low-string root' : 'the next connected position up the neck'}>
-                  {i === 0 ? '⌂ ' : ''}{pos.label}
-                </button>
+                <button key={i} className={`chip ${i === (p.position ?? 0) ? 'chip-on' : ''}`} onClick={() => p.onPosition!(i)}>{pos.label}</button>
               ))}
-              <span className="practice-hint">five boxes, one neck — the demo lick and drills follow the box you pick</span>
-              {p.onLefty && <button className={`chip ${p.lefty ? 'chip-on' : ''}`} onClick={p.onLefty} title="mirror the neck: nut on the right">🫲 Lefty</button>}
+              {p.onLefty && <button className={`chip ${p.lefty ? 'chip-on' : ''}`} onClick={p.onLefty}>Lefty</button>}
             </div>
           )}
 
           {p.instrument === 'guitar' && focusMap && solo.window && (
             <div className="caged-line">
-              🖐 {cagedText(focusMap.chord, cagedForm(notePc(focusMap.chord.root), solo.window), gripInPosition(focusMap.chord, solo.window))}
+              {cagedText(focusMap.chord, cagedForm(notePc(focusMap.chord.root), solo.window), gripInPosition(focusMap.chord, solo.window))}
             </div>
           )}
 
@@ -315,22 +304,20 @@ export function SoloLab(p: SoloLabProps) {
               {ROLE_LEGEND.filter((r) => legendKinds.has(r.kind)).map((r) => (
                 <span key={r.kind} className="legend-item" title={r.what}><i className={`legend-dot legend-${r.kind}`} />{r.name}</span>
               ))}
-              {view && view.targets.size < view.lit.size && <span className="legend-item" title="be here when the chord arrives"><i className="legend-dot legend-target" />land here</span>}
-              {focusMap.landing && <span className="legend-item" title="the next chord's 3rd — start heading for it"><i className="legend-dot legend-landing" />next landing</span>}
-              <span className="legend-hint">click any note to hear it</span>
+              {view && view.targets.size < view.lit.size && <span className="legend-item"><i className="legend-dot legend-target" />land here</span>}
+              {focusMap.landing && <span className="legend-item"><i className="legend-dot legend-landing" />next landing</span>}
             </div>
           ) : (
             <div className="scale-hint">
-              {(p.instrument === 'guitar' || p.instrument === 'bass') && 'solid dots = position box around the low-E root · faint dots = the rest of the neck'}
-              {p.instrument === 'piano' && `lit keys = the scale across two octaves (${pianoRangeLabel(p.octaveShift)}) · ring = root`}
-              {p.instrument === 'op1' && `lit keys = the scale across both octaves (${op1RangeLabel(p.octaveShift)}) · orange ring = root`}
-              {' · click any note to hear it'}
+              {(p.instrument === 'guitar' || p.instrument === 'bass') && 'solid dots: the position box · faint: the rest of the neck'}
+              {p.instrument === 'piano' && pianoRangeLabel(p.octaveShift)}
+              {p.instrument === 'op1' && op1RangeLabel(p.octaveShift)}
             </div>
           )}
 
           {(pinned || pinnedPlain) && (
             <div className="solo-pinned">
-              📍 {pinned
+              {pinned
                 ? <><strong>{pinned.label}</strong> is the {pinned.interval === '1' ? 'root' : pinned.interval} of {chordSymbol(focusMap!.chord)} — {ROLE_LEGEND.find((r) => r.kind === (pinned.inScale ? pinned.role : 'outside'))?.what}.</>
                 : <><strong>{pinnedPlain}</strong> — every copy of it is ringed. Pick a chord to see what it means there.</>}
             </div>
@@ -338,7 +325,7 @@ export function SoloLab(p: SoloLabProps) {
 
           {!p.compact && p.tips.length > 0 && (
             <div className="solo-tips">
-              {p.tips.map((t, i) => <div key={i} className="solo-tip">💡 {t}</div>)}
+              {p.tips.map((t, i) => <div key={i} className="solo-tip">{t}</div>)}
             </div>
           )}
         </>

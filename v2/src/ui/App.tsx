@@ -1,6 +1,6 @@
-// The shell: one controller, a persistent top bar, and three workspaces that
-// each have a clear centre — Learn (one lesson, one task), Jam (instrument in
-// hand, eyes on the diagram) and Write (chords, melody, song).
+// The shell: one controller, a persistent top bar, and three workspaces —
+// Learn (one lesson, one task), Jam (instrument in hand, eyes on the
+// diagram) and Write (chords, melody, song).
 
 import { useAppController } from '../state/controller';
 import { AppContext } from '../state/AppContext';
@@ -11,15 +11,14 @@ import { LessonBanner } from './LessonBanner';
 import { LearnView } from './views/LearnView';
 import { JamView } from './views/JamView';
 import { WriteView } from './views/WriteView';
-import { SettingsModal } from './SettingsModal';
 import { GenreLab } from './GenreLab';
 import { LibraryModal, saveLibrary } from './LibraryModal';
 import { ComposeModal } from './ComposeModal';
 
 const SHORTCUTS: Record<string, string> = {
-  learn: '⌨ space play · j jam · t themes',
-  jam: '⌨ space play · l demo lick · j back to write · d drums · b bass · m mute · 1-4 instrument · esc clear focus',
-  write: '⌨ space play · n new · c compose · s spice · u undo · x A/B · r reset · l demo lick · k crab · j jam · d drums · b bass · m mute · 1-4 instrument · t themes',
+  learn: 'space play · j jam',
+  jam: 'space play · l lick · j write · d drums · b bass · m mute · 1–4 instrument · esc clear',
+  write: 'space play · n new · c compose · s spice · u undo · x a/b · r reset · l lick · k crab · j jam · d drums · b bass · m mute · 1–4 instrument',
 };
 
 export default function App() {
@@ -36,12 +35,9 @@ export default function App() {
         {state.view === 'write' && <WriteView />}
 
         <footer className="footer">
-          <span>{SHORTCUTS[state.view]}{app.inputSource === 'qwerty' ? ' · (letter shortcuts on piano keys are paused while the keyboard is a piano)' : ''}</span>
+          <span>{SHORTCUTS[state.view]}{app.inputSource === 'qwerty' ? ' · letter shortcuts pause while the keyboard is a piano' : ''}</span>
         </footer>
 
-        {modal === 'settings' && (
-          <SettingsModal settings={app.settings} onChange={app.setSettings} onClose={() => setModal(null)} />
-        )}
         {modal === 'compose' && (
           <ComposeModal settings={app.composeSettings} onChange={app.setComposeSettings}
             onGenerate={app.composeNow} onClose={() => setModal(null)} />

@@ -24,7 +24,6 @@ import { Lick, STARTER_LICKS, lickFromBar, lickNumbers, loadLicks, parseTab, pla
 import { MelodyRoll } from './MelodyRoll';
 
 const FLAVOR_LABEL = { simple: 'simple', sus: 'suspended', rich: 'richer', borrowed: 'borrowed' } as const;
-const NOTE_ICON = { good: '✅', fix: '🛠', idea: '💡' } as const;
 
 export function MelodyWorkbench() {
   const app = useApp();
@@ -124,24 +123,20 @@ export function MelodyWorkbench() {
       <div className="panel-head">
         <div>
           <h2>Melody workbench</h2>
-          <div className="panel-sub">
-            rows are tinted by the chord underneath: bright = chord tone, purple = spice, dashed = rubs. Click to add, drag to move or stretch, double-click to delete.
-          </div>
         </div>
         <div className="panel-actions">
-          <button className={`btn ${recording ? 'btn-rec' : ''}`} onClick={recording ? stopPlayback : startRecording}
-            title={`count-in, then one pass is captured from ${inputSource === 'off' ? 'the computer keyboard (pick mic or MIDI in Jam → Listen)' : inputSource} and snapped to the grid`}>
-            {recording ? '■ Recording…' : '⏺ Record a pass'}
+          <button className={`btn ${recording ? 'btn-rec' : ''}`} onClick={recording ? stopPlayback : startRecording} title={`from ${inputSource === 'off' ? 'the computer keyboard' : inputSource}`}>
+            {recording ? '■ Recording' : 'Record a pass'}
           </button>
-          <div className="seg" title="grid: eighths or sixteenths">
-            <button className={grid === 0.5 ? 'seg-on' : ''} onClick={() => setGrid(0.5)}>♪ 8ths</button>
-            <button className={grid === 0.25 ? 'seg-on' : ''} onClick={() => setGrid(0.25)}>♬ 16ths</button>
+          <div className="seg">
+            <button className={grid === 0.5 ? 'seg-on' : ''} onClick={() => setGrid(0.5)}>8ths</button>
+            <button className={grid === 0.25 ? 'seg-on' : ''} onClick={() => setGrid(0.25)}>16ths</button>
           </div>
-          <button className="btn" onClick={seed} title="fill the roll with a generated lick — then delete down to the bar you like">🌱 Seed from lick</button>
+          <button className="btn" onClick={seed}>Seed from lick</button>
           <button className="btn" onClick={copyOut} disabled={!notes.length}>
-            {copied === 'melody' ? '✓ Copied' : state.instrument === 'guitar' || state.instrument === 'bass' ? '📋 Copy as tab' : '📋 Copy key chart'}
+            {copied === 'melody' ? 'Copied' : state.instrument === 'guitar' || state.instrument === 'bass' ? 'Copy as tab' : 'Copy key chart'}
           </button>
-          <button className="btn" onClick={() => setMelody(notes.filter((n) => n.locked))} disabled={!notes.length}>🧹 Clear</button>
+          <button className="btn" onClick={() => setMelody(notes.filter((n) => n.locked))} disabled={!notes.length}>Clear</button>
         </div>
       </div>
 
@@ -153,26 +148,25 @@ export function MelodyWorkbench() {
         onAudition={(midi) => audio.note(midi, state.instrument, 0.5)} />
 
       {onStrings && notes.length > 0 && (
-        <div className="tab-strip" title="fingered inside the neck position chosen in the panel below; the bottom line is each note's number against the chord under it">
+        <div className="tab-strip">
           <pre>{tabOf('').split('\n').slice(1).join('\n')}</pre>
         </div>
       )}
 
       <div className="motif-row">
-        <span className="control-label">LICK</span>
-        <button className={`chip ${stepEntry ? 'chip-on' : ''}`} onClick={() => setStepEntry(!stepEntry)}
-          title="click notes on the instrument diagram below and they land at the dashed cursor, one grid step each · ←/→ move the cursor · Backspace takes one back">
-          ✏️ Step entry{stepEntry ? ' — click the diagram below' : ''}
+        <span className="control-label">Lick</span>
+        <button className={`chip ${stepEntry ? 'chip-on' : ''}`} onClick={() => setStepEntry(!stepEntry)} title="click the diagram below · ←/→ move · Backspace takes one back">
+          Step entry
         </button>
-        {stepEntry && <button className="chip" onClick={() => setStepBeat((stepBeat + grid) % ctx.totalBeats)} title="leave this step empty">rest ➡</button>}
-        {onStrings && <button className={`chip ${pasting ? 'chip-on' : ''}`} onClick={() => setPasting(!pasting)} title="paste ASCII tab of a lick you already play">📋 Paste tab</button>}
+        {stepEntry && <button className="chip" onClick={() => setStepBeat((stepBeat + grid) % ctx.totalBeats)}>rest →</button>}
+        {onStrings && <button className={`chip ${pasting ? 'chip-on' : ''}`} onClick={() => setPasting(!pasting)}>Paste tab</button>}
         {onStrings && notes.some((n) => n.string !== undefined) && (
-          <div className="seg" title="the tab below: fingered where you entered it, or re-fingered inside the neck position chosen in the panel underneath — the same lick, somewhere else on the neck">
-            <button className={asPlayed ? 'seg-on' : ''} onClick={() => setAsPlayed(true)}>🖐 as played</button>
-            <button className={!asPlayed ? 'seg-on' : ''} onClick={() => setAsPlayed(false)}>📦 in position</button>
+          <div className="seg">
+            <button className={asPlayed ? 'seg-on' : ''} onClick={() => setAsPlayed(true)}>as played</button>
+            <button className={!asPlayed ? 'seg-on' : ''} onClick={() => setAsPlayed(false)}>in position</button>
           </div>
         )}
-        <button className={`chip ${lickShelf ? 'chip-on' : ''}`} onClick={() => setLickShelf(!lickShelf)} title="licks stored as numbers against a chord — drop one onto any bar, in any key">📚 Lick shelf</button>
+        <button className={`chip ${lickShelf ? 'chip-on' : ''}`} onClick={() => setLickShelf(!lickShelf)}>Lick shelf</button>
         {note && <span className="practice-hint">{note}</span>}
       </div>
 
@@ -181,7 +175,7 @@ export function MelodyWorkbench() {
           <textarea rows={7} spellCheck={false} value={tabText} onChange={(e) => setTabText(e.target.value)}
             placeholder={'e|-----------5-8-5--------|\nB|---------5-------8-5----|\nG|-----5h7-------------7--|\nD|---7--------------------|\nA|------------------------|\nE|------------------------|'} />
           <div className="paste-side">
-            <p>Tab carries the notes and their order, not the rhythm — each column becomes one {grid === 0.5 ? 'eighth' : 'sixteenth'}, starting at {bar === null ? 'the top' : `bar ${bar + 1}`}. Fix the timing on the roll afterwards; hammer-ons, slides and bends are read as plain notes.</p>
+            <p>Each column becomes one {grid === 0.5 ? 'eighth' : 'sixteenth'}, starting at {bar === null ? 'the top' : `bar ${bar + 1}`}. Hammer-ons, slides and bends read as plain notes.</p>
             <button className="btn btn-spice" disabled={!tabText.trim()} onClick={() => {
               const low = state.instrument === 'bass';
               const events = parseTab(tabText, low ? 4 : 6);
@@ -190,7 +184,7 @@ export function MelodyWorkbench() {
               const read = tabToNotes(events, low ? BASS_OPEN_MIDI : OPEN_MIDI, grid, start, ctx.totalBeats);
               const taken = new Set(read.notes.map((n) => n.beat));
               setMelody([...notes.filter((n) => n.locked || !taken.has(n.beat)), ...read.notes]);
-              setNote(`Read ${read.notes.length} notes${read.dropped ? ` — ${read.dropped} more ran past the end of the section` : ''}. The line under the tab is each note's number against its chord.`);
+              setNote(`Read ${read.notes.length} notes${read.dropped ? ` — ${read.dropped} more ran past the end of the section` : ''}.`);
               setPasting(false);
               setAsPlayed(true);
             }}>Read it in</button>
@@ -211,8 +205,7 @@ export function MelodyWorkbench() {
               setLicks(nextLicks);
               saveLicks(nextLicks);
               setLickName('');
-            }}>⭐ Save as numbers</button>
-            <span className="practice-hint">a saved lick forgets its key and its frets — it keeps its rhythm and its numbers, so it fits any chord</span>
+            }}>Save as numbers</button>
           </div>
           {[...licks, ...STARTER_LICKS].map((lick) => (
             <div key={lick.id} className="lick-row">
@@ -220,7 +213,7 @@ export function MelodyWorkbench() {
                 <strong>{lick.name}</strong> <span className="lick-numbers">{lickNumbers(lick)}</span>
                 {lick.from && <div className="practice-hint">{lick.from}</div>}
               </div>
-              <button className="btn" title={`hear it over ${slotChord ? chordSymbol(slotChord) : 'the first chord'}`} onClick={() => {
+              <button className="btn" onClick={() => {
                 if (state.playing) stopPlayback();
                 const placed = placeLick(lick, ctx, bar ?? 0);
                 const beat = 60 / app.bpm;
@@ -233,13 +226,13 @@ export function MelodyWorkbench() {
                 setMelody([...notes.filter((n) => !inBar.has(n.id)), ...placeLick(lick, ctx, at)]);
                 setBar(at);
                 setRolls(rolls + 1);
-              }}>⤵ Drop into bar {(bar ?? 0) + 1}</button>
+              }}>Drop into bar {(bar ?? 0) + 1}</button>
               {!lick.starter && (
-                <button className="btn" title="forget this lick" onClick={() => {
+                <button className="btn" onClick={() => {
                   const nextLicks = licks.filter((l) => l.id !== lick.id);
                   setLicks(nextLicks);
                   saveLicks(nextLicks);
-                }}>🗑</button>
+                }}>Delete</button>
               )}
             </div>
           ))}
@@ -247,48 +240,37 @@ export function MelodyWorkbench() {
       )}
 
       <div className="motif-row">
-        <span className="control-label">MOTIF</span>
+        <span className="control-label">Motif</span>
         {bar === null
-          ? <span className="practice-hint">click a bar number to pick your motif — then develop it instead of writing new notes</span>
+          ? <span className="practice-hint">click a bar number to pick a motif</span>
           : (
             <>
               <span className="motif-bar">bar {bar + 1}</span>
-              <button className="chip" disabled={!hasMotif || next === null} title="the same shape, moved along the scale so it lands on the next chord's target"
-                onClick={tool(() => sequenceBar(notes, ctx, bar, next!))}>⤴ Sequence → bar {next! + 1}</button>
-              <button className="chip" disabled={!hasMotif || next === null}
-                title="the lick moved by exactly the distance between the two chord roots, so every note keeps its number — how a lick you know becomes a lick for every chord"
-                onClick={tool(() => transposeToChord(notes, ctx, bar, next!))}>🎯 Same numbers → bar {next! + 1}</button>
-              <button className="chip" disabled={!hasMotif} title="same rhythm, contour turned over, ending at rest on the root"
-                onClick={tool(() => answerBar(notes, ctx, bar, next!))}>💬 Answer → bar {next! + 1}</button>
-              <button className="chip" disabled={!hasMotif} title="keep the rhythm, find new pitches"
-                onClick={tool(() => rerollPitches(notes, ctx, bar, rolls))}>🎲 New pitches</button>
-              <button className="chip" disabled={!hasMotif} title="rewrite where the phrase goes: lean into the next chord, or come to rest (click again for the other)"
-                onClick={tool(() => changeEnding(notes, ctx, bar, rolls))}>🔚 Change ending</button>
-              <button className="chip" disabled={!hasMotif} title="twice as slow, spilling into the next bar"
-                onClick={tool(() => stretchBar(notes, ctx, bar, 2))}>↔ Stretch ×2</button>
-              <button className="chip" disabled={!hasMotif} title="twice as fast, played twice"
-                onClick={tool(() => stretchBar(notes, ctx, bar, 0.5))}>⇥ Squeeze ×½</button>
-              <button className="chip" disabled={!hasMotif} title="mirror the contour around the first note"
-                onClick={tool(() => invertBar(notes, ctx, bar))}>🙃 Invert</button>
+              <button className="chip" disabled={!hasMotif || next === null} onClick={tool(() => sequenceBar(notes, ctx, bar, next!))}>Sequence → bar {next! + 1}</button>
+              <button className="chip" disabled={!hasMotif || next === null} onClick={tool(() => transposeToChord(notes, ctx, bar, next!))}>Same numbers → bar {next! + 1}</button>
+              <button className="chip" disabled={!hasMotif} onClick={tool(() => answerBar(notes, ctx, bar, next!))}>Answer → bar {next! + 1}</button>
+              <button className="chip" disabled={!hasMotif} onClick={tool(() => rerollPitches(notes, ctx, bar, rolls))}>New pitches</button>
+              <button className="chip" disabled={!hasMotif} onClick={tool(() => changeEnding(notes, ctx, bar, rolls))}>Change ending</button>
+              <button className="chip" disabled={!hasMotif} onClick={tool(() => stretchBar(notes, ctx, bar, 2))}>Stretch ×2</button>
+              <button className="chip" disabled={!hasMotif} onClick={tool(() => stretchBar(notes, ctx, bar, 0.5))}>Squeeze ×½</button>
+              <button className="chip" disabled={!hasMotif} onClick={tool(() => invertBar(notes, ctx, bar))}>Invert</button>
               <button className="chip" disabled={!hasMotif}
-                onClick={tool(() => notes.filter((n) => n.locked || !notesInBar(notes, ctx, bar).includes(n)))}>🧹 Clear bar</button>
+                onClick={tool(() => notes.filter((n) => n.locked || !notesInBar(notes, ctx, bar).includes(n)))}>Clear bar</button>
             </>
           )}
       </div>
       <div className="motif-row">
-        <span className="control-label">ALL</span>
-        <button className="chip" disabled={!notes.length} title="strong-beat and held notes that fight their chord move to the nearest chord tone"
-          onClick={tool(() => fixClashes(notes, ctx))}>🩹 Fix clashes</button>
+        <span className="control-label">All</span>
+        <button className="chip" disabled={!notes.length} onClick={tool(() => fixClashes(notes, ctx))}>Fix clashes</button>
         <button className="chip" disabled={!notes.length} onClick={tool(() => shiftOctave(notes, ctx, -1))}>octave ↓</button>
         <button className="chip" disabled={!notes.length} onClick={tool(() => shiftOctave(notes, ctx, 1))}>octave ↑</button>
         {selected && (
           <>
-            <span className="control-label band-label">NOTE</span>
-            <button className={`chip ${selected.locked ? 'chip-on' : ''}`} title="locked notes survive every motif tool, Clear and Record"
-              onClick={() => setMelody(notes.map((n) => (n.id === selected.id ? { ...n, locked: !n.locked } : n)))}>
-              {selected.locked ? '🔒 Locked' : '🔓 Lock'}
+            <span className="control-label band-label">Note</span>
+            <button className={`chip ${selected.locked ? 'chip-on' : ''}`} onClick={() => setMelody(notes.map((n) => (n.id === selected.id ? { ...n, locked: !n.locked } : n)))}>
+              {selected.locked ? 'Locked' : 'Lock'}
             </button>
-            <button className="chip" disabled={selected.locked} onClick={() => setMelody(notes.filter((n) => n.id !== selected.id))}>🗑 Delete</button>
+            <button className="chip" disabled={selected.locked} onClick={() => setMelody(notes.filter((n) => n.id !== selected.id))}>Delete</button>
           </>
         )}
       </div>
@@ -296,8 +278,8 @@ export function MelodyWorkbench() {
       {report && notes.length >= 2 && (
         <div className="coach">
           <div className="coach-head">
-            <span className="control-label">COACH</span>
-            <div className="coach-landings" title="does each chord arrive on one of its own notes?">
+            <span className="control-label">Coach</span>
+            <div className="coach-landings">
               {report.landings.map((l, i) => (
                 <span key={i} className={`landing ${l.midi === undefined ? 'landing-none' : l.hit ? 'landing-hit' : 'landing-miss'}`}>
                   {l.chord} {l.midi === undefined ? '·' : l.hit ? '✓' : '✗'}
@@ -307,7 +289,7 @@ export function MelodyWorkbench() {
           </div>
           {report.observations.map((o, i) => (
             <div key={i} className={`coach-note coach-${o.kind}`} onClick={() => o.bar !== undefined && setBar(o.bar)}>
-              {NOTE_ICON[o.kind]} {o.text}
+              {o.text}
             </div>
           ))}
         </div>
@@ -316,8 +298,8 @@ export function MelodyWorkbench() {
       {harmony.length > 0 && slotChord && slotIdx !== null && (
         <div className="harmonize">
           <div className="harmonize-head">
-            <span className="control-label">REHARMONIZE</span>
-            <span className="practice-hint">bar {bar! + 1} sits on {chordSymbol(slotChord)} — these would also carry its melody. The notes stay; the meaning changes.</span>
+            <span className="control-label">Reharmonize</span>
+            <span className="practice-hint">bar {bar! + 1} sits on {chordSymbol(slotChord)}; these would also carry its melody</span>
           </div>
           <div className="harmonize-options">
             {harmony.map((o) => (

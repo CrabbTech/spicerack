@@ -90,11 +90,9 @@ export function TransitionPanel({ insight, activeTag, looping, onHear, onLoop, o
       <div className="xfer-head">
         <h3>{insight.title}</h3>
         <div className="panel-actions">
-          <button className="btn" onClick={onHear} title="the chord, each moving voice alone, then the arrival">▶ Hear the move</button>
-          <button className={`btn ${looping ? 'btn-on' : ''}`} onClick={onLoop} title="loop just these two chords to practise the change">
-            {looping ? '🔁 Looping this change' : '🔁 Loop this change'}
-          </button>
-          <button className="btn" onClick={onClose}>✕</button>
+          <button className="btn" onClick={onHear}>▶ Hear the move</button>
+          <button className={`btn ${looping ? 'btn-on' : ''}`} onClick={onLoop}>{looping ? 'Looping' : 'Loop this change'}</button>
+          <button className="btn" onClick={onClose}>×</button>
         </div>
       </div>
       <div className="xfer-body">
@@ -102,12 +100,12 @@ export function TransitionPanel({ insight, activeTag, looping, onHear, onLoop, o
         <div className="xfer-text">
           <p>{insight.story}</p>
           <div className="xfer-moves">
-            {halves.length > 0 && <span className="xfer-tag xfer-half" title="half steps: the strongest pull">½ step · {halves.map(arrow).join(' · ')}</span>}
+            {halves.length > 0 && <span className="xfer-tag xfer-half">½ step · {halves.map(arrow).join(' · ')}</span>}
             {wholes.length > 0 && <span className="xfer-tag xfer-whole">whole step · {wholes.map(arrow).join(' · ')}</span>}
-            {holds.length > 0 && <span className="xfer-tag xfer-hold" title="common tones: the glue">holds · {holds.map((m) => m.from).join(' · ')}</span>}
+            {holds.length > 0 && <span className="xfer-tag xfer-hold">holds · {holds.map((m) => m.from).join(' · ')}</span>}
           </div>
           <p className="xfer-bass">{insight.bass}</p>
-          <p className="xfer-try">🎯 {insight.tryThis}</p>
+          <p className="xfer-try">Try: {insight.tryThis}</p>
         </div>
       </div>
     </div>

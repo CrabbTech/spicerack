@@ -112,15 +112,15 @@ export function LibraryModal({ items, genreName, onLoad, onDelete, onUpdate, onI
     <div className="modal-backdrop" onClick={onClose}>
       <div className="modal modal-wide" onClick={(e) => e.stopPropagation()}>
         <div className="modal-head">
-          <h2>📚 Library</h2>
+          <h2>Library</h2>
           <input className="text-input" placeholder="search names, chords, tags, notes…" value={query} onChange={(e) => setQuery(e.target.value)} />
-          <button className="btn" disabled={!items.length} title="every saved song as one JSON file — a backup, or a way to move machines"
-            onClick={() => download(`spicerack-library-${new Date().toISOString().slice(0, 10)}.json`, JSON.stringify(items, null, 2))}>⬇ Export all</button>
-          <label className="btn file-btn" title="import a Spicerack export">
-            ⬆ Import
+          <button className="btn" disabled={!items.length}
+            onClick={() => download(`spicerack-library-${new Date().toISOString().slice(0, 10)}.json`, JSON.stringify(items, null, 2))}>Export all</button>
+          <label className="file-btn">
+            Import
             <input type="file" accept="application/json,.json" onChange={(e) => { const f = e.target.files?.[0]; if (f) void importFile(f); e.target.value = ''; }} />
           </label>
-          <button className="btn" onClick={onClose}>✕ Close</button>
+          <button className="btn" onClick={onClose}>×</button>
         </div>
         {allTags.length > 0 && (
           <div className="chip-row library-tags">
@@ -131,7 +131,7 @@ export function LibraryModal({ items, genreName, onLoad, onDelete, onUpdate, onI
         )}
         {message && <div className="lab-ok">{message}</div>}
         {items.length === 0 && (
-          <div className="library-empty">Nothing saved yet — 💾 Save keeps the whole song: every section, its chords and its melody.</div>
+          <div className="library-empty">Nothing saved yet.</div>
         )}
         <div className="library-list">
           {shown.map((item) => (
@@ -140,8 +140,8 @@ export function LibraryModal({ items, genreName, onLoad, onDelete, onUpdate, onI
                 <div className="library-name">
                   {item.name}
                   {(item.sections?.length ?? 0) > 1 && <span className="library-badge">{item.sections!.length} sections</span>}
-                  {(item.melody?.length || item.sections?.some((sec) => sec.melody.length)) ? <span className="library-badge">🎵 melody</span> : null}
-                  {item.modulate ? <span className="library-badge">🚚</span> : null}
+                  {(item.melody?.length || item.sections?.some((sec) => sec.melody.length)) ? <span className="library-badge">melody</span> : null}
+                  {item.modulate ? <span className="library-badge">modulates</span> : null}
                 </div>
                 <div className="library-meta">
                   {genreName(item.genreId)} · {item.mode} · {item.summary} · {new Date(item.savedAt).toLocaleDateString()}
@@ -151,7 +151,7 @@ export function LibraryModal({ items, genreName, onLoad, onDelete, onUpdate, onI
                     <input className="text-input" value={item.name} onChange={(e) => onUpdate({ ...item, name: e.target.value })} />
                     <input className="text-input" placeholder="tags, comma separated" value={(item.tags ?? []).join(', ')}
                       onChange={(e) => onUpdate({ ...item, tags: e.target.value.split(',').map((t) => t.trim()).filter(Boolean) })} />
-                    <textarea rows={2} placeholder="notes to your future self — what it's for, what to try next" value={item.notes ?? ''}
+                    <textarea rows={2} placeholder="notes" value={item.notes ?? ''}
                       onChange={(e) => onUpdate({ ...item, notes: e.target.value })} />
                   </div>
                 ) : (
@@ -163,12 +163,12 @@ export function LibraryModal({ items, genreName, onLoad, onDelete, onUpdate, onI
               </div>
               <div className="library-actions">
                 <button className="btn" onClick={() => { onLoad(item); onClose(); }}>Load</button>
-                <button className={`btn ${editing === item.id ? 'btn-on' : ''}`} onClick={() => setEditing(editing === item.id ? null : item.id)} title="name, tags, notes">✎</button>
-                <button className="btn" title="export just this song"
-                  onClick={() => download(`${item.name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}.spicerack.json`, JSON.stringify(item, null, 2))}>⬇</button>
+                <button className={`btn ${editing === item.id ? 'btn-on' : ''}`} onClick={() => setEditing(editing === item.id ? null : item.id)}>Edit</button>
+                <button className="btn"
+                  onClick={() => download(`${item.name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}.spicerack.json`, JSON.stringify(item, null, 2))}>Export</button>
                 {confirming === item.id
                   ? <button className="btn btn-danger" onClick={() => { onDelete(item.id); setConfirming(null); }}>Sure?</button>
-                  : <button className="btn" onClick={() => setConfirming(item.id)}>🗑</button>}
+                  : <button className="btn" onClick={() => setConfirming(item.id)}>Delete</button>}
               </div>
             </div>
           ))}

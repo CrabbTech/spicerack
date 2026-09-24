@@ -52,7 +52,7 @@ export interface SpiceApplication {
 export interface Spice {
   id: SpiceId;
   name: string;
-  icon: string;
+
   blurb: string;
   find(slots: Slot[], ctx: SpiceContext): SpiceApplication[];
 }
@@ -90,7 +90,6 @@ const insertAt = (slots: Slot[], i: number, ...inserted: Slot[]): Slot[] =>
 const secondaryDominant: Spice = {
   id: 'secondary-dominant',
   name: 'Secondary dominant',
-  icon: '🎯',
   blurb: 'Borrow the V7 of any chord to yank the ear toward it.',
   find(slots, { key, flavor }) {
     const real = realize(slots, key);
@@ -125,7 +124,6 @@ const secondaryDominant: Spice = {
 const borrowedIv: Spice = {
   id: 'borrowed-iv',
   name: 'Borrowed iv',
-  icon: '🌧',
   blurb: 'Steal the minor iv from the parallel minor key.',
   find(slots, { key }) {
     if (isMinorish(key.mode)) return [];
@@ -163,7 +161,6 @@ const borrowedIv: Spice = {
 const flatSeven: Spice = {
   id: 'flat-seven',
   name: '♭VII stomp',
-  icon: '🍺',
   blurb: 'The rock & roll back door, one whole step below home.',
   find(slots, { key }) {
     if (isMinorish(key.mode)) return [];
@@ -200,7 +197,6 @@ const flatSeven: Spice = {
 const mario: Spice = {
   id: 'mario',
   name: 'Mario cadence',
-  icon: '🍄',
   blurb: '♭VI–♭VII–I: two borrowed chords climbing into victory.',
   find(slots, { key }) {
     if (isMinorish(key.mode)) return [];
@@ -231,7 +227,6 @@ const mario: Spice = {
 const tritoneSub: Spice = {
   id: 'tritone-sub',
   name: 'Tritone sub',
-  icon: '🃏',
   blurb: 'Swap any dominant for the one six frets away.',
   find(slots, { key }) {
     const real = realize(slots, key);
@@ -264,7 +259,6 @@ const tritoneSub: Spice = {
 const extensions: Spice = {
   id: 'extensions',
   name: 'Color tones',
-  icon: '🎨',
   blurb: 'Same chords, more vowels: 7ths and 9ths.',
   find(slots, { key, flavor }) {
     const upgrades: { i: number; numeral: string }[] = [];
@@ -306,7 +300,6 @@ export const SUFFIX_OF: Partial<Record<QualityId, string>> = {
 const susTension: Spice = {
   id: 'sus-tension',
   name: 'Sus & release',
-  icon: '⏳',
   blurb: 'Hold the 4th where the 3rd should be, then let go.',
   find(slots, { key }) {
     const apps: SpiceApplication[] = [];
@@ -337,7 +330,6 @@ const susTension: Spice = {
 const passingDim: Spice = {
   id: 'passing-dim',
   name: 'Passing dim7',
-  icon: '🪜',
   blurb: 'A chromatic stepping stone between two chords.',
   find(slots, { key }) {
     const real = realize(slots, key);
@@ -368,7 +360,6 @@ const passingDim: Spice = {
 const picardy: Spice = {
   id: 'picardy',
   name: 'Picardy third',
-  icon: '🌅',
   blurb: 'End the gloom on a surprise major chord.',
   find(slots, { key }) {
     if (!isMinorish(key.mode)) return [];
@@ -395,7 +386,6 @@ const picardy: Spice = {
 const andalusian: Spice = {
   id: 'andalusian',
   name: 'Andalusian slide',
-  icon: '💃',
   blurb: 'The flamenco staircase: i–♭VII–♭VI–V.',
   find(slots, { key }) {
     if (!isMinorish(key.mode)) return [];
@@ -430,7 +420,6 @@ const andalusian: Spice = {
 const truckDriver: Spice = {
   id: 'truck-driver',
   name: "Truck driver's gear change",
-  icon: '🚚',
   blurb: 'Last chorus? Take the whole thing up a step.',
   find(slots, { key }) {
     const prefer = flatLeaning(key) ? 'flat' : 'sharp';
@@ -453,7 +442,6 @@ const truckDriver: Spice = {
 const backdoor: Spice = {
   id: 'backdoor',
   name: 'Backdoor dominant',
-  icon: '🚪',
   blurb: '♭VII7 resolves home without the drama of V.',
   find(slots, { key }) {
     if (isMinorish(key.mode)) return [];
@@ -482,7 +470,6 @@ const backdoor: Spice = {
 const halfStepSlide: Spice = {
   id: 'half-step-slide',
   name: 'Half-step slide',
-  icon: '🛝',
   blurb: 'Approach any chord from one fret above.',
   find(slots, { key }) {
     const real = realize(slots, key);
@@ -516,7 +503,6 @@ const halfStepSlide: Spice = {
 const lineCliche: Spice = {
   id: 'line-cliche',
   name: 'Line cliché',
-  icon: '🕵️',
   blurb: 'One minor chord, one inner voice walking down.',
   find(slots, { key }) {
     if (!isMinorish(key.mode)) return [];
@@ -546,7 +532,6 @@ const lineCliche: Spice = {
 const pedalPoint: Spice = {
   id: 'pedal-point',
   name: 'Pedal point',
-  icon: '⚓',
   blurb: 'Park the bass on the tonic and let chords float over it.',
   find(slots, { key }) {
     if (slots.every((s) => s.pedalBass || isTonicDegree(s.numeral))) return [];
@@ -567,7 +552,6 @@ const pedalPoint: Spice = {
 const phrygianBite: Spice = {
   id: 'phrygian-bite',
   name: 'Phrygian ♭II',
-  icon: '🦈',
   blurb: 'The chord one half step above home. Menace included.',
   find(slots, { key }) {
     if (!isMinorish(key.mode)) return [];
@@ -592,7 +576,6 @@ const phrygianBite: Spice = {
 const tritoneRiff: Spice = {
   id: 'tritone-riff',
   name: "Devil's interval",
-  icon: '😈',
   blurb: 'Root to ♭5 — diabolus in musica.',
   find(slots, { key }) {
     if (!isMinorish(key.mode)) return [];
@@ -617,7 +600,6 @@ const tritoneRiff: Spice = {
 const harmonicMinorV: Spice = {
   id: 'harmonic-minor-v',
   name: 'Harmonic minor V',
-  icon: '🧛',
   blurb: 'Raise the leading tone; give minor a real dominant.',
   find(slots, { key }) {
     if (!isMinorish(key.mode)) return [];
@@ -646,7 +628,6 @@ const harmonicMinorV: Spice = {
 const deceptiveCadence: Spice = {
   id: 'deceptive-cadence',
   name: 'Deceptive cadence',
-  icon: '🪤',
   blurb: 'Promise them home; deliver the relative minor.',
   find(slots, { key }) {
     const apps: SpiceApplication[] = [];
@@ -679,7 +660,6 @@ const deceptiveCadence: Spice = {
 const chromaticMediant: Spice = {
   id: 'chromatic-mediant',
   name: 'Chromatic mediant',
-  icon: '🎬',
   blurb: 'The film-score jump-cut: chords a major third apart.',
   find(slots, { key }) {
     const apps: SpiceApplication[] = [];
@@ -711,7 +691,6 @@ const chromaticMediant: Spice = {
 const commonToneDim: Spice = {
   id: 'common-tone-dim',
   name: 'Common-tone dim',
-  icon: '💎',
   blurb: 'A dim7 that sparkles around the tonic without leaving it.',
   find(slots, { key }) {
     if (isMinorish(key.mode)) return [];
@@ -741,7 +720,6 @@ const commonToneDim: Spice = {
 const neapolitan: Spice = {
   id: 'neapolitan',
   name: 'Neapolitan ♭II',
-  icon: '🍦',
   blurb: 'The subdominant in a powdered wig, leaning onto V.',
   find(slots, { key }) {
     const apps: SpiceApplication[] = [];
@@ -772,7 +750,6 @@ const neapolitan: Spice = {
 const minorDeflation: Spice = {
   id: 'minor-deflation',
   name: 'Deflated dominant',
-  icon: '🎈',
   blurb: 'Let the air out of the V.',
   find(slots, { key }) {
     const apps: SpiceApplication[] = [];

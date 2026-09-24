@@ -9,7 +9,7 @@ import { Key, ModeId, TONIC_CHOICES } from '../theory/scales';
 import { Chord, QUALITIES, chordSymbol } from '../theory/chords';
 import { resolveNumeral } from '../theory/roman';
 import { RealizedSlot, Slot, newSlot } from '../theory/progression';
-import { ProgressionPatch, SPICES, SpiceId } from '../theory/spices';
+import { ProgressionPatch, SpiceId } from '../theory/spices';
 import { ComposedResult } from '../theory/compose';
 import { mirrorSlots, slotsArePalindrome } from '../theory/crab';
 import { GENRES, GENRE_LIST, Genre, GenreId, ProgressionTemplate, pickTemplate } from '../data/genres';
@@ -21,7 +21,6 @@ import { SavedProgression } from '../ui/LibraryModal';
 
 export interface LogEntry {
   id: number;
-  icon: string;
   title: string;
   text: string;
   kind: 'spice' | 'info';
@@ -126,8 +125,8 @@ const unstash = (sec: SectionData) => ({
 const SECTION_NAMES = 'ABCDEFGH';
 
 let logId = 1;
-export const entry = (icon: string, title: string, text: string, kind: LogEntry['kind'] = 'info'): LogEntry =>
-  ({ id: logId++, icon, title, text, kind });
+export const entry = (title: string, text: string, kind: LogEntry['kind'] = 'info'): LogEntry =>
+  ({ id: logId++, title, text, kind });
 
 function progressionFrom(t: ProgressionTemplate) {
   return {
@@ -215,7 +214,7 @@ function resume(session: SavedSession, params: URLSearchParams): AppState | unde
       arrangement: session.arrangement.filter((i) => i < sections.length).length ? session.arrangement.filter((i) => i < sections.length) : [0],
       view: (['learn', 'jam', 'write'] as const).find((v) => v === (params.get('view') ?? session.view)) ?? 'write',
       heat: 2,
-      log: [entry('🦀', 'Welcome back', 'Your song is where you left it — every section, chord and melody note. Hit play, or pick up a lesson in Learn.')],
+      log: [entry('Welcome back', 'Your song is where you left it.')],
       scaleIdx: session.scaleIdx ?? 0,
       playingSlot: null, playing: false, muted: false, drumsOn: true,
       bpm: session.bpm ?? null,
@@ -258,8 +257,7 @@ export function init(): AppState {
     history: [],
     heat: 2,
     log: [
-      entry(genre.emoji, genre.name, genre.tip),
-      entry('👋', 'Welcome to the rack', 'Pick a key and a genre, roll new progressions, then hit “Spice it up” — every trick gets explained right here. Click any chord to hear it.'),
+      entry(genre.name, genre.tip),
     ],
     voicingSel: {},
     scaleIdx: Number(params.get('scale')) || 0,
@@ -292,7 +290,7 @@ export function reducer(state: AppState, action: Action): AppState {
       return {
         ...state, genreId: genre.id, mode, ...fresh, baseSlots: fresh.slots,
         modulate: null, melody: [], history: [], voicingSel: {}, scaleIdx: 0, lastSpiceId: undefined, bpm: null,
-        log: [entry(genre.emoji, genre.name, genre.tip), ...state.log].slice(0, 40),
+        log: [entry(genre.name, genre.tip), ...state.log].slice(0, 40),
       };
     }
     case 'mode': {
@@ -327,7 +325,7 @@ export function reducer(state: AppState, action: Action): AppState {
         groups: undefined,
         slots, baseSlots: slots,
         modulate: null, melody: [], history: [], voicingSel: {}, lastSpiceId: undefined,
-        log: [entry('✨', `Composed: ${action.result.name}`, action.result.planText, 'spice'), ...state.log].slice(0, 40),
+        log: [entry(`Composed: ${action.result.name}`, action.result.planText, 'spice'), ...state.log].slice(0, 40),
       };
     }
     case 'load-save': {
@@ -354,7 +352,7 @@ export function reducer(state: AppState, action: Action): AppState {
         arrangement: action.item.arrangement?.length ? action.item.arrangement : [0],
         bpm: action.item.bpm,
         history: [], voicingSel: {}, scaleIdx: 0, lastSpiceId: undefined,
-        log: [entry('📚', `Loaded “${action.item.name}”`, `${action.item.summary} — back on the bench.`), ...state.log].slice(0, 40),
+        log: [entry(`Loaded “${action.item.name}”`, `${action.item.summary} — back on the bench.`), ...state.log].slice(0, 40),
       };
     }
     case 'apply-batch': {
@@ -365,7 +363,7 @@ export function reducer(state: AppState, action: Action): AppState {
       for (const step of action.steps) {
         if (step.patch.slots) slots = step.patch.slots;
         if (step.patch.modulate !== undefined) modulate = step.patch.modulate;
-        entries.unshift(entry(SPICES[step.spiceId].icon, step.spiceName, step.explanation, 'spice'));
+        entries.unshift(entry(step.spiceName, step.explanation, 'spice'));
       }
       return {
         ...state, slots, modulate,
@@ -394,12 +392,12 @@ export function reducer(state: AppState, action: Action): AppState {
     case 'reset-spice':
       return {
         ...state, slots: state.baseSlots, modulate: null, history: [], voicingSel: {}, lastSpiceId: undefined,
-        log: [entry('↺', 'Rinsed', 'Back to the plain progression. The spice rack is restocked.'), ...state.log].slice(0, 40),
+        log: [entry('Reset', 'Back to the plain progression.'), ...state.log].slice(0, 40),
       };
     case 'no-spice':
       return {
         ...state,
-        log: [entry('🧂', 'Fully seasoned', 'No spice currently fits this progression — roll a new one or reset and try a different path.'), ...state.log].slice(0, 40),
+        log: [entry('Nothing fits', 'No spice fits this progression. Roll a new one, or reset.'), ...state.log].slice(0, 40),
       };
     case 'add-numeral': {
       const slots = [...state.slots, newSlot(action.numeral, 1, { spiceId: action.spiceId })];
@@ -457,7 +455,7 @@ export function reducer(state: AppState, action: Action): AppState {
         ...state, slots,
         history: pushHistory(state), voicingSel: {},
         templateName: state.templateName.endsWith(' (mirrored)') ? state.templateName : `${state.templateName} (mirrored)`,
-        log: [entry('🪞', 'Mirrored the chords', `${symbols(state.slots)} → ${symbols(slots)}. The harmony now reads the same from either end, so a line that fits going forward fits going back — the ground every crab canon stands on. Your melody stays in the first half; write into the second and the two voices meet.`, 'spice'), ...state.log].slice(0, 40),
+        log: [entry('Mirrored the chords', `${symbols(state.slots)} → ${symbols(slots)}. The harmony now reads the same from either end, so a line that fits going forward fits going back — the ground every crab canon stands on. Your melody stays in the first half; write into the second and the two voices meet.`, 'spice'), ...state.log].slice(0, 40),
       };
     }
     case 'view':
@@ -489,7 +487,7 @@ export function reducer(state: AppState, action: Action): AppState {
         ...state, ...unstash(next),
         sections: [...sections, next], activeSection: sections.length,
         arrangement: [...state.arrangement, sections.length],
-        log: [entry('🧩', `Section ${name}`, action.copy
+        log: [entry(`Section ${name}`, action.copy
           ? `A copy of ${sections[state.activeSection].name} to vary — change one thing (an ending, a chord, the melody's peak) and you have a second verse.`
           : `A fresh part for contrast. If ${sections[state.activeSection].name} sits on the tonic, let this one start somewhere else.`), ...state.log].slice(0, 40),
       };

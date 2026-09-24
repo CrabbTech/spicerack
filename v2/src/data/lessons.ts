@@ -57,7 +57,6 @@ export interface LessonStep {
 
 export interface LearningPath {
   id: string;
-  icon: string;
   name: string;
   blurb: string;
   steps: LessonStep[];
@@ -72,7 +71,7 @@ const BLUES = {
 
 export const PATHS: LearningPath[] = [
   {
-    id: 'neck', icon: '🧠', name: 'Fretboard grammar',
+    id: 'neck', name: 'Fretboard grammar',
     blurb: 'For players who know a lot of shapes and licks but not what is inside them. Numbers instead of fret positions — until finding a 3rd is as automatic as finding a barre chord.',
     steps: [
       {
@@ -134,7 +133,7 @@ export const PATHS: LearningPath[] = [
     ],
   },
   {
-    id: 'four', icon: '🎯', name: 'Solo over four chords',
+    id: 'four', name: 'Solo over four chords',
     blurb: 'From one note per chord to a free solo that spells the harmony. Seven rungs, each one a graded play-along.',
     steps: [
       {
@@ -189,7 +188,7 @@ export const PATHS: LearningPath[] = [
     ],
   },
   {
-    id: 'borrow', icon: '🌧', name: 'Hear the borrowed chords',
+    id: 'borrow', name: 'Hear the borrowed chords',
     blurb: 'Why one out-of-key chord can change the weather — heard, explained, played over, then recognised by ear.',
     steps: [
       {
@@ -223,7 +222,7 @@ export const PATHS: LearningPath[] = [
     ],
   },
   {
-    id: 'write', icon: '✍️', name: 'Write an eight-bar melody',
+    id: 'write', name: 'Write an eight-bar melody',
     blurb: 'One motif, developed: sequence it, answer it, change its ending, give it a second section, and get it out to the OP-1.',
     steps: [
       {
@@ -271,7 +270,7 @@ export const PATHS: LearningPath[] = [
     ],
   },
   {
-    id: 'blues', icon: '🎷', name: 'Play the twelve-bar blues',
+    id: 'blues', name: 'Play the twelve-bar blues',
     blurb: 'Dominant chords that never resolve, one famous half-step, and the rub that gives the style its name.',
     steps: [
       {
@@ -305,7 +304,7 @@ export const PATHS: LearningPath[] = [
     ],
   },
   {
-    id: 'triads', icon: '🔺', name: 'Triads on three strings',
+    id: 'triads', name: 'Triads on three strings',
     blurb: 'Three notes, three strings, every chord a fret or two from the last — the comping and soloing skeleton hiding inside every progression.',
     steps: [
       {
@@ -346,7 +345,7 @@ export const PATHS: LearningPath[] = [
     ],
   },
   {
-    id: 'crab', icon: '🦀', name: 'Meet the crab',
+    id: 'crab', name: 'Meet the crab',
     blurb: 'Bach\'s trick from 1747: one line of music that accompanies itself when a second player reads it from the end. Three steps from "what?" to a canon that scores.',
     steps: [
       {

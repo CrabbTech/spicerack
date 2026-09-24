@@ -15,8 +15,8 @@ export function NextChordPanel() {
     <section className="panel next-panel">
       <div className="panel-head">
         <div>
-          <h2>What next?</h2>
-          <div className="panel-sub">after {last ? chordSymbol(last.chord) : 'silence'} — choose by what you want to happen</div>
+          <h2>What next</h2>
+          <div className="panel-sub">after {last ? chordSymbol(last.chord) : 'silence'}</div>
         </div>
       </div>
       {INTENTS.map((intent) => {
@@ -24,7 +24,7 @@ export function NextChordPanel() {
         if (!options.length) return null;
         return (
           <div key={intent.id} className="next-row" title={intent.blurb}>
-            <span className="next-intent">{intent.icon} {intent.name}</span>
+            <span className="next-intent">{intent.name}</span>
             <div className="next-options">
               {options.map((o) => (
                 <button key={o.numeral} className={`pal-chord next-chord numeral-${o.chord.func}`} title={o.why} onClick={() => addNextChord(o)}>
@@ -36,7 +36,6 @@ export function NextChordPanel() {
           </div>
         );
       })}
-      <div className="palette-hint">hover for the reason · click to hear it and add it — the reason lands in the log</div>
     </section>
   );
 }
@@ -45,11 +44,11 @@ export function LogPanel() {
   const { state } = useApp();
   return (
     <section className="panel log-panel">
-      <div className="panel-head"><h2>What just happened</h2></div>
+      <div className="panel-head"><h2>Log</h2></div>
       <div className="log">
         {state.log.map((e) => (
           <div key={e.id} className={`log-entry log-${e.kind}`}>
-            <div className="log-title">{e.icon} {e.title}</div>
+            <div className="log-title">{e.title}</div>
             <div className="log-text">{e.text}</div>
           </div>
         ))}
@@ -62,22 +61,20 @@ export function PalettePanel() {
   const { key, genre, palette, shelf, jazzyPalette, addPaletteChord, fakeSlot } = useApp();
   return (
     <section className="panel palette-panel">
-      <div className="panel-head">
-        <h2>Chords in {keyLabel(key)}</h2>
-      </div>
+      <div className="panel-head"><h2>Chords in {keyLabel(key)}</h2></div>
       <div className="palette">
         {palette.map((p) => {
           const numeral = jazzyPalette ? p.seventhNumeral : p.numeral;
           const c = resolveNumeral(numeral, key);
           return (
-            <button key={p.numeral} className="pal-chord" onClick={() => addPaletteChord(numeral)} title={`add ${chordSymbol(c)}`}>
+            <button key={p.numeral} className="pal-chord" onClick={() => addPaletteChord(numeral)}>
               <span className="pal-numeral">{prettyNumeral(numeral)}</span>
               <span className="pal-symbol">{chordSymbol(styleChord(fakeSlot(numeral), c, genre))}</span>
             </button>
           );
         })}
       </div>
-      <div className="shelf-head">BORROW SHELF <span>(out-of-key flavor)</span></div>
+      <div className="shelf-head">Borrow shelf</div>
       <div className="palette">
         {shelf.map((s) => {
           const c = resolveNumeral(s.numeral, key);
@@ -89,7 +86,6 @@ export function PalettePanel() {
           );
         })}
       </div>
-      <div className="palette-hint">click to hear & append — shelf chords explain themselves in the log</div>
     </section>
   );
 }

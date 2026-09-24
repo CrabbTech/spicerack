@@ -38,12 +38,12 @@ export interface FretCard {
   tag: string;
 }
 
-export const FRET_DRILLS: { id: FretDrillKind; icon: string; name: string; blurb: string }[] = [
-  { id: 'interval', icon: '📐', name: 'Interval from a root', blurb: 'A root is lit — find the 3rd, the 5th, the ♭7 around it. Intervals are shapes; learn the shapes and every chord and lick opens up.' },
-  { id: 'degree', icon: '🔢', name: 'Name that degree', blurb: 'Two dots: the root and a mystery note. What is it? The reverse of the first drill — recognition instead of recall.' },
-  { id: 'chordtone', icon: '🎯', name: 'Chord tone in position', blurb: 'A chord and a five-fret box: find its root, 3rd or 5th without leaving the box. This is what "playing the changes" is made of.' },
-  { id: 'unison', icon: '🪞', name: 'Same note, next string', blurb: 'Every note lives in several places. Find the same pitch one string over — five frets, except across G–B.' },
-  { id: 'note', icon: '🔤', name: 'Note names', blurb: 'Find a named note on a named string. The letters matter less than the numbers — but roots have names.' },
+export const FRET_DRILLS: { id: FretDrillKind; name: string; blurb: string }[] = [
+  { id: 'interval', name: 'Interval from a root', blurb: 'A root is lit — find the 3rd, the 5th, the ♭7 around it. Intervals are shapes; learn the shapes and every chord and lick opens up.' },
+  { id: 'degree', name: 'Name that degree', blurb: 'Two dots: the root and a mystery note. What is it? The reverse of the first drill — recognition instead of recall.' },
+  { id: 'chordtone', name: 'Chord tone in position', blurb: 'A chord and a five-fret box: find its root, 3rd or 5th without leaving the box. This is what "playing the changes" is made of.' },
+  { id: 'unison', name: 'Same note, next string', blurb: 'Every note lives in several places. Find the same pitch one string over — five frets, except across G–B.' },
+  { id: 'note', name: 'Note names', blurb: 'Find a named note on a named string. The letters matter less than the numbers — but roots have names.' },
 ];
 
 interface IntervalDef { tag: string; semis: number; short: string; name: string; weight: number }

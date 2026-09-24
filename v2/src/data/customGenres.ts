@@ -7,7 +7,8 @@ import { SpiceId } from '../theory/spices';
 export interface CustomGenreData {
   id: string; // "custom-<slug>"
   name: string;
-  emoji: string;
+  /** left over from older saves; no longer shown */
+  emoji?: string;
   baseId: GenreId;
   bpm: number;
   powerChords?: 'all' | 'plain';
@@ -39,7 +40,6 @@ export function materializeGenre(d: CustomGenreData): Genre {
     ...base,
     id: d.id,
     name: d.name,
-    emoji: d.emoji,
     tagline: `homemade — grooves like ${base.name}`,
     modes: modes.length ? modes : base.modes,
     templates: d.templates.length ? d.templates : base.templates,

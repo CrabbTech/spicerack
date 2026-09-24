@@ -30,7 +30,6 @@ import { Meter, beatsPerBar } from '../audio/groove';
 import { buildMidiFile, midiFilename } from '../audio/midi';
 import { buildSoloModel } from '../ui/soloModel';
 import { buildTransitionDemo } from '../ui/TransitionPanel';
-import { UiSettings, applySettings, loadSettings, saveSettings } from '../ui/themes';
 import { SavedProgression, loadLibrary, saveLibrary } from '../ui/LibraryModal';
 import { ComposeSettings } from '../ui/ComposeModal';
 
@@ -122,10 +121,9 @@ export function useAppController() {
   const [state, dispatch] = useReducer(reducer, undefined, init);
   const stopRef = useRef<(() => void) | null>(null);
   const [copied, setCopied] = useState<string | null>(null);
-  const [settings, setSettings] = useState<UiSettings>(loadSettings);
   const [customGenres, setCustomGenres] = useState<CustomGenreData[]>(loadCustomGenres);
   const [library, setLibrary] = useState<SavedProgression[]>(loadLibrary);
-  const [modal, setModal] = useState<'settings' | 'lab' | 'library' | 'compose' | null>(null);
+  const [modal, setModal] = useState<'lab' | 'library' | 'compose' | null>(null);
   const [labEditing, setLabEditing] = useState<CustomGenreData | undefined>(undefined);
   const [composeSettings, setComposeSettings] = useState<ComposeSettings>({
     length: 4, heat: 2, cadence: 'auto', startOnTonic: true,
@@ -210,11 +208,6 @@ export function useAppController() {
     audio.setLead(leadOn);
     if (!leadOn) setLeadMidi(null);
   }, [leadOn]);
-
-  useEffect(() => {
-    applySettings(settings);
-    saveSettings(settings);
-  }, [settings]);
 
   const allGenres = useMemo(
     () => [...GENRE_LIST, ...customGenres.map(materializeGenre)],
@@ -684,7 +677,7 @@ export function useAppController() {
     focusLast.current = true; // point the solo lab at the new chord, so its notes show up right away
     dispatch({
       type: 'add-numeral', numeral, spiceId: hook ? 'shelf' : undefined,
-      log: hook ? entry('🛒', `Borrowed ${chordSymbol(chord)}`, `${chordSymbol(chord)} (${prettyNumeral(numeral)}): ${hook}.`) : undefined,
+      log: hook ? entry(`Borrowed ${chordSymbol(chord)}`, `${chordSymbol(chord)} (${prettyNumeral(numeral)}): ${hook}.`) : undefined,
     });
   };
 
@@ -857,7 +850,6 @@ export function useAppController() {
         case '2': dispatch({ type: 'instrument', id: 'bass' }); break;
         case '3': dispatch({ type: 'instrument', id: 'piano' }); break;
         case '4': dispatch({ type: 'instrument', id: 'op1' }); break;
-        case 't': setModal('settings'); break;
       }
     };
     window.addEventListener('keydown', onKey);
@@ -1037,7 +1029,7 @@ export function useAppController() {
     focusLast.current = true;
     dispatch({
       type: 'add-numeral', numeral: opt.numeral, spiceId: opt.chord.func === 'borrowed' || opt.chord.func === 'secondary' ? 'shelf' : undefined,
-      log: entry('🧭', `${chordSymbol(opt.chord)} — to ${opt.intent}`, opt.why),
+      log: entry(`${chordSymbol(opt.chord)} — to ${opt.intent}`, opt.why),
     });
   };
 
@@ -1069,7 +1061,7 @@ export function useAppController() {
     audio.strum(previewMidis(styleChord(fakeSlot(opt.numeral), opt.chord, genre)), state.instrument);
     dispatch({
       type: 'set-numeral', slotId: r.slot.id, numeral: opt.numeral,
-      log: entry('🎼', `${chordSymbol(r.chord)} → ${chordSymbol(opt.chord)} under the same melody`, opt.why),
+      log: entry(`${chordSymbol(r.chord)} → ${chordSymbol(opt.chord)} under the same melody`, opt.why),
     });
   };
 
@@ -1081,7 +1073,7 @@ export function useAppController() {
     const after = analyzeCanon(fixed, melodyCtx, crabMode).score;
     dispatch({
       type: 'melody', notes: sortNotes(fixed),
-      log: entry('🩹', moved ? `Crab-proofed: ${moved} note${moved === 1 ? '' : 's'} moved` : 'Already crab-proof',
+      log: entry(moved ? `Crab-proofed: ${moved} note${moved === 1 ? '' : 's'} moved` : 'Already crab-proof',
         moved
           ? `Each one now sits on a pitch that works over its own chord and over the chord its mirror lands on. The crab scores ${after} — it was ${crabReport.score}.`
           : `Every unlocked note already works in both directions; the crab scores ${crabReport.score}. Unlock a note, or move one by hand, and try again.`),
@@ -1278,7 +1270,7 @@ export function useAppController() {
     spiceItUp, composeNow, cycleBars, asStep, addPaletteChord, fakeSlot, midisFor, harmonyMidis,
     copied, copyText, copyTab, copyBassTab, copyChart, exportMidi, saveToLibrary,
     // chrome
-    modal, setModal, labEditing, setLabEditing, customGenres, settings, setSettings,
+    modal, setModal, labEditing, setLabEditing, customGenres,
     composeSettings, setComposeSettings, saveCustomGenre, deleteCustomGenre, library, setLibrary,
   };
 }

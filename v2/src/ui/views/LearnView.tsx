@@ -14,13 +14,13 @@ function EarQuiz() {
     <section className="panel quiz-panel">
       <div className="panel-head">
         <div>
-          <h2>👂 Ear quiz — which chord changed?</h2>
-          <div className="panel-sub">a {genre.name} loop plays twice; the second time one chord has been spiced. Drawn from the genre and key you have up.</div>
+          <h2>Ear quiz</h2>
+          <div className="panel-sub">A {genre.name} loop plays twice. One chord in the second pass is spiced — which?</div>
         </div>
         <div className="panel-actions">
           <span className="quiz-streak">streak <strong>{quizStreak}</strong></span>
-          <button className="btn btn-spice" onClick={() => newQuizRound()} disabled={state.playing && !!quiz?.phase}>{quiz ? '▶ Next round' : '▶ Start'}</button>
-          {quiz && <button className="btn" onClick={replayQuiz}>↻ Hear it again</button>}
+          <button className="btn btn-spice" onClick={() => newQuizRound()} disabled={state.playing && !!quiz?.phase}>{quiz ? 'Next round' : 'Start'}</button>
+          {quiz && <button className="btn" onClick={replayQuiz}>Again</button>}
         </div>
       </div>
       {quiz && (
@@ -45,18 +45,27 @@ function EarQuiz() {
               </div>
             ))}
           </div>
-          {quiz.answered === null
-            ? <div className="practice-hint">Click the chord in the second row that sounded different.</div>
-            : (
-              <div className={`quiz-reveal ${right ? 'quiz-right' : ''}`}>
-                <strong>{right ? 'Yes.' : `It was chord ${quiz.round.changed + 1}.`} {quiz.round.spiceName}:</strong> {quiz.round.explanation}
-              </div>
-            )}
+          {quiz.answered !== null && (
+            <div className={`quiz-reveal ${right ? 'quiz-right' : ''}`}>
+              <strong>{right ? 'Yes.' : `It was chord ${quiz.round.changed + 1}.`} {quiz.round.spiceName}:</strong> {quiz.round.explanation}
+            </div>
+          )}
         </>
       )}
     </section>
   );
 }
+
+const GOAL_LABEL = (goal: (typeof PATHS)[number]['steps'][number]['goal']): string => {
+  switch (goal.kind) {
+    case 'score': return `play ${goal.min}+`;
+    case 'fret': return `sprint ${goal.min}+`;
+    case 'crab': return `crab ${goal.min}+`;
+    case 'coach': return 'coach';
+    case 'quiz': return 'quiz';
+    case 'check': return 'check';
+  }
+};
 
 export function LearnView() {
   const { progress, lessonDone, startLesson, lessonId } = useApp();
@@ -66,9 +75,7 @@ export function LearnView() {
       <section className="panel learn-intro">
         <div>
           <h2>Learn by doing</h2>
-          <div className="panel-sub">
-            Every step sets the bench up for you and asks for one concrete thing. Where the app can hear you — mic, MIDI or the computer keyboard — it checks the step off itself.
-          </div>
+          <div className="panel-sub">Each step sets the bench up and asks for one thing. Where the app can hear you, it checks the step off itself.</div>
         </div>
         <div className="learn-stats">
           <div><strong>{progress.lessons.length}</strong><span>steps done</span></div>
@@ -84,7 +91,7 @@ export function LearnView() {
           return (
             <section key={path.id} className="panel path">
               <div className="path-head">
-                <span className="path-icon">{path.icon}</span>
+                <span className="path-icon" />
                 <div>
                   <h2>{path.name}</h2>
                   <div className="panel-sub">{path.blurb}</div>
@@ -97,9 +104,7 @@ export function LearnView() {
                     <button className="step-go" onClick={() => startLesson(step)}>
                       <span className="step-mark">{lessonDone(step.id) ? '✓' : step === upNext ? '▶' : '○'}</span>
                       <span className="step-title">{step.title}</span>
-                      <span className="step-goal">
-                        {step.goal.kind === 'score' ? `🎤 ${step.goal.min}+` : step.goal.kind === 'fret' ? `🧠 ${step.goal.min}+` : step.goal.kind === 'crab' ? `🦀 ${step.goal.min}+` : step.goal.kind === 'coach' ? '🧑‍🏫 coach' : step.goal.kind === 'quiz' ? '👂 quiz' : '☑ check'}
-                      </span>
+                      <span className="step-goal">{GOAL_LABEL(step.goal)}</span>
                     </button>
                   </li>
                 ))}
@@ -112,18 +117,18 @@ export function LearnView() {
       <EarQuiz />
 
       <section className="panel">
-        <div className="panel-head"><div><h2>Drill records</h2><div className="panel-sub">best graded pass on each rung of the Jam ladder, and best sprint on each neck drill</div></div></div>
+        <div className="panel-head"><div><h2>Records</h2><div className="panel-sub">best graded pass per drill, best sprint per neck drill</div></div></div>
         <div className="records">
           {LENSES.map((l) => (
             <div key={l.id} className="record">
-              <span>{l.icon} {l.name}</span>
+              <span>{l.name}</span>
               <span className="record-bar"><i style={{ width: `${progress.drillBest[l.id] ?? 0}%` }} /></span>
               <strong>{progress.drillBest[l.id] ?? '—'}</strong>
             </div>
           ))}
           {FRET_DRILLS.map((d) => (
             <div key={d.id} className="record">
-              <span>{d.icon} {d.name}</span>
+              <span>{d.name}</span>
               <span className="record-bar"><i style={{ width: `${progress.fretBest[d.id] ?? 0}%` }} /></span>
               <strong>{progress.fretBest[d.id] ?? '—'}</strong>
             </div>

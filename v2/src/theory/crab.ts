@@ -17,14 +17,13 @@ export type CrabMode = 'crab' | 'table';
 
 export interface CrabModeDef {
   id: CrabMode;
-  icon: string;
   name: string;
   hint: string;
 }
 
 export const CRAB_MODES: CrabModeDef[] = [
-  { id: 'crab', icon: '🦀', name: 'Crab', hint: 'the same notes read from the end — last note first' },
-  { id: 'table', icon: '🪞', name: 'Table', hint: 'backwards and upside-down: the sheet as the player across the table sees it' },
+  { id: 'crab', name: 'Crab', hint: 'the same notes read from the end' },
+  { id: 'table', name: 'Table', hint: 'backwards and upside down' },
 ];
 
 // --- the mirror ----------------------------------------------------------------
@@ -145,7 +144,8 @@ export interface CrabClash {
 }
 
 export interface CrabVerdict {
-  icon: string;
+  /** crabs out of three */
+  crabs: number;
   name: string;
   text: string;
 }
@@ -198,10 +198,10 @@ function whyOf(role: SoloNote | undefined, chord: string): string {
 }
 
 export function verdictFor(score: number): CrabVerdict {
-  if (score >= 90) return { icon: '🦀🦀🦀', name: 'Cancrizans', text: 'The line is its own accompaniment. Bach would nod.' };
-  if (score >= 72) return { icon: '🦀🦀', name: 'Walks nicely', text: 'Backwards works, with a pinch or two along the way.' };
-  if (score >= 50) return { icon: '🦀', name: 'Pinchy', text: 'Read from the end, the line keeps stepping on notes the chords don’t want.' };
-  return { icon: '🫧', name: 'Lost at sea', text: 'Backwards, this line fights the chords most of the way. Nobody writes a crab canon by accident.' };
+  if (score >= 90) return { crabs: 3, name: 'Cancrizans', text: 'The line is its own accompaniment. Bach would nod.' };
+  if (score >= 72) return { crabs: 2, name: 'Walks nicely', text: 'Backwards works, with a pinch or two along the way.' };
+  if (score >= 50) return { crabs: 1, name: 'Pinchy', text: 'Read from the end, the line keeps stepping on notes the chords don’t want.' };
+  return { crabs: 0, name: 'Lost at sea', text: 'Backwards, this line fights the chords most of the way. Nobody writes a crab canon by accident.' };
 }
 
 /** Candidate pitches around `midi`, nearest first: the note itself, then a half step either way, and so on. */

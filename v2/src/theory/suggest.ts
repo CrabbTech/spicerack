@@ -96,12 +96,12 @@ export interface NextOption {
   why: string;
 }
 
-export const INTENTS: { id: Intent; icon: string; name: string; blurb: string }[] = [
-  { id: 'settle', icon: '🏡', name: 'Settle', blurb: 'Head toward rest: home, its close relatives, or the soft "Amen" road back.' },
-  { id: 'tension', icon: '🧲', name: 'Build tension', blurb: 'Chords with a leading tone or a tritone inside. They want to resolve, so the bar after them matters.' },
-  { id: 'brighten', icon: '🌤', name: 'Brighten', blurb: 'Raise a note of the key or step onto a major chord — same landscape, more light.' },
-  { id: 'darken', icon: '🌘', name: 'Darken', blurb: 'Lower a note of the key: borrowed minor color, a cloud crossing the sun.' },
-  { id: 'surprise', icon: '🃏', name: 'Surprise', blurb: 'Deceptive turns, chromatic mediants and the Neapolitan — somewhere the ear was not expecting to go.' },
+export const INTENTS: { id: Intent; name: string; blurb: string }[] = [
+  { id: 'settle', name: 'Settle', blurb: 'Head toward rest: home, its close relatives, or the soft "Amen" road back.' },
+  { id: 'tension', name: 'Build tension', blurb: 'Chords with a leading tone or a tritone inside. They want to resolve, so the bar after them matters.' },
+  { id: 'brighten', name: 'Brighten', blurb: 'Raise a note of the key or step onto a major chord — same landscape, more light.' },
+  { id: 'darken', name: 'Darken', blurb: 'Lower a note of the key: borrowed minor color, a cloud crossing the sun.' },
+  { id: 'surprise', name: 'Surprise', blurb: 'Deceptive turns, chromatic mediants and the Neapolitan — somewhere the ear was not expecting to go.' },
 ];
 
 const PER_INTENT = 3;

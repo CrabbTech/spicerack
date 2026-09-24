@@ -101,7 +101,7 @@ function TriadNeck({ neck, shapes, chosen, next, pinned, lefty, cursorMidi, held
             })}
             {on && (
               <text x={labelX} y={yOf(set[2]) - 15} textAnchor="middle" className="tn-label">
-                {pinned ? '📌 ' : ''}{['root pos', '1st inv', '2nd inv'][v.inversion]}
+                {pinned ? 'pinned · ' : ''}{['root pos', '1st inv', '2nd inv'][v.inversion]}
               </text>
             )}
           </g>
@@ -177,44 +177,37 @@ export function TriadLab() {
       <div className="panel-head">
         <div>
           <h2>Triad lab</h2>
-          <div className="panel-sub">three notes per chord, in whichever inversion keeps your hand where it is — for comping, and for solos that spell the chords</div>
         </div>
         <div className="panel-actions">
-          <button className={`btn ${demoOn ? 'btn-on' : ''}`} onClick={() => { setDemoOn(!demoOn); if (!demoOn && !state.playing) app.startPlayback(); }}
-            title="play the loop with each triad rolled low–mid–high–mid, and watch it walk the path (l)">
+          <button className={`btn ${demoOn ? 'btn-on' : ''}`} onClick={() => { setDemoOn(!demoOn); if (!demoOn && !state.playing) app.startPlayback(); }}>
             {demoOn ? '■ Demo arpeggio' : '▶ Demo arpeggio'}
           </button>
-          <button className={`btn ${triadComp ? 'btn-on' : ''}`} onClick={() => setTriadComp(!triadComp)}
-            title="the band plays these voice-led triads instead of the full chord grips — hear the path as a rhythm part">
-            🔊 Comp with these
-          </button>
+          <button className={`btn ${triadComp ? 'btn-on' : ''}`} onClick={() => setTriadComp(!triadComp)}>Comp with these</button>
         </div>
       </div>
 
       <div className="triad-controls">
         {triads.neck && (
           <>
-            <span className="control-label">STRINGS</span>
+            <span className="control-label">Strings</span>
             {triads.neck.setNames.map((name, i) => (
-              <button key={name} className={`chip ${i === triads.neck!.setIdx ? 'chip-on' : ''}`} onClick={() => setTriadSet(i)}
-                title={i === triads.neck!.setNames.length - 1 ? 'the top set: bright, cuts through, the classic comping register' : 'three adjacent strings'}>
+              <button key={name} className={`chip ${i === triads.neck!.setIdx ? 'chip-on' : ''}`} onClick={() => setTriadSet(i)}>
                 {name}
               </button>
             ))}
           </>
         )}
-        <span className={`control-label ${triads.neck ? 'band-label' : ''}`}>PATH</span>
+        <span className={`control-label ${triads.neck ? 'band-label' : ''}`}>Path</span>
         {PATH_MODES.map((m) => (
           <button key={m.id} className={`chip ${m.id === triadMode ? 'chip-on' : ''}`} title={m.blurb} onClick={() => setTriadMode(m.id)}>
-            {m.icon} {m.name}
+            {m.name}
           </button>
         ))}
-        <button className={`chip ${triadUpper ? 'chip-on' : ''}`} onClick={() => setTriadUpper(!triadUpper)}
-          title="over seventh chords, play the triad made of the 3rd, 5th and 7th — a simpler shape that implies the richer chord">
+        <button className={`chip ${triadUpper ? 'chip-on' : ''}`} onClick={() => setTriadUpper(!triadUpper)}>
           3-5-7
         </button>
-        {pinCount > 0 && <button className="chip" onClick={() => setTriadPins({})} title="let the path choose every shape again">📌 {pinCount} pinned ✕</button>}
-        {triads.neck && <button className={`chip ${lefty ? 'chip-on' : ''}`} onClick={() => setLefty(!lefty)} title="mirror the neck: nut on the right">🫲 Lefty</button>}
+        {pinCount > 0 && <button className="chip" onClick={() => setTriadPins({})}>{pinCount} pinned ×</button>}
+        {triads.neck && <button className={`chip ${lefty ? 'chip-on' : ''}`} onClick={() => setLefty(!lefty)}>Lefty</button>}
       </div>
 
       <div className="triad-stat">
@@ -227,7 +220,7 @@ export function TriadLab() {
       </div>
 
       <div className="follow-row">
-        <span className="control-label">{state.playing ? 'NOW' : 'OVER'}</span>
+        <span className="control-label">{state.playing ? 'Now' : 'Over'}</span>
         {realized.map((r, i) => (
           <button key={r.slot.id} className={`chip follow-chip numeral-${r.chord.func} ${i === at ? 'follow-on' : ''}`} onClick={() => setFocusId(r.slot.id)}>
             {chordSymbol(r.chord)}
@@ -263,7 +256,7 @@ export function TriadLab() {
         <span className="legend-item"><i className="legend-dot legend-fifth" />5th</span>
         {anyUpper && <span className="legend-item"><i className="legend-dot legend-outside" />7th</span>}
         <span className="legend-item"><i className="legend-dot legend-landing" />where the next chord is</span>
-        <span className="legend-hint">{triads.neck ? 'click any shape to hear it and pin it — the rest of the path re-routes around your choice' : 'the dashed keys are the next chord: see how little has to move'}</span>
+        <span className="legend-hint">{triads.neck ? 'click a shape to pin it' : 'dashed keys: the next chord'}</span>
       </div>
 
       <div className="triad-strip">
@@ -277,7 +270,7 @@ export function TriadLab() {
                 {triads.specs[i].source === 'upper' && <span className="triad-upper">play {triads.specs[i].name}</span>}
                 {v && triads.neck && <FretboardChord voicing={{ frets: miniFrets(v, triads.neck.names.length) }} rootIndex={v.strings![v.tones.findIndex((t) => t.degree === 1)]} />}
                 {v && !triads.neck && <span className="triad-notes">{v.tones.map((t) => t.label).join(' ')}</span>}
-                <span className="triad-inv">{v ? ['root pos', '1st inv', '2nd inv'][v.inversion] : 'no shape'}{triadPins[r.slot.id] !== undefined ? ' 📌' : ''}</span>
+                <span className="triad-inv">{v ? ['root pos', '1st inv', '2nd inv'][v.inversion] : 'no shape'}{triadPins[r.slot.id] !== undefined ? ' · pinned' : ''}</span>
               </button>
               {n > 1 && v && to && (
                 <span className="triad-moves" title={describeMove(v, to, unit)}>
