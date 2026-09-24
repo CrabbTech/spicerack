@@ -15,6 +15,8 @@ export interface MicOptions {
   onNote: (midi: number, on: boolean, time: number) => void;
   /** live level + pitch for the meter, ~20×/second */
   onLevel?: (rms: number, midi: number | null) => void;
+  /** a particular input (MediaDeviceInfo.deviceId); the browser's choice when absent */
+  deviceId?: string | null;
 }
 
 export const micSupported = (): boolean => typeof navigator !== 'undefined' && !!navigator.mediaDevices?.getUserMedia;
@@ -25,7 +27,7 @@ export async function openMic(ctx: AudioContext, opts: MicOptions): Promise<MicH
   try {
     // an instrument is not a voice call: leave the signal alone
     stream = await navigator.mediaDevices.getUserMedia({
-      audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false },
+      audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false, ...(opts.deviceId ? { deviceId: { exact: opts.deviceId } } : {}) },
     });
   }
   catch {

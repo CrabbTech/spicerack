@@ -7,6 +7,9 @@ edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
+[workspace]
+members = ["crates/quire-dsp"]
+
 [lib]
 # The `_lib` suffix may seem redundant but it is necessary
 # to make the lib name unique and wouldn't conflict with the bin name.
@@ -23,4 +26,16 @@ tauri-plugin-opener = "2"
 tauri-plugin-dialog = "2"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
+quire-dsp = { path = "crates/quire-dsp" }
+# the ears and the MIDI port: Core Audio and CoreMIDI on macOS
+cpal = "0.16"
+midir = "0.10"
 
+[target.'cfg(any(target_os = "macos", windows, target_os = "linux"))'.dependencies]
+tauri-plugin-window-state = "2"
+
+# pitch tracking runs while `tauri dev` builds the app crate unoptimised — keep the ears fast anyway
+[profile.dev.package.quire-dsp]
+opt-level = 3
+[profile.dev.package.quire]
+opt-level = 1

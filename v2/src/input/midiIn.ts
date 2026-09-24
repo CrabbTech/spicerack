@@ -1,7 +1,7 @@
 // Web MIDI in: an OP-1 field (or any controller) over USB. Available in
-// Chromium browsers; WKWebView — the Tauri shell on macOS — doesn't ship Web
-// MIDI, so callers must treat `null` as "not on this platform" and offer the
-// mic or the computer keyboard instead.
+// Chromium browsers; WKWebView — the desktop shell — doesn't ship Web MIDI,
+// so there the app listens to CoreMIDI natively instead (src/input/native.ts).
+// Callers treat `null` as "not on this platform".
 
 export interface MidiInHandle {
   stop(): void;

@@ -2,6 +2,7 @@
 // plate, and the keys that work on each page. Opened by the wordmark.
 
 import { useEffect, useState } from 'react';
+import { useApp } from '../state/AppContext';
 import { BRAND } from '../brand';
 import { storageKey } from '../state/storage';
 import { PixelCrab } from './PixelCrab';
@@ -24,7 +25,12 @@ const KEYS: { page: string; keys: [string, string][] }[] = [
   { page: 'Jam', keys: [['l', 'demo lick'], ['esc', 'clear the map'], ['← → ⌫', 'step entry, when armed']] },
 ];
 
+const MENU_KEYS: { page: string; keys: [string, string][] }[] = [
+  { page: 'Menu bar', keys: [['⌘N', 'new progression'], ['⌘⇧N', 'compose'], ['⌘S', 'save to library'], ['⌘L', 'library'], ['⌘E', 'export MIDI'], ['⌘⇧C', 'copy tab / chart'], ['⌘P', 'play / stop'], ['⌘⇧S', 'spice it up'], ['⌘⇧A', 'a/b'], ['⌘⌥R', 'reset'], ['⌘⇧K', 'let the crab in'], ['⌘⇧M', 'mirror the chords'], ['⌘1 ⌘2 ⌘3', 'learn, jam, write'], ['⌘⌥1 – 4', 'instrument'], ['⌘,', 'sound'], ['⌘I', 'inside cover']] },
+];
+
 export function CoverModal({ onClose }: { onClose: () => void }) {
+  const { desktop } = useApp();
   const [owner, setOwner] = useState(loadOwner);
   useEffect(() => {
     try {
@@ -54,7 +60,7 @@ export function CoverModal({ onClose }: { onClose: () => void }) {
           <input value={owner} placeholder="your name" spellCheck={false} onChange={(e) => setOwner(e.target.value)} />
         </label>
         <div className="cover-keys">
-          {KEYS.map((group) => (
+          {[...KEYS, ...(desktop ? MENU_KEYS : [])].map((group) => (
             <div key={group.page} className="cover-keygroup">
               <div className="shelf-head">{group.page}</div>
               {group.keys.map(([k, what]) => (

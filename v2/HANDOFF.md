@@ -90,3 +90,66 @@ in mono capitals; prose in the serif; every teaching line stays.
 **How to run:** `cd v2 && npm install && npm run dev` (browser, port 1430) or
 `npm run tauri dev`. Tests: `npm test`. Deep link that skips session resume:
 `?genre=pop&tonic=A&view=write&prog=I,vi,IV,V`.
+
+---
+
+# Handoff — the Mac app (`claude/quire-mac-app`)
+
+**What happened.** Quire became a proper macOS application, built on the
+journal branch. The Tauri shell (`v2/src-tauri`) grew:
+
+- `crates/quire-dsp` — the YIN pitch detector ported from `src/input/pitch.ts`
+  to Rust, with the same tests (sine sweeps, loud 2nd harmonic, bass E1 with
+  a 4096 window, mid-frame onsets, silence/noise/whispers, scratch reuse).
+  The note tracker stays in TypeScript so mic, interface and tests share it.
+- `src/audio.rs` — the interface as an input: cpal (Core Audio) opens the
+  chosen device, the callback de-interleaves the chosen input (or mixes them),
+  and a worker thread keeps a rolling window, runs the detector every hop
+  (512 samples) and emits `quire://audio` every second hop (~47/s) with
+  `{freq, midi, clarity, rms, level, t}`; `quire://audio-state` says running /
+  stopped / error. Commands: `audio_devices`, `audio_start(device, channel,
+  low)`, `audio_stop`.
+- `src/midi.rs` — CoreMIDI through midir on its own thread; `midi_ports`,
+  `midi_start(port)`, `midi_stop`; events `quire://midi` and `quire://midi-state`.
+- `src/menu.rs` — the menu bar (Quire / File / Edit / Song / View / Window /
+  Help) with accelerators; every item emits `quire://menu` with its id and the
+  controller's `onMenu` turns it into a move.
+- `tauri.conf.json` — `titleBarStyle: Overlay`, `hiddenTitle`, traffic lights
+  at (16, 19), desk-coloured window background, `bundle.category: Music`,
+  `bundle.macOS.entitlements: Entitlements.plist` (audio-input),
+  `minimumSystemVersion: 12.0`. `tauri-plugin-window-state` remembers the
+  window. Capabilities add `window-state:default` and
+  `core:window:allow-start-dragging` (the `.titlebar` strip is a drag region).
+
+On the page: `src/input/native.ts` is the bridge (`openInterface`,
+`openNativeMidi`, device and port lists, `isDesktop`, `isMac`); the controller
+has an `interface` input source, `sound` settings (`src/state/sound.ts`,
+kept as `quire.sound`), native MIDI when on the desktop, and the menu
+dispatcher; `SoundModal` is the Sound sheet (⌘, · the Sound… button in
+Listen); the inside cover lists the menu keys on a Mac; `<html data-shell>`
+is `mac` in the app (`?shell=mac` previews the chrome in a browser). The mic
+can be asked for by device in a browser too.
+
+**Verified here (Linux container).** The whole Tauri crate type-checks and
+lints clean with the Linux backends of cpal (ALSA) and midir installed
+(`cargo check`, `cargo clippy`); `cargo test` passes in `quire-dsp`. tsc,
+vitest (261) and `vite build` are clean. **Not verified:** nothing was built or
+run on a Mac — the first `npm run tauri dev` on macOS is the real test. Things
+most likely to need a touch there: the exact `PredefinedMenuItem` builder
+names on this tauri version (all compiled here, so they exist), the traffic
+light offset against the tab row, and Core Audio device names as ids (they
+are the `name()` cpal reports — an interface with two identically named
+entries would collide).
+
+**Companion setup.** Quire reads the interface directly; Core Audio shares
+inputs, so AmpliTube keeps the guitar too. The Sound sheet explains the
+routing, including BlackHole/Loopback for grading the processed tone.
+
+**Open threads.**
+- Output device selection: Web Audio in WKWebView cannot pick an output
+  (`setSinkId` is missing), so the band plays through the system default. A
+  native output path would mean moving playback out of the webview — big.
+- The interface's latency is taken as 30 ms like the mic; a real measurement
+  (loopback ping) could replace the constant.
+- `?shell=mac` only previews the chrome; the Interface source and device
+  lists need the app.

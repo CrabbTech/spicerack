@@ -123,6 +123,56 @@ pressed on every practice day. No emoji.
 - The **inside cover** (click the wordmark): what the name means, a plate,
   "this journal belongs to", and every keyboard shortcut.
 
+## The Mac app
+
+The same journal, as a native macOS application (Tauri 2), with the things a
+web page cannot do:
+
+- **The interface, straight in.** In Jam, Listen has an **Interface** source:
+  the app opens your audio interface through Core Audio (`src-tauri/src/audio.rs`),
+  on the input you pick under **Sound…** (⌘,), and tracks pitch in Rust
+  (`src-tauri/crates/quire-dsp`, the same YIN ears as the web build). Core
+  Audio lets more than one app read an input at once, so an amp sim can keep
+  the guitar too — that is the companion setup below.
+- **CoreMIDI.** The OP-1 field (or any controller) over USB, without Web MIDI:
+  pick the port under Sound.
+- **A menu bar** with the keys a Mac expects (⌘N new, ⌘S save, ⌘E export MIDI,
+  ⌘P play, ⌘⇧S spice, ⌘1/2/3 for the pages, ⌘, for Sound, ⌘I for the inside
+  cover — the cover lists them all), a title bar the page draws under, and a
+  window that remembers where it was.
+
+### Playing next to an amp sim (AmpliTube, or any of them)
+
+1. Plug the guitar into the interface. Point AmpliTube at the same interface,
+   as you would anyway, and play through it as usual.
+2. In Quire, open **Sound…** (⌘,), pick the interface and the **input** the
+   guitar is on (usually 1), and press **Listen** — the meter moves and the
+   note you play appears. Quire hears the dry string; AmpliTube shapes the
+   tone you hear; both play out of the same output.
+3. In Jam, set Listen to **Interface**, press play, and play along. Every
+   diagram lights the notes you play and each pass is graded.
+
+To have Quire grade the amp's sound instead of the dry string, route AmpliTube
+into a virtual device (BlackHole, Loopback) and pick that device under Sound.
+An interface input never hears the band, so headphones are optional there;
+a microphone does hear it, so headphones keep it out.
+
+### Building it
+
+```bash
+cd v2
+npm install
+npm run tauri dev        # the app window, hot reloading
+npm run tauri build      # Quire.app + .dmg in src-tauri/target/release/bundle/
+```
+
+Needs Xcode's command line tools and Rust (rustup). `src-tauri/Entitlements.plist`
+carries the audio-input entitlement the hardened runtime needs; macOS asks for
+the microphone once (`NSMicrophoneUsageDescription` in `src-tauri/Info.plist`),
+and that permission covers the interface as well. Signing and notarization go
+through `bundle.macOS.signingIdentity` in `src-tauri/tauri.conf.json` as usual
+for Tauri.
+
 ## Run it
 
 ```bash
@@ -151,6 +201,9 @@ src/state/    reducer.ts   — the document: key, genre, sections (chords + melo
               journal.ts   — the book: every log line with its time, kept between sessions
               dates.ts     — datelines, day/week of the year, the month grid
               storage.ts   — localStorage under the app's name (+ carry-over from the old one)
+              sound.ts     — which input, which MIDI port
+src-tauri/    lib.rs (commands, menu, window) · audio.rs (Core Audio in, pitch in Rust) · midi.rs (CoreMIDI) · menu.rs
+              crates/quire-dsp — the YIN detector, ported and tested
 src/theory/   notes, scales, chords, roman numerals, progressions, spices, compose
               solo.ts (note roles + drills) · lick.ts (demo licks) · transitions.ts
               melody.ts (motif moves + coach) · suggest.ts (next-chord intents, reharmonize)
@@ -158,7 +211,7 @@ src/theory/   notes, scales, chords, roman numerals, progressions, spices, compo
               triads.ts (inversions on string sets / key windows + the voice-leading path solver)
 src/audio/    engine.ts (voices, buses, backing-band scheduler, transport clock)
               groove.ts (bar events shared by playback AND midi.ts) · midi.ts
-src/input/    pitch.ts (YIN + note tracker) · mic.ts · midiIn.ts · qwerty.ts
+src/input/    pitch.ts (YIN + note tracker) · mic.ts · midiIn.ts · qwerty.ts · native.ts (the desktop app's ears and MIDI port)
 src/practice/ grade.ts (takes vs drills) · fretDrills.ts (fluency sprints) · progress.ts · earQuiz.ts
 src/data/     genres.ts (the genre book) · lessons.ts (learning paths) · customGenres.ts
 src/guitar/   shapes, voicings, tab, positions.ts (connected boxes), caged.ts (form + known grip), melodyTab.ts,

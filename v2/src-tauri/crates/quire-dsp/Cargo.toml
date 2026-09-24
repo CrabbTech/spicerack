@@ -1,0 +1,8 @@
+[package]
+name = "quire-dsp"
+version = "0.1.0"
+edition = "2021"
+description = "Quire's ears: monophonic pitch detection, frames in and data out"
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }

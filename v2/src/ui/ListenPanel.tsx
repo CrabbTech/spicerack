@@ -11,17 +11,19 @@ import { micSupported } from '../input/mic';
 
 const SOURCES: { id: InputSource; name: string; hint: string }[] = [
   { id: 'off', name: 'Off', hint: 'not listening' },
+  { id: 'interface', name: 'Interface', hint: 'the audio interface, straight in — pick the device and input under Sound' },
   { id: 'mic', name: 'Mic', hint: 'guitar, bass, voice or a speaker — one note at a time' },
   { id: 'midi', name: 'MIDI', hint: 'any controller over USB (Chrome / Edge)' },
   { id: 'qwerty', name: 'Keys', hint: 'the computer keyboard as a two-octave piano' },
 ];
 
 export function ListenPanel() {
-  const { inputSource, setInputSource, inputStatus, held, micLevel, grade, scores, lens, progress, state, preferFlat } = useApp();
+  const { inputSource, setInputSource, inputStatus, held, micLevel, grade, scores, lens, progress, state, preferFlat, desktop, setModal } = useApp();
   const drill = LENSES.find((l) => l.id === lens) ?? LENSES[0];
   const best = progress.drillBest[lens];
   const name = (m: number) => midiLabel(m, preferFlat ? 'flat' : 'sharp');
-  const supported = (id: InputSource) => id === 'off' || id === 'qwerty' || (id === 'mic' ? micSupported() : midiInSupported());
+  const supported = (id: InputSource) => id === 'off' || id === 'qwerty' || (id === 'mic' ? micSupported() : id === 'interface' ? desktop : desktop || midiInSupported());
+  const sources = SOURCES.filter((s) => s.id !== 'interface' || desktop);
 
   return (
     <section className="panel listen-panel">
@@ -30,12 +32,15 @@ export function ListenPanel() {
           <h2>Listen</h2>
           <div className="panel-sub">graded against <strong>{drill.name}</strong></div>
         </div>
-        <div className="seg">
-          {SOURCES.map((s) => (
-            <button key={s.id} className={inputSource === s.id ? 'seg-on' : ''} disabled={!supported(s.id)} title={s.hint} onClick={() => setInputSource(s.id)}>
-              {s.name}
-            </button>
-          ))}
+        <div className="panel-actions">
+          <div className="seg">
+            {sources.map((s) => (
+              <button key={s.id} className={inputSource === s.id ? 'seg-on' : ''} disabled={!supported(s.id)} title={s.hint} onClick={() => setInputSource(s.id)}>
+                {s.name}
+              </button>
+            ))}
+          </div>
+          <button className="btn" title="which input, which MIDI port, and how to sit next to an amp sim" onClick={() => setModal('sound')}>Sound…</button>
         </div>
       </div>
 
@@ -45,8 +50,8 @@ export function ListenPanel() {
         <>
           <div className="listen-status">
             <span>{inputStatus}</span>
-            {inputSource === 'mic' && <span className="mic-meter"><i style={{ width: `${Math.min(100, micLevel.rms * 450)}%` }} /></span>}
-            <span className="listen-now">{held.length ? held.map(name).join(' ') : inputSource === 'mic' && micLevel.midi !== null ? name(micLevel.midi) : '—'}</span>
+            {(inputSource === 'mic' || inputSource === 'interface') && <span className="mic-meter"><i style={{ width: `${Math.min(100, micLevel.rms * 450)}%` }} /></span>}
+            <span className="listen-now">{held.length ? held.map(name).join(' ') : (inputSource === 'mic' || inputSource === 'interface') && micLevel.midi !== null ? name(micLevel.midi) : '—'}</span>
           </div>
           {!state.playing && <div className="practice-hint">Notes count while the loop is running.</div>}
           {grade && (

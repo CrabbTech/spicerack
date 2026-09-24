@@ -43,6 +43,8 @@ import { CrabMode, analyzeCanon, crabProof, mirrorLead, mirrorSpec, movedNotes }
 import { TakeGrade, gradeTake } from '../practice/grade';
 import { Progress, loadProgress, recordLesson, recordPass, recordSprint, saveProgress } from '../practice/progress';
 import { storageKey } from './storage';
+import { SoundSettings, loadSound, saveSound } from './sound';
+import { isDesktop, openInterface, openNativeMidi } from '../input/native';
 import { JournalEntry, appendJournal, loadJournal, saveJournal } from './journal';
 import { turnPage } from '../ui/pageTurn';
 import { EarRound, buildEarRound } from '../practice/earQuiz';
@@ -95,11 +97,11 @@ export interface AbChip {
   changed: boolean;
 }
 
-export type InputSource = 'off' | 'qwerty' | 'midi' | 'mic';
+export type InputSource = 'off' | 'qwerty' | 'midi' | 'mic' | 'interface';
 export type JamTool = 'solo' | 'triads' | 'drills';
 
 /** seconds between playing a note and the app hearing about it, per source */
-const INPUT_LATENCY: Record<InputSource, number> = { off: 0, qwerty: 0.03, midi: 0.012, mic: 0.03 };
+const INPUT_LATENCY: Record<InputSource, number> = { off: 0, qwerty: 0.03, midi: 0.012, mic: 0.03, interface: 0.03 };
 
 /** the crab canon's second voice plays on a different sound from the line it mirrors, so the two readings can be told apart */
 const CRAB_VOICE: Record<InstrumentId, InstrumentId> = { guitar: 'op1', bass: 'piano', piano: 'op1', op1: 'piano' };
@@ -142,7 +144,7 @@ export function useAppController() {
   const [copied, setCopied] = useState<string | null>(null);
   const [customGenres, setCustomGenres] = useState<CustomGenreData[]>(loadCustomGenres);
   const [library, setLibrary] = useState<SavedProgression[]>(loadLibrary);
-  const [modal, setModal] = useState<'lab' | 'library' | 'compose' | 'cover' | null>(null);
+  const [modal, setModal] = useState<'lab' | 'library' | 'compose' | 'cover' | 'sound' | null>(null);
   const [labEditing, setLabEditing] = useState<CustomGenreData | undefined>(undefined);
   const [composeSettings, setComposeSettings] = useState<ComposeSettings>({
     length: 4, heat: 2, cadence: 'auto', startOnTonic: true,
@@ -194,6 +196,13 @@ export function useAppController() {
   const [stepBeat, setStepBeat] = useState(0);
   // play-along: what is listening, what it heard, how the last pass went
   const [inputSource, setInputSource] = useState<InputSource>('off');
+  // which input the ears open, and which MIDI port — kept between launches
+  const [sound, setSoundState] = useState<SoundSettings>(loadSound);
+  const setSound = (next: SoundSettings) => {
+    setSoundState(next);
+    saveSound(next);
+  };
+  const desktop = isDesktop();
   const [inputStatus, setInputStatus] = useState('');
   const [held, setHeld] = useState<number[]>([]);
   const [micLevel, setMicLevel] = useState<{ rms: number; midi: number | null }>({ rms: 0, midi: null });
@@ -997,11 +1006,28 @@ export function useAppController() {
     let stop: (() => void) | undefined;
     if (inputSource === 'midi') {
       setInputStatus('Looking for MIDI…');
-      void openMidiIn(
-        (midi, on, _vel, stamp) => onPlayed.current(midi, on, audio.now() - (performance.now() - stamp) / 1000),
-        (names) => setInputStatus(names.length ? `Listening to ${names.join(', ')}` : 'No MIDI device found — plug the OP-1 in over USB'),
-      ).then((handle) => {
-        if (!handle) setInputStatus('Web MIDI isn’t available here (the desktop shell and Safari don’t have it) — use the mic, or open the web build in Chrome.');
+      const onNote = (midi: number, on: boolean, _vel: number, stamp: number) => onPlayed.current(midi, on, audio.now() - (performance.now() - stamp) / 1000);
+      const onPorts = (names: string[]) => setInputStatus(names.length ? `Listening to ${names.join(', ')}` : `No MIDI device found — plug the OP-1 in over USB${desktop ? ', then pick it under Sound' : ''}`);
+      void (desktop ? openNativeMidi(onNote, onPorts, sound.midiPort) : openMidiIn(onNote, onPorts)).then((handle) => {
+        if (!handle) setInputStatus('Web MIDI isn’t available here (Safari doesn’t have it) — use the mic, or open the web build in Chrome.');
+        else if (closed) handle.stop();
+        else stop = handle.stop;
+      });
+    }
+    else if (inputSource === 'interface') {
+      setInputStatus('Opening the interface…');
+      void openInterface(audio.context(), {
+        deviceId: sound.deviceId,
+        channel: sound.channel,
+        low: isBass,
+        onNote: (midi, on, time) => onPlayed.current(midi, on, time),
+        onLevel: (rms, midi) => setMicLevel({ rms, midi }),
+        onState: (s) => {
+          if (s.kind === 'running') setInputStatus(`Listening to ${s.device}, input ${sound.channel < 0 ? 'mix' : sound.channel + 1} — one note at a time.`);
+          else if (s.kind === 'error') setInputStatus(`The interface stopped: ${s.message}`);
+        },
+      }).then((handle) => {
+        if (!handle) setInputStatus('Couldn’t open that input — pick another under Sound, or use the mic.');
         else if (closed) handle.stop();
         else stop = handle.stop;
       });
@@ -1010,6 +1036,7 @@ export function useAppController() {
       setInputStatus('Asking for the microphone…');
       void openMic(audio.context(), {
         low: isBass,
+        deviceId: sound.micId,
         onNote: (midi, on, time) => onPlayed.current(midi, on, time),
         onLevel: (rms, midi) => setMicLevel({ rms, midi }),
       }).then((handle) => {
@@ -1025,7 +1052,7 @@ export function useAppController() {
       closed = true;
       stop?.();
     };
-  }, [inputSource, isBass, qwertyLo]);
+  }, [inputSource, isBass, qwertyLo, sound]);
 
   /** Capture one pass of playing into the melody: count-in, play, quantize, done. */
   const startRecording = () => {
@@ -1272,6 +1299,55 @@ export function useAppController() {
     return () => window.clearTimeout(timer);
   }, [sessionSig, state.slots, state.melody, state.sections]); // eslint-disable-line react-hooks/exhaustive-deps
 
+
+  // --- the desktop menu bar: every item forwards its id; this is where it becomes a move ---
+  const onMenu = useRef<(id: string) => void>(() => undefined);
+  onMenu.current = (id) => {
+    switch (id) {
+      case 'sound': setModal('sound'); break;
+      case 'new': dispatch({ type: 'new-progression', genre }); break;
+      case 'compose': setModal('compose'); break;
+      case 'save': saveToLibrary(); break;
+      case 'library': setModal('library'); break;
+      case 'export-midi': void exportMidi(); break;
+      case 'copy-tab':
+        if (state.instrument === 'guitar') copyTab();
+        else if (state.instrument === 'bass') copyBassTab();
+        else copyChart();
+        break;
+      case 'undo-spice': dispatch({ type: 'undo' }); break;
+      case 'play': if (state.playing) stopPlayback(); else startPlayback(); break;
+      case 'spice': spiceItUp(); break;
+      case 'ab': if (ab) stopPlayback(); else startAB(); break;
+      case 'reset': dispatch({ type: 'reset-spice' }); break;
+      case 'crab': setCrabOn((on) => !on); break;
+      case 'mirror': mirrorChords(); break;
+      case 'drums': dispatch({ type: 'drums', on: !state.drumsOn }); break;
+      case 'mute': audio.setMuted(!state.muted); dispatch({ type: 'muted', muted: !state.muted }); break;
+      case 'view-learn': dispatch({ type: 'view', view: 'learn' }); break;
+      case 'view-jam': dispatch({ type: 'view', view: 'jam' }); break;
+      case 'view-write': dispatch({ type: 'view', view: 'write' }); break;
+      case 'instrument-guitar': dispatch({ type: 'instrument', id: 'guitar' }); break;
+      case 'instrument-bass': dispatch({ type: 'instrument', id: 'bass' }); break;
+      case 'instrument-piano': dispatch({ type: 'instrument', id: 'piano' }); break;
+      case 'instrument-op1': dispatch({ type: 'instrument', id: 'op1' }); break;
+      case 'cover': setModal('cover'); break;
+    }
+  };
+  useEffect(() => {
+    if (!desktop) return undefined;
+    let un: (() => void) | undefined;
+    let gone = false;
+    void import('@tauri-apps/api/event').then(({ listen }) => listen<string>('quire://menu', (e) => onMenu.current(e.payload))).then((f) => {
+      if (gone) f();
+      else un = f;
+    });
+    return () => {
+      gone = true;
+      un?.();
+    };
+  }, [desktop]);
+
   return {
     state, dispatch, genre, allGenres, key, liveKey, preferFlat, realized, liveRealized, meter, perBar, bpm,
     guitarCandidates, voicingIdx, op1Voicings, pianoVoicings, bassShapes, cardApps,
@@ -1295,7 +1371,7 @@ export function useAppController() {
     // the crab canon
     melodyLead, loopBeats, crabOn, setCrabOn, crabMode, setCrabMode, crabReport, crabLead, crabProofNow, mirrorChords,
     // listening
-    inputSource, setInputSource, inputStatus, held, micLevel, grade, scores, progress,
+    inputSource, setInputSource, inputStatus, held, micLevel, grade, scores, progress, sound, setSound, desktop,
     // learn
     lesson, lessonId, setLessonId, startLesson, completeLesson, lessonDone, quiz, quizStreak, newQuizRound, answerQuiz,
     replayQuiz: () => { if (quiz) playQuiz(quiz.round); },

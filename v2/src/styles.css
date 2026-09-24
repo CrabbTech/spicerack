@@ -881,3 +881,20 @@ html[data-turn="back"]::view-transition-new(book) { animation-name: page-in-back
 .tick-path { animation: tick-draw .45s var(--ease-out) both; }
 .lesson-done-tag { animation: stamp .42s cubic-bezier(.2, .9, .3, 1.25) both; }
 @keyframes tick-draw { from { stroke-dashoffset: 26; } to { stroke-dashoffset: 0; } }
+
+/* ---------- the desktop shell: title bar, sound sheet ---------- */
+
+.titlebar { position: fixed; top: 0; left: 0; right: 0; height: 38px; z-index: 4; }
+html[data-shell="mac"] .desk { padding-top: 42px; }
+html[data-shell="mac"] .tabs { padding-left: 86px; }
+html[data-shell="desktop"] .desk { padding-top: 22px; }
+.sound { width: 760px; }
+.sound-section { padding: 12px 0; border-top: 1px solid var(--line); }
+.sound-section:first-of-type { border-top: none; }
+.sound-section .shelf-head { margin: 0 0 6px; }
+.sound-section select { max-width: 360px; }
+.sound-meter { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: 8px; }
+.sound-meter .mic-meter { width: 140px; }
+.sound-meter .listen-now { margin-left: 0; min-width: 40px; text-align: left; }
+.sound-routing p { font-size: 13.5px; color: var(--dim); margin: 0 0 8px; max-width: 640px; }
+.sound-routing strong { color: var(--text); }

@@ -14,6 +14,7 @@ import { GenreLab } from './GenreLab';
 import { LibraryModal, saveLibrary } from './LibraryModal';
 import { ComposeModal } from './ComposeModal';
 import { CoverModal } from './CoverModal';
+import { SoundModal } from './SoundModal';
 
 export default function App() {
   const app = useAppController();
@@ -22,6 +23,7 @@ export default function App() {
   return (
     <AppContext.Provider value={app}>
       <div className={`desk view-${state.view}`}>
+        {app.desktop && <div className="titlebar" data-tauri-drag-region />}
         <Tabs />
         <div className="book">
           {state.view === 'learn' && <LearnView />}
@@ -30,6 +32,7 @@ export default function App() {
         </div>
 
         {modal === 'cover' && <CoverModal onClose={() => setModal(null)} />}
+        {modal === 'sound' && <SoundModal onClose={() => setModal(null)} />}
         {modal === 'compose' && (
           <ComposeModal settings={app.composeSettings} onChange={app.setComposeSettings}
             onGenerate={app.composeNow} onClose={() => setModal(null)} />
