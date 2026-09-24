@@ -1,14 +1,17 @@
-// WRITE: key and genre, the song's sections, the chord bench with every
-// harmonic tool, the melody workbench and the crab canon — with the reasons alongside.
+// WRITE: the left page is the bench — key and genre, the song's sections, the
+// chords with every harmonic tool, the melody workbench and the crab canon.
+// The right page is the journal, what could come next, and the key's palette.
 
 import { useApp } from '../../state/AppContext';
 import { noteLabel } from '../../theory/notes';
 import { MODE_NAMES, TONIC_CHOICES } from '../../theory/scales';
+import { Spread } from '../Spread';
+import { LessonBanner } from '../LessonBanner';
 import { ProgressionPanel } from '../ProgressionPanel';
 import { SectionBar } from '../SectionBar';
 import { MelodyWorkbench } from '../MelodyWorkbench';
 import { CrabCanon } from '../CrabCanon';
-import { LogPanel, NextChordPanel, PalettePanel } from '../SidePanels';
+import { JournalPanel, NextChordPanel, PalettePanel } from '../SidePanels';
 import { SoloPanel } from '../SoloPanel';
 
 export function KeyGenreControls() {
@@ -48,22 +51,27 @@ export function KeyGenreControls() {
 
 export function WriteView() {
   return (
-    <>
-      <KeyGenreControls />
-      <main className="main">
-        <div className="col-left">
-          <SectionBar />
-          <ProgressionPanel editing />
-          <MelodyWorkbench />
-          <CrabCanon />
-          <SoloPanel compact />
-        </div>
+    <Spread folio={5}
+      left={
+        <>
+          <LessonBanner />
+          <KeyGenreControls />
+          <div className="col-left">
+            <SectionBar />
+            <ProgressionPanel editing />
+            <MelodyWorkbench />
+            <CrabCanon />
+            <SoloPanel compact />
+          </div>
+        </>
+      }
+      right={
         <div className="col-right">
+          <JournalPanel />
           <NextChordPanel />
-          <LogPanel />
           <PalettePanel />
         </div>
-      </main>
-    </>
+      }
+    />
   );
 }

@@ -114,7 +114,7 @@ export function MobiusStrip(p: MobiusStripProps) {
             return <circle key={i} cx={it.x} cy={it.y} r={it.r} className={it.cls} />;
           case 'cursor':
             return it.crab
-              ? <PixelCrabGlyph key={i} x={it.x} y={it.y} width={26 * it.scale} />
+              ? <PixelCrabGlyph key={i} x={it.x} y={it.y} width={26 * it.scale} walking />
               : <circle key={i} cx={it.x} cy={it.y} r={7 * it.scale} className="mobius-play" />;
         }
       })}

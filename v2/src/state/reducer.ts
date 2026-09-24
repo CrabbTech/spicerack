@@ -24,6 +24,10 @@ export interface LogEntry {
   title: string;
   text: string;
   kind: 'spice' | 'info';
+  /** when it was written */
+  at: number;
+  /** shown this session, but not written into the journal (the launch greeting) */
+  quiet?: boolean;
 }
 
 export interface Snapshot {
@@ -126,7 +130,7 @@ const SECTION_NAMES = 'ABCDEFGH';
 
 let logId = 1;
 export const entry = (title: string, text: string, kind: LogEntry['kind'] = 'info'): LogEntry =>
-  ({ id: logId++, title, text, kind });
+  ({ id: logId++, title, text, kind, at: Date.now() });
 
 function progressionFrom(t: ProgressionTemplate) {
   return {
@@ -214,7 +218,7 @@ function resume(session: SavedSession, params: URLSearchParams): AppState | unde
       arrangement: session.arrangement.filter((i) => i < sections.length).length ? session.arrangement.filter((i) => i < sections.length) : [0],
       view: (['learn', 'jam', 'write'] as const).find((v) => v === (params.get('view') ?? session.view)) ?? 'write',
       heat: 2,
-      log: [entry('Welcome back', 'Your song is where you left it.')],
+      log: [{ ...entry('Welcome back', 'Your song is where you left it.'), quiet: true }],
       scaleIdx: session.scaleIdx ?? 0,
       playingSlot: null, playing: false, muted: false, drumsOn: true,
       bpm: session.bpm ?? null,

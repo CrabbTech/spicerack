@@ -1,4 +1,4 @@
-# Build Spicerack 2 (v2/) and deploy it to GitHub Pages on every push to main.
+# Build Quire (v2/) and deploy it to GitHub Pages on every push to main.
 name: Deploy to GitHub Pages
 
 on:

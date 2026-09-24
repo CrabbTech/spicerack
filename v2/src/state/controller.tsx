@@ -2,7 +2,8 @@
 // playback, practice tools, persistence. Views stay dumb: they read this
 // through useApp() and call what they need.
 
-import { MouseEvent, useEffect, useMemo, useReducer, useRef, useState } from 'react';
+import { MouseEvent, useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react';
+import { flushSync } from 'react-dom';
 import { midiLabel, mod12, notePc, spellPcSimple } from '../theory/notes';
 import { LENSES, LensId } from '../theory/solo';
 import { explainTransition } from '../theory/transitions';
@@ -33,7 +34,7 @@ import { buildTransitionDemo } from '../ui/TransitionPanel';
 import { SavedProgression, loadLibrary, saveLibrary } from '../ui/LibraryModal';
 import { ComposeSettings } from '../ui/ComposeModal';
 
-import { SpiceStep, buildSoloTips, entry, init, linkParam, reducer, stash, styleChord } from './reducer';
+import { Action, SpiceStep, ViewId, buildSoloTips, entry, init, linkParam, reducer, stash, styleChord } from './reducer';
 import {
   MelNote, MelodyContext, analyzeMelody, newNoteId, quantize, sortNotes, toLead,
 } from '../theory/melody';
@@ -42,6 +43,8 @@ import { CrabMode, analyzeCanon, crabProof, mirrorLead, mirrorSpec, movedNotes }
 import { TakeGrade, gradeTake } from '../practice/grade';
 import { Progress, loadProgress, recordLesson, recordPass, recordSprint, saveProgress } from '../practice/progress';
 import { storageKey } from './storage';
+import { JournalEntry, appendJournal, loadJournal, saveJournal } from './journal';
+import { turnPage } from '../ui/pageTurn';
 import { EarRound, buildEarRound } from '../practice/earQuiz';
 import { ALL_STEPS, LessonStep } from '../data/lessons';
 import { neckPositions } from '../guitar/positions';
@@ -69,6 +72,8 @@ export interface PracticeSettings {
   backing: 'same' | InstrumentId;
 }
 
+/** the pages in the order they are bound: Learn, Jam, Write */
+const PAGE_ORDER: ViewId[] = ['learn', 'jam', 'write'];
 const PRACTICE_KEY = storageKey('practice');
 const LABELS_KEY = storageKey('labels');
 const LEFTY_KEY = storageKey('lefty');
@@ -121,12 +126,23 @@ export interface AbState {
 
 
 export function useAppController() {
-  const [state, dispatch] = useReducer(reducer, undefined, init);
+  const [state, rawDispatch] = useReducer(reducer, undefined, init);
+  // a change of view turns the page: its DOM update runs inside a view transition (pageTurn.ts)
+  const viewRef = useRef(state.view);
+  viewRef.current = state.view;
+  const dispatch = useCallback((action: Action) => {
+    const to = action.type === 'view' || action.type === 'stage' ? action.view : null;
+    if (to !== null && to !== viewRef.current) {
+      document.documentElement.dataset.turn = PAGE_ORDER.indexOf(to) > PAGE_ORDER.indexOf(viewRef.current) ? 'fwd' : 'back';
+      turnPage(() => flushSync(() => rawDispatch(action)));
+    }
+    else rawDispatch(action);
+  }, []);
   const stopRef = useRef<(() => void) | null>(null);
   const [copied, setCopied] = useState<string | null>(null);
   const [customGenres, setCustomGenres] = useState<CustomGenreData[]>(loadCustomGenres);
   const [library, setLibrary] = useState<SavedProgression[]>(loadLibrary);
-  const [modal, setModal] = useState<'lab' | 'library' | 'compose' | null>(null);
+  const [modal, setModal] = useState<'lab' | 'library' | 'compose' | 'cover' | null>(null);
   const [labEditing, setLabEditing] = useState<CustomGenreData | undefined>(undefined);
   const [composeSettings, setComposeSettings] = useState<ComposeSettings>({
     length: 4, heat: 2, cadence: 'auto', startOnTonic: true,
@@ -185,6 +201,11 @@ export function useAppController() {
   const [scores, setScores] = useState<number[]>([]);
   const [recording, setRecording] = useState(false);
   const [progress, setProgress] = useState<Progress>(loadProgress);
+  // the journal: every log line, written into the book with its time, kept between sessions
+  const [journal, setJournal] = useState<JournalEntry[]>(loadJournal);
+  const journalRef = useRef(journal);
+  journalRef.current = journal;
+  const journaled = useRef(0);
   const [lessonId, setLessonId] = useState<string | null>(null);
   const [songAt, setSongAt] = useState<number | null>(null);
   const [quiz, setQuiz] = useState<QuizState | null>(null);
@@ -194,6 +215,15 @@ export function useAppController() {
   const songRef = useRef(false);
 
   useEffect(() => saveProgress(progress), [progress]);
+  useEffect(() => {
+    // the log is newest-first; anything above the high-water mark is new this render
+    const fresh = state.log.filter((e) => e.id > journaled.current && !e.quiet);
+    for (const e of state.log) journaled.current = Math.max(journaled.current, e.id);
+    if (!fresh.length) return;
+    const next = appendJournal(journalRef.current, [...fresh].reverse().map((e) => ({ id: `${e.at}-${e.id}`, at: e.at, title: e.title, text: e.text, kind: e.kind })));
+    saveJournal(next);
+    setJournal(next);
+  }, [state.log]);
   useEffect(() => localStorage.setItem(LEFTY_KEY, lefty ? '1' : '0'), [lefty]);
 
   useEffect(() => {
@@ -1273,7 +1303,7 @@ export function useAppController() {
     spiceItUp, composeNow, cycleBars, asStep, addPaletteChord, fakeSlot, midisFor, harmonyMidis,
     copied, copyText, copyTab, copyBassTab, copyChart, exportMidi, saveToLibrary,
     // chrome
-    modal, setModal, labEditing, setLabEditing, customGenres,
+    modal, setModal, labEditing, setLabEditing, customGenres, journal,
     composeSettings, setComposeSettings, saveCustomGenre, deleteCustomGenre, library, setLibrary,
   };
 }

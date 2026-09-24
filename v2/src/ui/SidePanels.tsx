@@ -1,12 +1,16 @@
-// The right-hand column in Write: what could come next (by intention), what
-// just happened (the teaching log), and the full palette of the key.
+// The right-hand page in Write: the journal (what the app told you, with the
+// time it said it, today and the days before), what could come next (by
+// intention), and the full palette of the key.
 
+import { useRef } from 'react';
 import { useApp } from '../state/AppContext';
 import { chordSymbol } from '../theory/chords';
 import { keyLabel } from '../theory/progression';
 import { prettyNumeral, resolveNumeral } from '../theory/roman';
 import { INTENTS } from '../theory/suggest';
 import { styleChord } from '../state/reducer';
+import { journalDays } from '../state/journal';
+import { timeLabel } from '../state/dates';
 
 export function NextChordPanel() {
   const { nextOptions, addNextChord, realized } = useApp();
@@ -40,16 +44,31 @@ export function NextChordPanel() {
   );
 }
 
-export function LogPanel() {
-  const { state } = useApp();
+export function JournalPanel() {
+  const { journal } = useApp();
+  // lines written since this page was opened get inked in; older ones are simply there
+  const opened = useRef(new Set(journal.map((e) => e.id)));
+  const days = journalDays(journal);
   return (
-    <section className="panel log-panel">
-      <div className="panel-head"><h2>Log</h2></div>
-      <div className="log">
-        {state.log.map((e) => (
-          <div key={e.id} className={`log-entry log-${e.kind}`}>
-            <div className="log-title">{e.title}</div>
-            <div className="log-text">{e.text}</div>
+    <section className="panel journal-panel">
+      <div className="panel-head">
+        <div>
+          <h2>Journal</h2>
+          <div className="panel-sub">every move, explained — and kept</div>
+        </div>
+      </div>
+      <div className="journal">
+        {!days.length && <div className="journal-empty">Nothing written yet. Spice a chord, pick what comes next, mirror the song — the reasons land here.</div>}
+        {days.map((d, di) => (
+          <div key={d.day} className="journal-day">
+            {(di > 0 || d.label !== 'Today') && <div className="journal-dayhead">{d.label}</div>}
+            {d.entries.map((e) => (
+              <div key={e.id} className={`journal-entry journal-${e.kind} ${opened.current.has(e.id) ? '' : 'journal-new'}`}>
+                <span className="journal-time">{timeLabel(e.at)}</span>
+                <div className="journal-title">{e.title}</div>
+                <div className="journal-text">{e.text}</div>
+              </div>
+            ))}
           </div>
         ))}
       </div>

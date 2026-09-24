@@ -15,7 +15,7 @@ export function LessonBanner() {
     <div className={`lesson-banner ${done ? 'lesson-done' : ''}`}>
       <div className="lesson-main">
         <div className="lesson-kicker">{path.name} · step {at + 1} of {path.steps.length}</div>
-        <div className="lesson-title">{done ? '✓ ' : ''}{lesson.title}</div>
+        <div className="lesson-title">{lesson.title}{done && <span className="lesson-done-tag">done</span>}</div>
         <div className="lesson-teach">{lesson.teach}</div>
         <div className="lesson-task">{lesson.task}</div>
       </div>

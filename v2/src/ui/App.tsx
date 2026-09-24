@@ -1,25 +1,19 @@
-// The shell: one controller, a persistent top bar, and three workspaces —
+// The shell: one controller, a desk, and a book open at one of three pages —
 // Learn (one lesson, one task), Jam (instrument in hand, eyes on the
-// diagram) and Write (chords, melody, song).
+// diagram) and Write (chords, melody, song). The tabs turn the page.
 
 import { useAppController } from '../state/controller';
 import { AppContext } from '../state/AppContext';
 import { GENRE_LIST } from '../data/genres';
 import { materializeGenre } from '../data/customGenres';
-import { TopBar } from './TopBar';
-import { LessonBanner } from './LessonBanner';
+import { Tabs } from './Tabs';
 import { LearnView } from './views/LearnView';
 import { JamView } from './views/JamView';
 import { WriteView } from './views/WriteView';
 import { GenreLab } from './GenreLab';
 import { LibraryModal, saveLibrary } from './LibraryModal';
 import { ComposeModal } from './ComposeModal';
-
-const SHORTCUTS: Record<string, string> = {
-  learn: 'space play · j jam',
-  jam: 'space play · l lick · j write · d drums · b bass · m mute · 1–4 instrument · esc clear',
-  write: 'space play · n new · c compose · s spice · u undo · x a/b · r reset · l lick · k crab · j jam · d drums · b bass · m mute · 1–4 instrument',
-};
+import { CoverModal } from './CoverModal';
 
 export default function App() {
   const app = useAppController();
@@ -27,17 +21,15 @@ export default function App() {
 
   return (
     <AppContext.Provider value={app}>
-      <div className={`app view-${state.view}`}>
-        <TopBar />
-        {state.view !== 'learn' && <LessonBanner />}
-        {state.view === 'learn' && <LearnView />}
-        {state.view === 'jam' && <JamView />}
-        {state.view === 'write' && <WriteView />}
+      <div className={`desk view-${state.view}`}>
+        <Tabs />
+        <div className="book">
+          {state.view === 'learn' && <LearnView />}
+          {state.view === 'jam' && <JamView />}
+          {state.view === 'write' && <WriteView />}
+        </div>
 
-        <footer className="footer">
-          <span>{SHORTCUTS[state.view]}{app.inputSource === 'qwerty' ? ' · letter shortcuts pause while the keyboard is a piano' : ''}</span>
-        </footer>
-
+        {modal === 'cover' && <CoverModal onClose={() => setModal(null)} />}
         {modal === 'compose' && (
           <ComposeModal settings={app.composeSettings} onChange={app.setComposeSettings}
             onGenerate={app.composeNow} onClose={() => setModal(null)} />

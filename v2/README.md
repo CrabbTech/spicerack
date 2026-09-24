@@ -1,8 +1,11 @@
-# Spicerack 2 — chords, scales & spice
+# Quire — a practice journal for chords
 
-A desktop chord-progression workshop: the software version of those die-cut
-"chord folder" tools, but it plays sound, explains every trick, and speaks both
-**guitar tab** and **OP-1 Field keyboard**.
+*A quire is a gathering of pages, folded and sewn; it sounds like choir.*
+
+A desktop chord-progression workshop kept as a journal: the software version
+of those die-cut "chord folder" tools, but it plays sound, explains every
+trick, writes the explanation into the book with the time it said it, and
+speaks both **guitar tab** and **OP-1 Field keyboard**. Formerly Spicerack 2.
 
 Pick a key and a genre → get an idiomatic progression → **spice it up** with
 secondary dominants, borrowed chords, tritone subs, passing diminisheds and
@@ -89,15 +92,36 @@ and the chord-shape library is interval-verified by the test suite.
 
 ## The look
 
-One direction, no themes: a field manual for a small instrument. Warm paper,
-black ink, one orange (the crab's), hairline rules, numbered sections, mono
-capitals for labels. The only decoration is a 32×24 pixel crab, hand-placed
-(`src/ui/pixelCrab.ts`), drawn as SVG rects so it stays crisp and takes its
-colours from the page — it is the wordmark, the app icon, the canon's cursor
-and the verdict's rating. No emoji, no shadows, no gradients. Harmonic
-function (tonic / subdominant / dominant / borrowed / secondary) and note
-roles (root / chord tone / colour / passing / rub / spice) keep their own inks
-because they mean something.
+An open notebook on a desk. Two pages in a spread with a stitched gutter,
+cream paper with a faint dot grid, a vermilion margin rule, running heads (the
+crab and the wordmark on the left page, today's date on the right), folios in
+the feet, and index tabs along the top edge for Learn, Jam and Write. Teaching
+text is set in Newsreader, headings and the dateline in Fraunces, labels are
+typed in IBM Plex Mono capitals; the wordmark is Silkscreen. Harmonic function
+(tonic / subdominant / dominant / borrowed / secondary) and note roles (root /
+chord tone / colour / passing / rub / spice) keep their own inks because they
+mean something.
+
+The only decoration is a 32×24 pixel crab, hand-placed (`src/ui/pixelCrab.ts`)
+in two frames, drawn as SVG rects so it stays crisp and takes its colours from
+the page — it is the wordmark (walking while the band plays), the app icon,
+the canon's cursor on the Möbius strip, the verdict's rating, and the stamp
+pressed on every practice day. No emoji.
+
+### The journal
+
+- Every move the app explains — a spice, a reharmonisation, a mirrored song,
+  a loaded save — is written into the **journal** on the right page with the
+  time, and kept between sessions under day headings (Today, Yesterday, Mon
+  21 Sep). New lines ink in.
+- **Learn** opens on the contents: paths with hand-drawn ticks for finished
+  steps; the right page is today — steps done, the streak, graded passes, and
+  the month as a **stamp card** with the crab on every day you practised.
+- Turning to another page runs as a page turn (View Transitions where the
+  browser has them); the active tab slides. Stamps and grades thump in.
+  `prefers-reduced-motion` turns all of it off.
+- The **inside cover** (click the wordmark): what the name means, a plate,
+  "this journal belongs to", and every keyboard shortcut.
 
 ## Run it
 
@@ -105,24 +129,28 @@ because they mean something.
 npm install
 npm run tauri dev      # development app window
 npm run tauri build    # release .app + .dmg (in src-tauri/target/release/bundle/)
-npm test               # 247 theory/voicing/groove/input/practice tests
+npm test               # 258 theory/voicing/groove/input/practice/journal tests
 npm run dev            # UI only, in a browser
 ```
 
 ## Stack
 
 Tauri 2 (native shell) · React 19 + TypeScript + Vite · SVG diagrams ·
-Web Audio (no samples) · Vitest. Runtime dependencies: React and three bundled
-typefaces (IBM Plex Sans, IBM Plex Mono, Silkscreen — all OFL).
+Web Audio (no samples) · Vitest. Runtime dependencies: React and four bundled
+typefaces (Newsreader, Fraunces, IBM Plex Mono, Silkscreen — all OFL).
 
 ## Architecture
 
 ```
+src/brand.ts  the name, in one place
 src/state/    reducer.ts   — the document: key, genre, sections (chords + melody), undo, view
               controller.tsx — useAppController(): all behaviour in one hook (derived music,
                              playback, input capture + grading, lessons, persistence)
               AppContext.tsx — useApp(); views stay dumb
               session.ts   — resume-where-you-left-off
+              journal.ts   — the book: every log line with its time, kept between sessions
+              dates.ts     — datelines, day/week of the year, the month grid
+              storage.ts   — localStorage under the app's name (+ carry-over from the old one)
 src/theory/   notes, scales, chords, roman numerals, progressions, spices, compose
               solo.ts (note roles + drills) · lick.ts (demo licks) · transitions.ts
               melody.ts (motif moves + coach) · suggest.ts (next-chord intents, reharmonize)
@@ -136,7 +164,8 @@ src/data/     genres.ts (the genre book) · lessons.ts (learning paths) · custo
 src/guitar/   shapes, voicings, tab, positions.ts (connected boxes), caged.ts (form + known grip), melodyTab.ts,
               licks.ts (tab parser + licks stored as numbers)
 src/op1/ src/piano/ src/bass/   instrument layouts + chord fitting
-src/ui/       App.tsx (shell) · TopBar · views/{Learn,Jam,Write}View · SoloLab · MelodyRoll
+src/ui/       App.tsx (desk + book) · Tabs · Spread (pages, running heads, folios) · pageTurn.ts
+              views/{Learn,Jam,Write}View · Stamps · CoverModal · SoloLab · MelodyRoll
               MelodyWorkbench · CrabCanon + MobiusStrip (mobius.ts is the geometry) · ListenPanel
               ProgressionPanel · TransitionPanel · …
 ```

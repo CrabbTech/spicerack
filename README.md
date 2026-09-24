@@ -1,11 +1,12 @@
-# Spicerack — chords, scales & spice 🦀
+# Quire (née Spicerack) — chords, scales & spice
 
 Two desktop chord-progression workshops live here:
 
-- **`v2/` — Spicerack 2** ← the good one. A pixel crab, a field-manual look
-  (paper, ink, one orange), 19 genres + a Genre Lab for building your own,
-  drum machine, MIDI export, progression library, keyboard shortcuts, and a
-  crab canon.
+- **`v2/` — Quire** ← the good one. A practice journal for chords: an open
+  notebook on a desk, a pixel crab that walks, a dated journal of every move
+  explained, a stamp card of practice days, 19 genres + a Genre Lab for
+  building your own, drum machine, MIDI export, song library, keyboard
+  shortcuts, and a crab canon. (It was Spicerack 2 until the journal.)
 - **`v1/`** — the original: 9 genres, guitar + OP-1 Field modes, the spice
   system, scale maps, audio preview.
 
