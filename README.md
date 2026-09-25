@@ -1,5 +1,7 @@
 # Quire (née Spicerack) — chords, scales & spice
 
+New here? **[GUIDE.md](GUIDE.md)** gets it cloned and running.
+
 Two desktop chord-progression workshops live here:
 
 - **`v2/` — Quire** ← the good one. A practice journal for chords: an open
