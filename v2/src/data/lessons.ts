@@ -13,7 +13,6 @@ export type LessonGoal =
   | { kind: 'score'; lens: LensId; min: number }
   /** the melody coach reports every chord change landing, with at least `notes` notes written */
   | { kind: 'coach'; notes: number }
-  /** answer this many floors of the burrow right in a row */
   /** dig this deep in one descent of the burrow */
   | { kind: 'burrow'; depth: number }
   /** finish a ten-card fretboard sprint of this drill with at least this score */

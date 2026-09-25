@@ -232,7 +232,6 @@ export function useAppController() {
   const [burrow, setBurrow] = useState<BurrowState | null>(null);
   const burrowRef = useRef(burrow);
   burrowRef.current = burrow;
-  /** floors answered right in a row — the ear's streak, which the lessons watch */
   const takeRef = useRef<{ notes: TakeNote[]; open: Map<number, TakeNote> }>({ notes: [], open: new Map() });
   const pendingXfer = useRef<number | null>(null);
   const songRef = useRef(false);

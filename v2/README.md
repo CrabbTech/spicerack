@@ -34,7 +34,7 @@ Transformational ear training as a descent. The crab digs under one of your genr
 - Floors 1–3 play the loop you know and then the changed one. From floor 4 **only the new loop plays**: the old one is in your ear. You have one *Again* per descent.
 - Where the genre carries the truck driver, floor 4 is **the burrow turning**: no question, the whole loop a step up, and everything below is spelled in the new key.
 - From floor 8 two chords change at once. Pick both.
-- When the rack has nothing left that would change a chord, or the loop is eight chords long, that is **bedrock** — Thrash Metal is shallow ground; Neo-Soul goes down a long way.
+- When the rack has nothing left that would change a chord, or the loop is eight chords long, that is **bedrock** — Thrash Metal is shallow ground; Pop Punk and Vaporwave go down a long way.
 - The burrow leans toward spices whose names have never appeared in your journal, so over weeks it becomes a curriculum of the moves you have not heard yet.
 - Any ending — a miss, bedrock, or *Come up* — does the same generous thing: the page turns to Write, the loop as the burrow left it is on the bench (named "…, dug to floor 6", the gear change as the every-other-pass repeat), every floor is a dated line in the journal in the rack's own words, and the deepest floor per genre goes in the records. ⌘S saves it; undo pops the whole descent back to the surface.
 

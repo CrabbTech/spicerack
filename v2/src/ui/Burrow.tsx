@@ -62,7 +62,7 @@ export function Burrow() {
         </div>
       </div>
 
-      {!canDig && <div className="practice-hint">Nothing to dig under here: every {genre.name} loop in this mode is longer than eight chords. Pick another genre or mode.</div>}
+      {!canDig && <div className="practice-hint">Nothing to dig under here: the burrow wants a loop of two to eight chords, and no {genre.name} loop in this mode is one. Pick another genre or mode.</div>}
 
       {burrow && run && (
         <>
@@ -99,7 +99,7 @@ export function Burrow() {
                       {floor && revealed && <span className="burrow-move">{gear ? 'up a step' : floor.steps.map((s) => s.spiceName).join(' + ')}</span>}
                     </div>
                     {floor && isCurrent && gear && <div className="burrow-hint">The burrow turns: a whole step up. No question, just hear it.</div>}
-                    {floor && isCurrent && !ended && !gear && floor.depth === firstMemory && <div className="burrow-hint">Only the new loop plays from here. The old one is in your ear.</div>}
+                    {floor && isCurrent && !ended && !gear && floor.depth === firstMemory && <div className="burrow-hint">Only the new loop plays from here. The old one is in your ear, and Again brings it back once.</div>}
                     {floor && isCurrent && !ended && !gear && pairHint && <div className="burrow-hint">Two chords changed on this floor. Pick both.</div>}
                   </div>
                 );

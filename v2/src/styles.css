@@ -842,6 +842,8 @@ html[data-turn="back"]::view-transition-new(book) { animation-name: page-in-back
   *, ::before, ::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; }
   .px-walking .px-f1 { display: none; }
   ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*) { animation: none !important; }
+  /* the journal's staggered ink-in is a delay, not a duration: landed lines appear together */
+  .journal-new .journal-title, .journal-new .journal-text, .journal-new .journal-time { animation-delay: 0s !important; }
 }
 
 /* ---------- a narrower desk: the pages stack ---------- */
