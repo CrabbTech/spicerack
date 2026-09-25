@@ -68,6 +68,8 @@ export interface PlayOptions {
   onPass?: (info: PassInfo) => void;
   /** stop by itself after this many passes (ear-training rounds, song play-throughs) */
   maxPasses?: number;
+  /** seconds to wait before the first pass — room for the crab to dig */
+  startIn?: number;
   onEnd?: () => void;
 }
 
@@ -396,13 +398,19 @@ class AudioEngine {
   }
 
   /** Count-in stick click — on the ui bus so it survives a muted drummer. */
-  private click(when: number, accent: boolean): void {
+  /** Three quiet ticks: the crab digging, before a floor of the burrow plays. */
+  dig(): void {
+    const now = this.ensure().currentTime;
+    for (const at of [0.02, 0.11, 0.2]) this.click(now + at, false, 0.07);
+  }
+
+  private click(when: number, accent: boolean, gain = accent ? 0.22 : 0.14): void {
     const ctx = this.ensure();
     const osc = ctx.createOscillator();
     osc.type = 'square';
     osc.frequency.value = accent ? 1760 : 1175;
     const g = ctx.createGain();
-    g.gain.setValueAtTime(accent ? 0.22 : 0.14, when);
+    g.gain.setValueAtTime(gain, when);
     g.gain.exponentialRampToValueAtTime(0.001, when + 0.05);
     osc.connect(g).connect(this.buses.ui.out);
     osc.start(when);
@@ -518,7 +526,7 @@ class AudioEngine {
       ));
     };
 
-    let start = ctx.currentTime + 0.06;
+    let start = ctx.currentTime + 0.06 + (opts.startIn ?? 0);
     if (opts.countIn) {
       const beat = 60 / bpmOf(0);
       const clicks = opts.meter ? groupStarts(opts.meter) : [0, 1, 2, 3];

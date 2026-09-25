@@ -35,7 +35,8 @@ would give the desktop app a fresh data directory and lose the same things.
   Consecutive identical lines are written once. The launch greeting is
   `quiet` (shown, not journaled).
 - Learn: the left page is the contents (paths with hand-drawn ticks and
-  strike-throughs, a "3/8" count) plus the ear quiz; the right page is Today
+  strike-throughs, a "3/8" count) plus the burrow (last section; it replaced
+  the ear quiz); the right page is Today
   (`src/ui/Stamps.tsx`: the month as a stamp card — practised days get the
   crab pressed in vermilion at a stable per-day tilt, today is ringed) and the
   records.
@@ -153,3 +154,72 @@ routing, including BlackHole/Loopback for grading the processed tone.
   (loopback ping) could replace the constant.
 - `?shell=mac` only previews the chrome; the Interface source and device
   lists need the app.
+
+---
+
+# Handoff — the burrow (`claude/quire-mac-app`)
+
+**What it is.** The ear quiz became a descent. `src/practice/burrow.ts` is the
+whole game as pure functions: `pickSurface` (a 3–5 chord loop of the genre,
+one bar a chord), `digFloor` (the next floor: the rack's moves on the loop as
+it now stands, filtered to exactly one changed position by `changedRegion` —
+prefix/suffix diff on numeral + pedal bass — or two from floor 8, with the
+gentle pool on floors 1–2 and the bold pool from 8, a x3 weight for spices the
+journal has never seen and x0.25 for the last one, grouped by spice so a
+prolific spice never dominates), the gear floor (floor 4 where the genre has
+the truck driver: `{ modulate: 2 }`, no question), `judgeFloor`,
+`benchTemplate` / `descentNote` / `closingLine`. Tests in `burrow.test.ts`
+(seeded with `mulberry32`) walk every genre to bedrock. `progress.burrowBest`
+keeps the deepest floor per genre (`recordBurrow`). The reducer has a `note`
+action (one log line). The engine has `dig()` (three quiet ticks) and a
+`startIn` option so a floor starts after them.
+
+**Controller.** `BurrowState` (`run`, `symbols` per row spelled in the key the
+ear heard, `phase`/`at`, `picks`, `answered`, `replays`, `reached`);
+`startBurrow` plays the surface once then digs by itself; `playFloor` is the
+old quiz one-shot (`maxPasses: 1`, `songRef` guard) with the burrow's own
+transposition — the engine's `modulate` only fires on odd passes, and a floor
+is one pass; `answerFloor`, `replayFloor`, `leaveBurrow`, `endBurrow` (stage
+the surface as a template on Write, `apply-batch` the floors' patches — the
+last patch with slots wins, which is the last floor's `after` — then the
+closing line; the dispatch wrapper turns the page and the journal effect
+persists every line with a 90 ms stagger). The `quiz` goal kind went with the
+quiz: `borrow.quiz` and the *Down the burrow* path use the `burrow` goal
+(`depth`), measured from `BurrowState.reached`.
+
+**Review pass (what a five-lens review found and what changed).** A descent
+keeps the genre, key and mode it started in (`runGenre`/`runKey` in the
+controller; the pickers on Write no longer bend a live run). A floor cut short
+from outside (Stop, Play, a lesson) settles its row through the `stopRef`
+wrapper, and a cut surface hands the shovel to the player (`answered: true`
+→ *Dig*). The dig ticks are scheduled after `play()`, which begins by stopping
+whatever was live (they were silent before). The closing line is stamped in
+the reducer (`note` carries title/text) so it sorts above the floor lines;
+`stage` takes the run's own `slots` so A/B, Undo and Reset line up with the
+landed bench. The engine only asks a floor with one reading (`validPicks`:
+an inserted pair beside an identical chord can be heard two ways), never turns
+the gear onto bedrock, tries a two-chord move before declaring bedrock at any
+depth, damps the last spice on the second move of a pair too, and the miss
+line names each move at the chord it made (`BurrowStep.at`) in the rack's
+own case. The crab's row is measured (`offsetTop`), not assumed.
+
+**UI.** `src/ui/Burrow.tsx` replaces the quiz at the foot of Learn's left
+page: the shaft is rows on the dot grid (surface, then `depth · strata`), the
+crab slides down a row per floor and walks while the band plays, the current
+floor shows numbered chips, answered floors show symbols with the changed one
+in the borrowed ink and the spice's name inked in the margin, a gear floor is
+vermilion. Hints on the first memory floor, the gear floor and the first
+two-change floor. Records list the deepest floor per genre.
+
+**Not verified by ear.** Everything above was screenshotted through a
+Playwright playthrough (dig, floor 1, answer, dig on, come up, the landing);
+the sound of a floor and the feel of the 0.45 s dig pause were not heard.
+Things to listen for: whether one bar a chord is too fast for deep floors,
+and whether the memory floors want the loop twice by default.
+
+**Open threads.** A two-move floor's `changed` is the two positions, not the
+span, so a test compares against the span; an insertion spice numbers the
+chips by their place in the new loop (the previous loop is one row up).
+Explanations after the gear name the chords in the transposed key on
+purpose; the bench stays in the written key. Custom genres work through
+`genre.spices` and their templates.

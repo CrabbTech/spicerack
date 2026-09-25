@@ -67,7 +67,12 @@ export function journalDays(list: JournalEntry[], today = dayKeyOf(new Date())):
     if (bucket) bucket.push(e);
     else byDay.set(day, [e]);
   }
+  // newest first; lines written in the same instant keep their order of writing (the later one on top)
+  const order = new Map(list.map((e, i) => [e.id, i] as const));
   return [...byDay.entries()]
     .sort((a, b) => (a[0] < b[0] ? 1 : -1))
-    .map(([day, entries]) => ({ day, label: dayLabel(day, today), entries: [...entries].sort((a, b) => b.at - a.at) }));
+    .map(([day, entries]) => ({
+      day, label: dayLabel(day, today),
+      entries: [...entries].sort((a, b) => b.at - a.at || (order.get(b.id) ?? 0) - (order.get(a.id) ?? 0)),
+    }));
 }

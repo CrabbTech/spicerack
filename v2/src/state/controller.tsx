@@ -11,13 +11,13 @@ import { Key, TONIC_CHOICES, flatLeaning } from '../theory/scales';
 import { Chord, chordSymbol } from '../theory/chords';
 import { prettyNumeral, resolveNumeral } from '../theory/roman';
 import {
-  RealizedSlot, Slot, borrowShelf, diatonicPalette, keyLabel, newSlot, realizeSlot,
+  RealizedSlot, Slot, borrowShelf, diatonicPalette, keyLabel, realizeSlot,
 } from '../theory/progression';
 import {
   BOLD_SPICES, GENTLE_SPICES, SpiceApplication, SpiceContext, findAllApplications, pickRandomApplication,
 } from '../theory/spices';
 import { composeProgression } from '../theory/compose';
-import { GENRE_LIST, scaleRecsFor } from '../data/genres';
+import { GENRE_LIST, Genre, scaleRecsFor } from '../data/genres';
 import {
   CustomGenreData, loadCustomGenres, materializeGenre, saveCustomGenres,
 } from '../data/customGenres';
@@ -41,13 +41,13 @@ import {
 import { LeadNote } from '../theory/lick';
 import { CrabMode, analyzeCanon, crabProof, mirrorLead, mirrorSpec, movedNotes } from '../theory/crab';
 import { TakeGrade, gradeTake } from '../practice/grade';
-import { Progress, loadProgress, recordLesson, recordPass, recordSprint, saveProgress } from '../practice/progress';
+import { Progress, loadProgress, recordBurrow, recordLesson, recordPass, recordSprint, saveProgress } from '../practice/progress';
 import { storageKey } from './storage';
 import { SoundSettings, loadSound, saveSound } from './sound';
 import { isDesktop, openInterface, openNativeMidi } from '../input/native';
 import { JournalEntry, appendJournal, loadJournal, saveJournal } from './journal';
 import { turnPage } from '../ui/pageTurn';
-import { EarRound, buildEarRound } from '../practice/earQuiz';
+import { BurrowRun, benchTemplate, closingLine, digFloor, judgeFloor, keyUp, pickSurface, startRun, unheardSpices } from '../practice/burrow';
 import { ALL_STEPS, LessonStep } from '../data/lessons';
 import { neckPositions } from '../guitar/positions';
 import { OPEN_PC } from '../guitar/shapes';
@@ -108,14 +108,20 @@ const CRAB_VOICE: Record<InstrumentId, InstrumentId> = { guitar: 'op1', bass: 'p
 
 type TakeNote = MelNote & { pass: number };
 
-export interface QuizState {
-  round: EarRound;
-  before: string[];
-  after: string[];
-  /** which half is sounding, and which chord of it */
+/** A descent of the burrow, as the panel sees it. */
+export interface BurrowState {
+  run: BurrowRun;
+  /** chord symbols per row — the surface, then each floor — spelled in the key the ear heard */
+  symbols: string[][];
+  /** which half is sounding (A: the loop it grew from, B: the floor) and which chord of it */
   phase: 'A' | 'B' | null;
   at: number | null;
-  answered: number | null;
+  picks: number[];
+  answered: boolean;
+  /** replays left this descent */
+  replays: number;
+  /** the deepest floor passed */
+  reached: number;
 }
 
 /** Before/after listening: the loop plays the previous version, then the current one. */
@@ -132,11 +138,17 @@ export function useAppController() {
   // a change of view turns the page: its DOM update runs inside a view transition (pageTurn.ts)
   const viewRef = useRef(state.view);
   viewRef.current = state.view;
+  /** the burrow's delayed turn to Write after a landing; any other page turn cancels it */
+  const turnTimer = useRef(0);
   const dispatch = useCallback((action: Action) => {
     const to = action.type === 'view' || action.type === 'stage' ? action.view : null;
     if (to !== null && to !== viewRef.current) {
+      window.clearTimeout(turnTimer.current);
       document.documentElement.dataset.turn = PAGE_ORDER.indexOf(to) > PAGE_ORDER.indexOf(viewRef.current) ? 'fwd' : 'back';
-      turnPage(() => flushSync(() => rawDispatch(action)));
+      turnPage(() => {
+        flushSync(() => rawDispatch(action));
+        window.scrollTo({ top: 0 }); // a new page starts at its top
+      });
     }
     else rawDispatch(action);
   }, []);
@@ -217,8 +229,10 @@ export function useAppController() {
   const journaled = useRef(0);
   const [lessonId, setLessonId] = useState<string | null>(null);
   const [songAt, setSongAt] = useState<number | null>(null);
-  const [quiz, setQuiz] = useState<QuizState | null>(null);
-  const [quizStreak, setQuizStreak] = useState(0);
+  const [burrow, setBurrow] = useState<BurrowState | null>(null);
+  const burrowRef = useRef(burrow);
+  burrowRef.current = burrow;
+  /** floors answered right in a row — the ear's streak, which the lessons watch */
   const takeRef = useRef<{ notes: TakeNote[]; open: Map<number, TakeNote> }>({ notes: [], open: new Map() });
   const pendingXfer = useRef<number | null>(null);
   const songRef = useRef(false);
@@ -470,14 +484,14 @@ export function useAppController() {
     bars: realized[i].slot.bars, rootPc: rootPcOf(realized[i].chord),
   });
 
-  const grooveOpts = () => ({
+  const grooveOpts = (g: Genre = genre) => ({
     bpm: Math.max(40, Math.min(244, bpm)),
-    swing: genre.swing,
-    pattern: genre.pattern,
+    swing: g.swing,
+    pattern: g.pattern,
     instrument: state.instrument,
     backingVoice: practice.backing === 'same' ? undefined : practice.backing,
-    drums: genre.drums,
-    arp: genre.arp,
+    drums: g.drums,
+    arp: g.arp,
     meter,
   });
 
@@ -491,7 +505,7 @@ export function useAppController() {
     setAb(null);
     setSongAt(null);
     setRecording(false);
-    setQuiz((q) => q && { ...q, phase: null, at: null });
+    setBurrow((b) => b && { ...b, phase: null, at: null });
     songRef.current = false;
     dispatch({ type: 'playing', playing: false });
     dispatch({ type: 'playing-slot', idx: null });
@@ -528,7 +542,7 @@ export function useAppController() {
     setAb(null);
     setXferTag(null);
     setSongAt(null);
-    setQuiz((q) => q && { ...q, phase: null, at: null });
+    setBurrow((b) => b && { ...b, phase: null, at: null });
     songRef.current = false;
     takeRef.current = { notes: [], open: new Map() };
     const play = order ?? realized.map((_, i) => i);
@@ -591,7 +605,7 @@ export function useAppController() {
     lastLive.current = liveSignature;
     if (!state.playing || songRef.current) return; // a song walks through sections on purpose
     if (progChanged) stopPlayback();
-    else if (liveChanged && !ab && !quiz?.phase) startPlayback();
+    else if (liveChanged && !ab && !burrow?.phase) startPlayback();
   });
 
   // a new set of chords invalidates anything that pointed at the old ones
@@ -1197,6 +1211,7 @@ export function useAppController() {
 
   const startLesson = (step: LessonStep) => {
     if (state.playing) stopPlayback();
+    window.clearTimeout(turnTimer.current);
     const g = allGenres.find((x) => x.id === step.setup.genre) ?? genre;
     const mode = step.setup.mode ?? (step.setup.genre ? g.modes[0] : state.mode);
     pendingXfer.current = step.setup.xfer ?? null;
@@ -1233,7 +1248,7 @@ export function useAppController() {
     const goal = lesson.goal;
     if (goal.kind === 'score' && grade && lens === goal.lens && grade.score >= goal.min) completeLesson(lesson.id);
     if (goal.kind === 'coach' && melodyReport && melodyReport.noteCount >= goal.notes && melodyReport.landings.every((l) => l.hit)) completeLesson(lesson.id);
-    if (goal.kind === 'quiz' && quizStreak >= goal.streak) completeLesson(lesson.id);
+    if (goal.kind === 'burrow' && burrow && burrow.reached >= goal.depth) completeLesson(lesson.id);
     if (goal.kind === 'fret' && lastSprint && lastSprint.kind === goal.drill && lastSprint.score >= goal.min) completeLesson(lesson.id);
     if (goal.kind === 'crab' && crabReport && crabReport.score >= goal.min && crabReport.together >= 0.25) completeLesson(lesson.id);
   }); // eslint-disable-line react-hooks/exhaustive-deps
@@ -1243,49 +1258,156 @@ export function useAppController() {
     if (lens !== 'map' && focusIdx === null && realized.length) setFocusId(realized[0].slot.id);
   }, [lens, lessonId]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // --- ear quiz: which chord changed? ---
-  const playQuiz = (round: EarRound) => {
+  // --- the burrow: transformational ear training as a descent (src/practice/burrow.ts) ---
+  // a descent keeps the genre, key and mode it started in, whatever the pickers on Write do meanwhile
+  const runGenre = (run: BurrowRun): Genre => allGenres.find((g) => g.id === run.genreId) ?? genre;
+  const baseKey = (run: BurrowRun): Key => ({ tonic: TONIC_CHOICES[run.tonicIdx], mode: run.mode });
+  const runKey = (run: BurrowRun): Key => keyUp(baseKey(run), run.transpose);
+  const symbolsOf = (list: Slot[], run: BurrowRun): string[] => {
+    const g = runGenre(run), k = runKey(run);
+    return list.map((x) => chordSymbol(styleChord(x, realizeSlot(x, k).chord, g)));
+  };
+
+  /** One floor through the band — the loop once, or the loop it grew from and then the loop — after three ticks of digging. */
+  const playFloor = (run: BurrowRun, halves: { before?: Slot[]; after: Slot[] }, onDone?: () => void) => {
     stopRef.current?.();
     setAb(null);
     setPassInfo(null);
-    const n = round.before.length;
-    const chordsOf = (list: Slot[]) => list.map((x) => styleChord(x, realizeSlot(x, key).chord, genre));
-    const both = [...chordsOf(round.before), ...chordsOf(round.after)];
-    const midis = voicedMidis(both);
-    const slots = both.map((c, i) => ({ midis: midis[i], bars: (i < n ? round.before : round.after)[i % n].bars, rootPc: rootPcOf(c) }));
+    const lists = halves.before ? [halves.before, halves.after] : [halves.after];
+    const n0 = halves.before?.length ?? 0;
+    const flat = lists.flat();
+    const g = runGenre(run);
+    const k = baseKey(run);
+    const chords = flat.map((x) => styleChord(x, realizeSlot(x, k).chord, g));
+    const midis = voicedMidis(chords);
+    // the engine's own gear change only fires on odd passes, and a floor is one pass: the burrow transposes itself
+    const slots = chords.map((c, i) => ({ midis: midis[i].map((m) => m + run.transpose), bars: flat[i].bars, rootPc: mod12(rootPcOf(c) + run.transpose) }));
     songRef.current = true; // keep the transport effects from restarting this one-shot
-    stopRef.current = audio.play(slots, {
-      ...grooveOpts(), meter: undefined, lead: () => null, maxPasses: 1,
-      onSlot: (idx) => setQuiz((q) => (q && idx !== null ? { ...q, phase: idx < n ? 'A' : 'B', at: idx % n } : q)),
+    let sounding = true;
+    const stop = audio.play(slots, {
+      ...grooveOpts(g), meter: undefined, lead: () => null, maxPasses: 1, modulate: null, countIn: false, startIn: 0.45,
+      onSlot: (idx) => setBurrow((b) => (b && idx !== null ? { ...b, phase: idx < n0 ? 'A' : 'B', at: idx < n0 ? idx : idx - n0 } : b)),
       onEnd: () => {
+        sounding = false;
         songRef.current = false;
-        setQuiz((q) => q && { ...q, phase: null, at: null });
+        setBurrow((b) => b && { ...b, phase: null, at: null });
         dispatch({ type: 'playing', playing: false });
+        onDone?.();
       },
     });
+    audio.dig(); // after play(), which begins by stopping whatever was live — the ticks included, if scheduled first
+    // cut short from outside (Stop, Play, a lesson, another loop) the row settles instead of staying lit,
+    // and at the surface the shovel passes to the player, since the crab's own dig never comes
+    stopRef.current = () => {
+      stop();
+      if (!sounding) return;
+      sounding = false;
+      songRef.current = false;
+      setBurrow((b) => (b && b.run === run ? { ...b, phase: null, at: null, answered: b.answered || !b.run.floors.length } : b));
+    };
     dispatch({ type: 'playing', playing: true });
   };
 
-  const newQuizRound = () => {
-    const round = buildEarRound(
-      genre.templates.filter((t) => t.mode === state.mode),
-      (t) => t.numerals.map((num, i) => newSlot(num, Math.min(1, t.bars?.[i] ?? 1))),
-      ctx, genre.spices.filter((x) => x !== 'truck-driver'),
-    );
-    if (!round) {
-      setQuiz(null);
-      return false;
+  /**
+   * Any ending lands the loop as the burrow left it on the bench, with every
+   * floor written into the journal. The page turns to Write a moment later on
+   * a miss or at bedrock, so the reveal can be read first; at once on Come up.
+   */
+  const endBurrow = (b: BurrowState, why: 'miss' | 'bedrock' | 'quit', missed?: number[]) => {
+    stopRef.current?.();
+    stopRef.current = null;
+    audio.stop();
+    songRef.current = false;
+    dispatch({ type: 'playing', playing: false });
+    const run: BurrowRun = { ...b.run, ended: why, missed };
+    setBurrow({ ...b, run, phase: null, at: null });
+    setProgress((p) => recordBurrow(p, run.genreId, b.reached));
+    const steps = run.floors.flatMap((f) => f.steps);
+    const g = runGenre(run);
+    const line = closingLine(run, g.name, g.spices.length);
+    if (!steps.length) {
+      // nothing to land: bedrock at the surface is still worth a line (it says why); coming straight back up is not
+      if (why === 'bedrock') dispatch({ type: 'note', title: line.title, text: line.text });
+      return;
     }
-    const symbols = (list: Slot[]) => list.map((x) => chordSymbol(styleChord(x, realizeSlot(x, key).chord, genre)));
-    setQuiz({ round, before: symbols(round.before), after: symbols(round.after), phase: null, at: null, answered: null });
-    playQuiz(round);
+    const from = viewRef.current;
+    if (state.tonicIdx !== run.tonicIdx) dispatch({ type: 'tonic', idx: run.tonicIdx });
+    dispatch({ type: 'stage', genre: g, mode: run.mode, view: from, template: benchTemplate(run, g.name), slots: run.surface });
+    dispatch({ type: 'apply-batch', steps });
+    dispatch({ type: 'note', title: line.title, text: line.text });
+    // the page turns only if the reader is still where the landing happened
+    window.clearTimeout(turnTimer.current);
+    turnTimer.current = window.setTimeout(() => {
+      if (burrowRef.current?.run === run && viewRef.current === from) dispatch({ type: 'view', view: 'write' });
+    }, why === 'quit' ? 0 : 2600);
+  };
+
+  const digNext = () => {
+    const b = burrowRef.current;
+    if (!b || b.run.ended || b.phase !== null) return;
+    const run = b.run;
+    const g = runGenre(run);
+    const spices = g.spices.filter((x) => x !== 'truck-driver');
+    const floor = digFloor(run, { key: runKey(run), flavor: g.flavor }, spices, {
+      hasGear: g.spices.includes('truck-driver'), unheard: unheardSpices(journalRef.current, spices),
+      lastSpiceId: run.floors[run.floors.length - 1]?.steps.slice(-1)[0]?.spiceId, rand: Math.random,
+    });
+    if (!floor) {
+      endBurrow(b, 'bedrock');
+      return;
+    }
+    const nextRun: BurrowRun = { ...run, floors: [...run.floors, floor], transpose: floor.gear ?? run.transpose };
+    setBurrow({
+      ...b, run: nextRun, symbols: [...b.symbols, symbolsOf(floor.after, nextRun)], picks: [],
+      answered: !!floor.gear, reached: floor.gear ? floor.depth : b.reached,
+    });
+    playFloor(nextRun, floor.hearBoth ? { before: floor.before, after: floor.after } : { after: floor.after });
+  };
+  const digNextRef = useRef(digNext);
+  digNextRef.current = digNext;
+
+  const startBurrow = () => {
+    stopRef.current?.();
+    window.clearTimeout(turnTimer.current);
+    const tpl = pickSurface(templatesForMode, Math.random);
+    if (!tpl) return false;
+    const run = startRun(genre.id, state.mode, state.tonicIdx, tpl);
+    setBurrow({ run, symbols: [symbolsOf(run.surface, run)], phase: null, at: null, picks: [], answered: false, replays: 1, reached: 0 });
+    // the surface once; then the crab starts digging on its own
+    playFloor(run, { after: run.surface }, () => {
+      window.setTimeout(() => {
+        const b = burrowRef.current;
+        if (b && b.run === run && !b.run.ended) digNextRef.current();
+      }, 600);
+    });
     return true;
   };
 
-  const answerQuiz = (idx: number) => {
-    if (!quiz || quiz.answered !== null) return;
-    setQuiz({ ...quiz, answered: idx });
-    setQuizStreak((n) => (idx === quiz.round.changed ? n + 1 : 0));
+  const answerFloor = (i: number) => {
+    const b = burrowRef.current;
+    const floor = b?.run.floors[b.run.floors.length - 1];
+    if (!b || !floor || b.run.ended || b.answered || b.picks.includes(i)) return;
+    const picks = [...b.picks, i];
+    // functional updates: the floor may still be sounding, and its onEnd must not be overwritten by this click
+    if (picks.length < floor.wanted) {
+      setBurrow((cur) => cur && { ...cur, picks });
+      return;
+    }
+    if (judgeFloor(floor, picks)) setBurrow((cur) => cur && { ...cur, picks, answered: true, reached: floor.depth });
+    else endBurrow({ ...b, picks }, 'miss', picks);
+  };
+
+  const replayFloor = () => {
+    const b = burrowRef.current;
+    const floor = b?.run.floors[b.run.floors.length - 1];
+    if (!b || !floor || b.run.ended || b.replays <= 0 || b.phase !== null) return;
+    setBurrow((cur) => cur && { ...cur, replays: cur.replays - 1 });
+    playFloor(b.run, floor.gear ? { after: floor.after } : { before: floor.before, after: floor.after });
+  };
+
+  const leaveBurrow = () => {
+    const b = burrowRef.current;
+    if (b && !b.run.ended) endBurrow(b, 'quit');
   };
 
   // --- resume where you left off ---
@@ -1373,8 +1495,9 @@ export function useAppController() {
     // listening
     inputSource, setInputSource, inputStatus, held, micLevel, grade, scores, progress, sound, setSound, desktop,
     // learn
-    lesson, lessonId, setLessonId, startLesson, completeLesson, lessonDone, quiz, quizStreak, newQuizRound, answerQuiz,
-    replayQuiz: () => { if (quiz) playQuiz(quiz.round); },
+    lesson, lessonId, setLessonId, startLesson, completeLesson, lessonDone,
+    // the burrow
+    burrow, startBurrow, digNext, answerFloor, replayFloor, leaveBurrow,
     // editing
     spiceItUp, composeNow, cycleBars, asStep, addPaletteChord, fakeSlot, midisFor, harmonyMidis,
     copied, copyText, copyTab, copyBassTab, copyChart, exportMidi, saveToLibrary,

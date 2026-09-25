@@ -189,8 +189,10 @@ export type Action =
   | { type: 'melody'; notes: MelNote[]; undoable?: boolean; log?: LogEntry }
   /** the crab canon's palindrome: the progression comes back the way it went */
   | { type: 'mirror-slots' }
-  | { type: 'stage'; genre: Genre; mode: ModeId; template?: ProgressionTemplate; view: ViewId; scale?: number }
+  | { type: 'stage'; genre: Genre; mode: ModeId; template?: ProgressionTemplate; slots?: Slot[]; view: ViewId; scale?: number }
   | { type: 'view'; view: ViewId }
+  /** one line into the log, nothing else changes (the burrow's closing line) */
+  | { type: 'note'; title: string; text: string }
   | { type: 'section-add'; copy: boolean; genre: Genre }
   | { type: 'section-select'; idx: number }
   | { type: 'section-rename'; idx: number; name: string }
@@ -464,9 +466,13 @@ export function reducer(state: AppState, action: Action): AppState {
     }
     case 'view':
       return { ...state, view: action.view };
+    case 'note':
+      // stamped here, not in the handler: a line written after a batch must sort above it
+      return { ...state, log: [entry(action.title, action.text), ...state.log].slice(0, 40) };
     case 'stage': {
-      // a lesson sets the bench: genre, mode and (when it brings one) a progression
-      const fresh = action.template ? progressionFrom(action.template) : undefined;
+      // a lesson sets the bench: genre, mode and (when it brings one) a progression — with its own slots when
+      // what follows (the burrow's floors) is keyed to their ids
+      const fresh = action.template ? { ...progressionFrom(action.template), ...(action.slots ? { slots: action.slots } : {}) } : undefined;
       return {
         ...state, genreId: action.genre.id, mode: action.mode, view: action.view,
         scaleIdx: action.scale ?? state.scaleIdx, bpm: action.genre.id === state.genreId ? state.bpm : null,

@@ -13,8 +13,9 @@ export type LessonGoal =
   | { kind: 'score'; lens: LensId; min: number }
   /** the melody coach reports every chord change landing, with at least `notes` notes written */
   | { kind: 'coach'; notes: number }
-  /** answer this many ear-quiz rounds correctly in a row */
-  | { kind: 'quiz'; streak: number }
+  /** answer this many floors of the burrow right in a row */
+  /** dig this deep in one descent of the burrow */
+  | { kind: 'burrow'; depth: number }
   /** finish a ten-card fretboard sprint of this drill with at least this score */
   | { kind: 'fret'; drill: FretDrillKind; min: number }
   /** the crab canon scores at least `min`, with the two voices overlapping for a quarter of the loop */
@@ -201,7 +202,7 @@ export const PATHS: LearningPath[] = [
       {
         id: 'borrow.ab', title: 'Before and after',
         teach: 'A spice is easiest to hear against what it replaced. A/B plays the old loop and the new one back to back in the same groove, so the only thing that changes is the harmony.',
-        task: 'Click the 🌧 chip on the IV card to borrow the iv, then press 🔀 A/B and listen for the moment the colour turns.',
+        task: 'Click the "D → Dm" chip on the IV card to borrow the iv, then press A/B and listen for the moment the colour turns.',
         setup: { view: 'write', genre: 'classic-rock', mode: 'major', prog: { name: 'Plain first', numerals: ['I', 'IV', 'V', 'IV'] } },
         goal: { kind: 'check' },
       },
@@ -214,10 +215,30 @@ export const PATHS: LearningPath[] = [
       },
       {
         id: 'borrow.quiz', title: 'Which chord changed?',
-        teach: 'Now without the labels. You will hear a loop twice; the second time one chord has been spiced. Point at the chord that changed.',
-        task: 'Get three in a row in the ear quiz below.',
+        teach: 'Now without the labels. The burrow plays a loop twice; the second time one chord has been spiced. Point at the chord that changed.',
+        task: 'Dig to floor 3 of the burrow below: three floors right, one descent.',
         setup: { view: 'learn' },
-        goal: { kind: 'quiz', streak: 3 },
+        goal: { kind: 'burrow', depth: 3 },
+      },
+    ],
+  },
+  {
+    id: 'burrow', name: 'Down the burrow',
+    blurb: 'Transformational ear training: not "name this chord" but "what just changed, and why did it pull that way". The loop you answered on one floor is the loop the next floor changes.',
+    steps: [
+      {
+        id: 'burrow.three', title: 'Three floors, both loops',
+        teach: 'Each floor plays the loop you know, then the loop with one chord changed. The reveal is the rack\'s own explanation, so every floor teaches the move it just tested.',
+        task: 'Dig to floor 3 in any genre.',
+        setup: { view: 'learn' },
+        goal: { kind: 'burrow', depth: 3 },
+      },
+      {
+        id: 'burrow.six', title: 'Hold the loop in your ear',
+        teach: 'From floor 4 only the new loop plays. Holding a progression in mind without a diagram is the skill players lack most, and the only way to get it is to be asked.',
+        task: 'Dig to floor 6. You have one replay; spend it late.',
+        setup: { view: 'learn' },
+        goal: { kind: 'burrow', depth: 6 },
       },
     ],
   },
@@ -351,20 +372,20 @@ export const PATHS: LearningPath[] = [
       {
         id: 'crab.hear', title: 'A line that walks backwards',
         teach: 'The crab canon is a single melody played forwards and, at the same time, from the end — crabs walk sideways, the line walks backwards. For it to work, every note has to do two jobs: fit its own chord, and fit the chord its mirror image lands on. Most melodies fail the second job spectacularly, which is the fun part.',
-        task: 'Seed a melody in the workbench (🌱), press 🦀 Let the crab in, and play. Watch the crab walk the Möbius strip the other way, then read the verdict: it names every place the backwards voice steps on something.',
+        task: 'Seed a melody in the workbench ("Seed from lick"), press "Let the crab in", and play. Watch the crab walk the Möbius strip the other way, then read the verdict: it names every place the backwards voice steps on something.',
         setup: { view: 'write', genre: 'pop', mode: 'major', prog: { name: 'Four chords', numerals: ['I', 'vi', 'IV', 'V'] } },
         goal: { kind: 'check' },
       },
       {
         id: 'crab.mirror', title: 'Harmony that reads both ways',
         teach: 'Read backwards, bar 1 lands over bar 4\'s chord — unless the progression is a palindrome. I–vi–IV–vi–I meets itself in the middle, so any note that fit going forward fits going back, by construction. Bach\'s crab canon leans on almost exactly this: its harmony is nearly symmetrical.',
-        task: 'Press 🪞 Mirror the chords. The section doubles, reading the same from either end. Play it — your line, then the crab answering it. Then write into the second half so the two voices overlap.',
+        task: 'Press "Mirror the chords". The section doubles, reading the same from either end. Play it — your line, then the crab answering it. Then write into the second half so the two voices overlap.',
         setup: { view: 'write' },
         goal: { kind: 'check' },
       },
       {
         id: 'crab.proof', title: 'Agree with yourself',
-        teach: 'Where the voices overlap they can grind: a half step, a tritone, a 7th on a strong beat. 🩹 Make it crab-proof moves each unlocked note to the nearest pitch that works over both chords and against the other voice — the fix a canon writer makes by hand, one note at a time. Lock any note you refuse to give up and the solver works around it.',
+        teach: 'Where the voices overlap they can grind: a half step, a tritone, a 7th on a strong beat. "Crab-proof" moves each unlocked note to the nearest pitch that works over both chords and against the other voice — the fix a canon writer makes by hand, one note at a time. Lock any note you refuse to give up and the solver works around it.',
         task: 'Work the verdict\'s notes and crab-proof the line until the crab scores 85 with the voices overlapping for at least a quarter of the loop.',
         setup: { view: 'write' },
         goal: { kind: 'crab', min: 85 },

@@ -23,9 +23,20 @@ scales for solos, as a full-neck fretboard map or lit-up OP-1 keys.
 - **Teaching palette**: every diatonic chord in the key, plus a "borrow shelf" of idiomatic out-of-key chords that explain themselves when used
 ### Three workspaces
 
-- **Learn** — seven paths of short steps (*Fretboard grammar*, *Solo over four chords*, *Hear the borrowed chords*, *Write an eight-bar melody*, *Play the twelve-bar blues*, *Triads on three strings*, *Meet the crab*). Each step stages the bench (genre, progression, drill, even the open transition) and sends you to the workspace where the doing happens. Steps the app can measure finish themselves: a graded play-along pass, the melody coach showing on every chord, or an ear-quiz streak. Also here: the **ear quiz** (a loop from your genre plays twice, one chord spiced — which one changed? the reveal is the spice's own explanation), drill records, and a practice streak
+- **Learn** — eight paths of short steps (*Fretboard grammar*, *Solo over four chords*, *Hear the borrowed chords*, *Down the burrow*, *Write an eight-bar melody*, *Play the twelve-bar blues*, *Triads on three strings*, *Meet the crab*). Each step stages the bench (genre, progression, drill, even the open transition) and sends you to the workspace where the doing happens. Steps the app can measure finish themselves: a graded play-along pass, the melody coach showing on every chord, or a floor of the burrow. Also here: **the burrow** (below), drill records, and a practice streak
 - **Jam** — instrument in hand. Cards shrink to a chord chart, the big diagram belongs to the **Solo Lab**, the **Triad Lab** or the **Neck Drills**, and the app **listens**
 - **Write** — key & genre, song sections, the chord bench with every harmonic tool, the melody workbench, the crab canon, and the reasons alongside
+
+### The burrow
+
+Transformational ear training as a descent. The crab digs under one of your genre's loops a floor at a time. Every floor, the spice rack changes one chord of the loop *as it now stands* — a sus, a borrowed iv, a tritone sub, a passing diminished, whatever the rack finds room for — the loop plays, and you say which chord is new or changed. Right, and the reveal is the spice's own explanation; the crab waits while you read, then digs on.
+
+- Floors 1–3 play the loop you know and then the changed one. From floor 4 **only the new loop plays**: the old one is in your ear. You have one *Again* per descent.
+- Where the genre carries the truck driver, floor 4 is **the burrow turning**: no question, the whole loop a step up, and everything below is spelled in the new key.
+- From floor 8 two chords change at once. Pick both.
+- When the rack has nothing left that would change a chord, or the loop is eight chords long, that is **bedrock** — Thrash Metal is shallow ground; Neo-Soul goes down a long way.
+- The burrow leans toward spices whose names have never appeared in your journal, so over weeks it becomes a curriculum of the moves you have not heard yet.
+- Any ending — a miss, bedrock, or *Come up* — does the same generous thing: the page turns to Write, the loop as the burrow left it is on the bench (named "…, dug to floor 6", the gear change as the every-other-pass repeat), every floor is a dated line in the journal in the rack's own words, and the deepest floor per genre goes in the records. ⌘S saves it; undo pops the whole descent back to the surface.
 
 ### Solo lab
 
@@ -179,7 +190,7 @@ for Tauri.
 npm install
 npm run tauri dev      # development app window
 npm run tauri build    # release .app + .dmg (in src-tauri/target/release/bundle/)
-npm test               # 258 theory/voicing/groove/input/practice/journal tests
+npm test               # 277 theory/voicing/groove/input/practice/journal tests
 npm run dev            # UI only, in a browser
 ```
 
@@ -212,7 +223,7 @@ src/theory/   notes, scales, chords, roman numerals, progressions, spices, compo
 src/audio/    engine.ts (voices, buses, backing-band scheduler, transport clock)
               groove.ts (bar events shared by playback AND midi.ts) · midi.ts
 src/input/    pitch.ts (YIN + note tracker) · mic.ts · midiIn.ts · qwerty.ts · native.ts (the desktop app's ears and MIDI port)
-src/practice/ grade.ts (takes vs drills) · fretDrills.ts (fluency sprints) · progress.ts · earQuiz.ts
+src/practice/ grade.ts (takes vs drills) · fretDrills.ts (fluency sprints) · progress.ts · burrow.ts (the descent: floors, gear, bedrock, the landing)
 src/data/     genres.ts (the genre book) · lessons.ts (learning paths) · customGenres.ts
 src/guitar/   shapes, voicings, tab, positions.ts (connected boxes), caged.ts (form + known grip), melodyTab.ts,
               licks.ts (tab parser + licks stored as numbers)

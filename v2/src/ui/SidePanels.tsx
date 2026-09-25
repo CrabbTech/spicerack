@@ -2,7 +2,7 @@
 // time it said it, today and the days before), what could come next (by
 // intention), and the full palette of the key.
 
-import { useRef } from 'react';
+import { CSSProperties, useRef } from 'react';
 import { useApp } from '../state/AppContext';
 import { chordSymbol } from '../theory/chords';
 import { keyLabel } from '../theory/progression';
@@ -46,9 +46,11 @@ export function NextChordPanel() {
 
 export function JournalPanel() {
   const { journal } = useApp();
-  // lines written since this page was opened get inked in; older ones are simply there
-  const opened = useRef(new Set(journal.map((e) => e.id)));
+  // lines written since this page was opened — or in the moments before it opened, as a descent of the burrow lands — ink in; older ones are simply there
+  const opened = useRef(new Set(journal.filter((e) => e.at < Date.now() - 4000).map((e) => e.id)));
   const days = journalDays(journal);
+  // lines that landed together (a descent of the burrow) ink in one after another, oldest first
+  const freshOrder = new Map(journal.filter((e) => !opened.current.has(e.id)).map((e, i) => [e.id, i] as const));
   return (
     <section className="panel journal-panel">
       <div className="panel-head">
@@ -63,7 +65,8 @@ export function JournalPanel() {
           <div key={d.day} className="journal-day">
             {(di > 0 || d.label !== 'Today') && <div className="journal-dayhead">{d.label}</div>}
             {d.entries.map((e) => (
-              <div key={e.id} className={`journal-entry journal-${e.kind} ${opened.current.has(e.id) ? '' : 'journal-new'}`}>
+              <div key={e.id} className={`journal-entry journal-${e.kind} ${opened.current.has(e.id) ? '' : 'journal-new'}`}
+                style={{ '--i': freshOrder.get(e.id) ?? 0 } as CSSProperties}>
                 <span className="journal-time">{timeLabel(e.at)}</span>
                 <div className="journal-title">{e.title}</div>
                 <div className="journal-text">{e.text}</div>

@@ -4,7 +4,7 @@ import { useApp } from '../state/AppContext';
 import { PATHS } from '../data/lessons';
 
 export function LessonBanner() {
-  const { lesson, lessonDone, completeLesson, startLesson, setLessonId, dispatch, grade, lens, quizStreak, lastSprint, crabReport } = useApp();
+  const { lesson, lessonDone, completeLesson, startLesson, setLessonId, dispatch, grade, lens, lastSprint, crabReport, burrow } = useApp();
   if (!lesson) return null;
   const path = PATHS.find((p) => p.steps.some((s) => s.id === lesson.id))!;
   const at = path.steps.findIndex((s) => s.id === lesson.id);
@@ -33,7 +33,7 @@ export function LessonBanner() {
           </div>
         )}
         {goal.kind === 'coach' && <div className="lesson-goal">done when every chord change lands</div>}
-        {goal.kind === 'quiz' && <div className="lesson-goal">streak <strong>{quizStreak}</strong> / {goal.streak}</div>}
+        {goal.kind === 'burrow' && <div className="lesson-goal">floor <strong>{burrow?.reached ?? 0}</strong> / {goal.depth}</div>}
         {goal.kind === 'crab' && (
           <div className="lesson-goal">
             crab score <strong>{crabReport?.score ?? '—'}</strong> / {goal.min}

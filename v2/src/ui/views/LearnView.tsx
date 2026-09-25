@@ -1,6 +1,6 @@
 // LEARN: the left page is the contents — paths of short steps, each of which
 // stages the bench and sends you to the page where the doing happens — and
-// the ear quiz. The right page is today: the month of stamps and the records.
+// the burrow. The right page is today: the month of stamps and the records.
 
 import { useApp } from '../../state/AppContext';
 import { PATHS } from '../../data/lessons';
@@ -9,63 +9,15 @@ import { FRET_DRILLS } from '../../practice/fretDrills';
 import { streak } from '../../practice/progress';
 import { Spread } from '../Spread';
 import { Stamps } from '../Stamps';
-
-function EarQuiz() {
-  const { quiz, quizStreak, newQuizRound, answerQuiz, replayQuiz, genre, state } = useApp();
-  const right = quiz && quiz.answered !== null && quiz.answered === quiz.round.changed;
-  return (
-    <section className="panel quiz-panel">
-      <div className="panel-head">
-        <div>
-          <h2>Ear quiz</h2>
-          <div className="panel-sub">A {genre.name} loop plays twice. One chord in the second pass is spiced — which?</div>
-        </div>
-        <div className="panel-actions">
-          <span className="quiz-streak">streak <strong>{quizStreak}</strong></span>
-          <button className="btn btn-spice" onClick={() => newQuizRound()} disabled={state.playing && !!quiz?.phase}>{quiz ? 'Next round' : 'Start'}</button>
-          {quiz && <button className="btn" onClick={replayQuiz}>Again</button>}
-        </div>
-      </div>
-      {quiz && (
-        <>
-          <div className="quiz-rows">
-            {(['A', 'B'] as const).map((side) => (
-              <div key={side} className={`ab-row ${quiz.phase === side ? 'ab-live' : ''}`}>
-                <span className="ab-side">{side === 'A' ? 'first' : 'second'}</span>
-                {quiz.before.map((_, i) => {
-                  const revealed = quiz.answered !== null;
-                  const symbol = side === 'A' ? quiz.before[i] : quiz.after[i];
-                  const now = quiz.phase === side && quiz.at === i;
-                  if (side === 'A') return <span key={i} className={`ab-chip ${now ? 'ab-now' : ''}`}>{revealed ? symbol : i + 1}</span>;
-                  return (
-                    <button key={i} disabled={revealed}
-                      className={`ab-chip quiz-pick ${now ? 'ab-now' : ''} ${revealed && i === quiz.round.changed ? 'ab-changed' : ''} ${revealed && quiz.answered === i && !right ? 'quiz-wrong' : ''}`}
-                      onClick={() => answerQuiz(i)}>
-                      {revealed ? symbol : i + 1}
-                    </button>
-                  );
-                })}
-              </div>
-            ))}
-          </div>
-          {quiz.answered !== null && (
-            <div className={`quiz-reveal ${right ? 'quiz-right' : ''}`}>
-              <strong>{right ? 'Yes.' : `It was chord ${quiz.round.changed + 1}.`} {quiz.round.spiceName}:</strong> {quiz.round.explanation}
-            </div>
-          )}
-        </>
-      )}
-    </section>
-  );
-}
+import { Burrow } from '../Burrow';
 
 const GOAL_LABEL = (goal: (typeof PATHS)[number]['steps'][number]['goal']): string => {
   switch (goal.kind) {
     case 'score': return `play ${goal.min}+`;
     case 'fret': return `sprint ${goal.min}+`;
     case 'crab': return `crab ${goal.min}+`;
+    case 'burrow': return `floor ${goal.depth}`;
     case 'coach': return 'coach';
-    case 'quiz': return 'quiz';
     case 'check': return 'check';
   }
 };
@@ -80,7 +32,7 @@ function Tick() {
 }
 
 export function LearnView() {
-  const { progress, lessonDone, startLesson, lessonId } = useApp();
+  const { progress, lessonDone, startLesson, lessonId, allGenres } = useApp();
   const days = streak(progress);
   const stepsDone = progress.lessons.length;
   const stepsAll = PATHS.reduce((n, p) => n + p.steps.length, 0);
@@ -124,7 +76,7 @@ export function LearnView() {
               );
             })}
           </div>
-          <EarQuiz />
+          <Burrow />
         </div>
       }
       right={
@@ -139,7 +91,7 @@ export function LearnView() {
             <Stamps progress={progress} />
           </section>
           <section className="panel">
-            <div className="panel-head"><div><h2>Records</h2><div className="panel-sub">best graded pass per drill, best sprint per neck drill</div></div></div>
+            <div className="panel-head"><div><h2>Records</h2><div className="panel-sub">best graded pass per drill, best sprint per neck drill, deepest burrow per genre</div></div></div>
             <div className="records">
               {LENSES.map((l) => (
                 <div key={l.id} className="record">
@@ -153,6 +105,13 @@ export function LearnView() {
                   <span>{d.name}</span>
                   <span className="record-bar"><i style={{ width: `${progress.fretBest[d.id] ?? 0}%` }} /></span>
                   <strong>{progress.fretBest[d.id] ?? '—'}</strong>
+                </div>
+              ))}
+              {allGenres.filter((g) => progress.burrowBest[g.id]).map((g) => (
+                <div key={`burrow-${g.id}`} className="record">
+                  <span>{g.name} · burrow</span>
+                  <span className="record-bar"><i style={{ width: `${Math.min(100, (progress.burrowBest[g.id] / 12) * 100)}%` }} /></span>
+                  <strong>{progress.burrowBest[g.id]}</strong>
                 </div>
               ))}
             </div>

@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { Progress, recordLesson, recordPass, recordSprint, streak } from './progress';
+import { Progress, recordBurrow, recordLesson, recordPass, recordSprint, streak } from './progress';
 
-const EMPTY: Progress = { drillBest: {}, drillPasses: {}, lessons: [], days: [], fretBest: {}, fretRuns: {}, fretMisses: {} };
+const EMPTY: Progress = { drillBest: {}, drillPasses: {}, lessons: [], days: [], fretBest: {}, fretRuns: {}, fretMisses: {}, burrowBest: {} };
 
 describe('progress', () => {
   it('keeps the best score and counts passes', () => {
@@ -10,6 +10,13 @@ describe('progress', () => {
     expect(p.drillBest.thirds).toBe(60);
     expect(p.drillPasses.thirds).toBe(2);
     expect(p.days).toEqual(['2026-09-20']);
+  });
+  it('keeps the deepest floor of the burrow per genre, and counts a descent as practice', () => {
+    let p = recordBurrow(EMPTY, 'pop', 3, '2026-09-20');
+    p = recordBurrow(p, 'pop', 2, '2026-09-21');
+    p = recordBurrow(p, 'blues', 0, '2026-09-22');
+    expect(p.burrowBest).toEqual({ pop: 3 });
+    expect(p.days).toEqual(['2026-09-20', '2026-09-21']);
   });
   it('marks lessons once', () => {
     const p = recordLesson(recordLesson(EMPTY, 'four.roots', '2026-09-20'), 'four.roots', '2026-09-21');

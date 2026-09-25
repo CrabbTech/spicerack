@@ -18,10 +18,12 @@ export interface Progress {
   fretRuns: Record<string, number>;
   /** what keeps getting missed (interval / chord-tone / string tags) — dealt more often until it stops */
   fretMisses: Record<string, number>;
+  /** the burrow: deepest floor answered right, per genre */
+  burrowBest: Record<string, number>;
 }
 
 const KEY = storageKey('progress');
-const EMPTY: Progress = { drillBest: {}, drillPasses: {}, lessons: [], days: [], fretBest: {}, fretRuns: {}, fretMisses: {} };
+const EMPTY: Progress = { drillBest: {}, drillPasses: {}, lessons: [], days: [], fretBest: {}, fretRuns: {}, fretMisses: {}, burrowBest: {} };
 
 export function loadProgress(): Progress {
   try {
@@ -65,6 +67,16 @@ export function recordSprint(p: Progress, kind: string, score: number, cards: { 
     ...p, fretMisses,
     fretBest: { ...p.fretBest, [kind]: Math.max(p.fretBest[kind] ?? 0, score) },
     fretRuns: { ...p.fretRuns, [kind]: (p.fretRuns[kind] ?? 0) + 1 },
+    days: touchDay(p, today),
+  };
+}
+
+/** A descent ended: keep the deepest floor per genre; going down at all is practice. */
+export function recordBurrow(p: Progress, genreId: string, depth: number, today = dayKey()): Progress {
+  if (depth < 1) return p;
+  return {
+    ...p,
+    burrowBest: { ...p.burrowBest, [genreId]: Math.max(p.burrowBest[genreId] ?? 0, depth) },
     days: touchDay(p, today),
   };
 }

@@ -17,6 +17,12 @@ describe('the journal', () => {
     expect(days[0].entries.map((e) => e.id)).toEqual(['c', 'b']);
   });
 
+  it('puts lines written in the same instant in the order they were written, latest on top', () => {
+    const same = at(2026, 9, 24, 14, 2);
+    const days = journalDays([line('first', same, 'Borrowed iv'), line('second', same, 'Sus & release'), line('third', same, 'The burrow')], '2026-09-24');
+    expect(days[0].entries.map((e) => e.id)).toEqual(['third', 'second', 'first']);
+  });
+
   it('keeps the book to a fixed length, dropping the oldest lines', () => {
     const many = Array.from({ length: JOURNAL_KEEP }, (_, i) => line(`e${i}`, i, `Line ${i}`));
     const next = appendJournal(many, [line('new', 10_000)]);
